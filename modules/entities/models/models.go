@@ -19,3 +19,17 @@ type Approval struct {
 	RequestUser  uint `json:"request_user"`
 	Task         interface{} `json:"task"`
 }
+
+
+type UpdateStatusReq struct{
+	Status string `json:"status"`
+	Approver uint
+}
+
+
+type ResponseData struct {
+	Message    string      `json:"message"`
+	Status     string      `json:"status"`
+	StatusCode int         `json:"status_code"`
+	Data       interface{} `json:"data"`
+}
