@@ -16,7 +16,7 @@ func NewApprovalController(router fiber.Router, approvalSrv models.ApprovalUseca
 	}
 	_ = controllers//gfffffffffffffffffffffffffffffffffffffdsssssssssssssssssssssssssssssssssssssssssssssssssss
 	// router.Post("/profile", controllers.newProfile)swwrfwaefaewrfaewrf
-	// //router.Post("/hr-profile", controllers.PullData)
+	// //router.Post("/hr-profile", controllers.PullData)fffffffffffffffffffffffdfdf
 	// router.Get("/profiles", controllers.getAllProfileData)
 	// router.Get("/profile/:profileId", controllers.GetProfileByID)
 	// router.Get("/profiles/:role", controllers.GetProfileByRole)
