@@ -14,7 +14,7 @@ func NewApprovalController(router fiber.Router, approvalSrv models.ApprovalUseca
 	controllers := &approvalHandler{
 		approvalSrv: approvalSrv,
 	}
-	_ = controllers//gfffffffffffffffffffffffffffffffffffffdsssssssssssssssssssssssssssssssssssssssssssssssssss
+	_ = controllers //gfffffffffffffffffffffffffffffffffffffdsssssssssssssssssssssssssssssssssssssssssssssssssss
 	// router.Post("/profile", controllers.newProfile)swwrfwaefaewrfaewrf
 	// //router.Post("/hr-profile", controllers.PullData)
 	// router.Get("/profiles", controllers.getAllProfileData)
@@ -25,6 +25,7 @@ func NewApprovalController(router fiber.Router, approvalSrv models.ApprovalUseca
 	// router.Delete("/profile/:profileId", controllers.Delete)
 	// router.Get("/test", controllers.Test)
 
+}
 func test() {
 	println("dadsasad")
 }

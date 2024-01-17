@@ -17,3 +17,9 @@ func NewapprovalRepositoryDB(db *gorm.DB) approvalRepositoryDB {
 	}
 	return approvalRepositoryDB{db: db}
 }
+func test() {
+	println("dadsasad")
+}
+func test() {
+	println("dadsasad")
+}

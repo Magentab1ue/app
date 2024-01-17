@@ -12,3 +12,10 @@ func NewApprovalService(
 ) models.ApprovalUsecase {
 	return &approvalService{approvalRepo}
 }
+
+func test() {
+	println("dadsasad")
+}
+func test() {
+	println("dadsasad")
+}
