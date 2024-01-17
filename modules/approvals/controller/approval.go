@@ -27,14 +27,9 @@ package controller
 
 
 
-
-
-
-
-
 func test() {
 	println("dadsasad")
 }
-func test1() {
+func test() {
 	println("dadsasad")
 }
