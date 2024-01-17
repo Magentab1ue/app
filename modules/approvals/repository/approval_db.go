@@ -17,5 +17,3 @@ func NewapprovalRepositoryDB(db *gorm.DB) approvalRepositoryDB {
 	}
 	return approvalRepositoryDB{db: db}
 }
-
-///dfdfdfdfdfdf
