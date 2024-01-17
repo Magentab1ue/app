@@ -1,0 +1,400 @@
+# Approval Service API Documentation
+
+## Table of Contents
+
+- [Approval Service API Documentation](#approval-service-api-documentation)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [Authentication](#authentication)
+  - [Base URL](#base-url)
+  - [Endpoints](#endpoints)
+    - [GET v1/approval/:id](#get-v1approvalid)
+    - [GET v1/approvals?status=xxx?to=xxx?](#get-v1approvalsstatusxxxtoxxx)
+    - [PUT v1/approval/update-status/:id](#put-v1approvalupdate-statusid)
+    - [PUT v1/approval/sent-request/:id](#put-v1approvalupdate-statusid)
+    - [GET v1/approval/user/:id?status=xxx?to=xxx?](#get-v1approvaluseridstatusxxxtoxxx)
+    - [GET v1/approval/user/:id/receive-request?requsetUser=xx](#get-v1approvaluseridreceive-request)
+    - [GET v1/approval/user/:id/send-request?to=xxx?project=xxx](#get-v1approvaluseridsend-request)
+    - [DELETE /v1/approval/:id](#delete-v1approvalid)
+  - [Status Codes](#status-codes)
+  - [Event topics](#event-topics)
+
+## Introduction
+
+Welcome to the "Approval Service" API. Used to manage user Approval information in the system.
+
+## Authentication
+
+All requests to the API must include an API key in the header to authenticate:
+
+`Authorization: Bearer YOUR_API_KEY`
+
+## Base URL
+
+All Approval service API endpoints are relative to this base
+URL: `https://approval-service:{{app_port}}/`
+
+## Endpoints
+
+### GET v1/approval/:id
+
+Get Approval by id
+
+**Headers**
+
+```json
+Authorization: JWT YOUR_TOKEN
+```
+
+**Paremeters**:
+
+```json
+id : (require) type: uint
+```
+
+**Response**:
+
+```json
+{
+  "data" : {
+    "id" : ,
+    "requsetId":,
+    "to":,
+    "approver" :,
+    "project" :,
+    "status" :,
+    "creationDate":,
+    "requestUser" :,
+    "task" : [],
+  },
+  "message": "successful",
+  "status": "ok",
+  "status_code": 200
+}
+```
+
+### GET /v1/approvals?status=xxx?to=xxx?project=xxx?
+
+Get the approvals data. filter
+**Headers**:
+
+```
+Authorization: JWT YOUR_TOKEN
+```
+
+**Response**:
+
+```json
+{
+
+  "data" : [{
+    "id" : ,
+    "requsetId":,
+    "to":,
+    "approver" :,
+    "project" :,
+    "status" :,
+    "creationDate":,
+    "requestUser" :,
+    "task" : [],
+  },
+    {.....},// ... other profiles
+  ],
+  "status": "OK",
+  "status_code": 200
+}
+```
+
+### PUT v1/approval/update-status/:id
+
+Update status approval.
+
+**Headers**
+
+```json
+Authorization: JWT YOUR_TOKEN
+```
+
+**Paremeters**:
+
+```json
+id : (require) type: uint
+```
+
+**Request Body:**
+
+```json
+{
+  "status":,
+  "approver":,
+}
+```
+
+**Response**:
+
+```json
+{
+  "data" : {
+    "id" : ,
+    "requsetId":,
+    "to":,
+    "approver" :,
+    "project" :,
+    "status" :,
+    "creationDate":,
+    "requestUser" :,
+    "task" : [],
+  },
+  "message": "status changed",
+  "status": "ok",
+  "status_code": 200
+}
+```
+
+### PUT v1/approval/sent-request/:id
+
+Update status approval.
+
+**Headers**
+
+```json
+Authorization: JWT YOUR_TOKEN
+```
+
+**Paremeters**:
+
+```json
+id : (require) type: uint
+```
+
+**Request Body:**
+
+```json
+{
+    "to":,
+    "approver" :,
+    "creationDate":,
+    "requestUser" :,
+}
+```
+
+**Response**:
+
+```json
+{
+  "data" : {
+    "id" : ,
+    "requsetId":,
+    "to":,
+    "approver" :,
+    "project" :,
+    "status" :,
+    "creationDate":,
+    "requestUser" :,
+    "task" : [],
+  },
+  "message": "status changed",
+  "status": "ok",
+  "status_code": 200
+}
+```
+
+### GET /v1/approval/user/:id?status=xxx?to=xxx?
+
+get approval from database by user id with filter
+
+**Headers**:
+
+```
+Authorization: JWT YOUR_TOKEN
+```
+
+**Paremeters**:
+
+- id : (require) type: uint
+
+**Response**:
+
+```json
+{
+  "data" : [{
+    "id" : ,
+    "requsetId":,
+    "to":,
+    "approver" :,
+    "project" :,
+    "status" :,
+    "creationDate":,
+    "requestUser" :,
+    "task" : [],
+  },
+    {.....},// ... other profiles
+  ],
+  "message": "successful",
+  "status": "ok",
+  "status_code": 200
+}
+```
+
+### GET /v1/approval/user/:id/receive-request/
+
+get approval from the database receives the user ID.
+
+**Headers**:
+
+```
+Authorization: JWT YOUR_TOKEN
+```
+
+**Paremeters**:
+
+- id : (require) type: uint
+
+**Response**:
+
+```json
+{
+  "data" : [{
+    "id" : ,
+    "requsetId":,
+    "to":,
+    "approver" :,
+    "project" :,
+    "status" :,
+    "creationDate":,
+    "requestUser" :,
+    "task" : [],
+  },
+    {.....},// ... other profiles
+  ],
+  "message": "successful",
+  "status": "ok",
+  "status_code": 200
+}
+```
+
+### GET /v1/approval/user/:id/send-request/
+
+get approval from the database sends the user ID.
+
+**Headers**:
+
+```
+Authorization: JWT YOUR_TOKEN
+```
+
+**Paremeters**:
+
+- id : (require) type: uint
+
+**Response**:
+
+```json
+{
+  "data" : [{
+    "id" : ,
+    "requsetId":,
+    "to":,
+    "approver" :,
+    "project" :,
+    "status" :,
+    "creationDate":,
+    "requestUser" :,
+    "task" : [],
+  },
+    {.....},// ... other profiles
+  ],
+  "message": "successful",
+  "status": "ok",
+  "status_code": 200
+}
+```
+
+### DELETE /v1/approval/:id
+
+delete approval from database
+
+**Headers**:
+
+```
+Authorization: JWT YOUR_TOKEN
+```
+
+**Paremeters**:
+
+- id : (require) type: uint
+
+**Response**:
+
+```json
+{
+  "message": "approval deleted",
+  "status": "ok",
+  "status_code": 200
+}
+```
+
+## Status Codes
+
+<ul>
+  <li>200 : OK. Request was successful.</li>
+  <li>201 : Created. Resource was successfully created.</li>
+  <li>400 : Bad request. The request was invalid or cannot be served.</li>
+  <li>401 : Unauthorized. The request lacks valid authentication credentials.</li>
+  <li>403 : Forbidden. The server understood the request, but it refuses to authorize it. This status code is similar to 401, but indicates that the client must authenticate itself to get permission.</li>
+  <li>500 : Internal Server Error. The server has encountered a situation it does not know how to handle.</li>
+</ul>
+
+## Event topics
+
+**RequstCreated**
+
+**Subscribe** to the `RequestCreate` topic to receive information for create approval
+
+**Message**:
+
+```json
+{
+ "request" : {
+    "id" : ,
+    "requsetId":,
+    "to":,
+    "approver" :,
+    "project" :,
+    "status" :,
+    "creationDate":,
+    "requestUser" :,
+    "task" : [],
+  },
+}
+```
+
+**ApprovalUpdated**
+
+**Publish** information about approval after update to the `ApprovalUpdated` topic
+
+**Message**:
+
+```json
+
+    {
+      "status":,
+      "approver":,
+      "task":[]
+   }
+
+```
+
+**ApprovalDeleted**
+
+**Publish** delete event approval after delete to the `ApprovalDeleted` topic
+
+**Message**:
+
+```json
+{
+  "task": []
+}
+```
+
+API Documentation version:1 17/01/2024
