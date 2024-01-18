@@ -52,46 +52,48 @@ func (r approvalRepositoryDB) UpdateStatus(requestId uint, req *models.UpdateSta
 func (r approvalRepositoryDB) GetSendRequest(userId uint, optional map[string]interface{}) ([]models.Approvals, error) {
 
 	approval := []models.Approvals{}
-	optional["request_user"] = userId
-
-	if _, ok := optional["to"]; !ok {
-		if err := r.db.Where("request_user = ?", userId).Find(&approval).Error; err != nil {
-			logs.Error(fmt.Sprintf("Error finding approval receive request user with ID %d: %v", userId, err), zap.Error(err))
-			return nil, err
-		}
-	} else {
+	optionalStr := fmt.Sprintf("%v", optional)
+	condition := r.db.Where("request_user = ?", userId)
+	if _, ok := optional["to"]; ok {
 		to := optional["to"]
 		delete(optional, "to")
-		if err := r.db.Where(optional).Where("? = ANY(\"to\")", to).Find(&approval).Error; err != nil {
-			logs.Error(fmt.Sprintf("Error finding approval receive request user with ID %d: %v", userId, err), zap.Error(err))
-			return nil, err
-		}
-
+		condition = condition.Where(optional).Where("? = ANY(\"to\")", to)
 	}
-
+	if _, ok := optional["project"]; ok {
+		projectId := optional["project"]
+		delete(optional, "project")
+		condition = condition.Where(optional).Where("project @> ?", projectId).Find(&approval)
+	}
+	err := condition.Where(optional).Find(&approval).Error
+	if err != nil {
+		logs.Error(fmt.Sprintf("Error finding approval Send request user with ID %d with optional %s : %v", userId, optionalStr, err), zap.Error(err))
+		return nil, err
+	}
+	if len(approval) == 0 {
+		return nil, fmt.Errorf("error finding approval Send request user with ID %d with optional %s ", userId, optionalStr)
+	}
 	return approval, nil
 }
 
 func (r approvalRepositoryDB) GetReceiveRequest(userId uint, optional map[string]interface{}) ([]models.Approvals, error) {
 
 	approval := []models.Approvals{}
+	optionalStr := fmt.Sprintf("%v", optional)
+	condition := r.db.Where(optional).Where("? = ANY(\"to\")", userId)
 
-	if optional != nil {
-		if err := r.db.Where(optional).Where("? = ANY(\"to\")", []uint{userId}).Find(&approval).Error; err != nil {
-			logs.Error(fmt.Sprintf("Error finding approval receive request user with ID %d: %v", userId, err.Error()), zap.Error(err))
-			return nil, err
-		}
-	} else {
-
-		if err := r.db.Where("? = ANY(\"to\")", []uint{userId}).Find(&approval).Error; err != nil {
-			logs.Error(fmt.Sprintf("Error finding approval receive request user with ID %d: %v", userId, err.Error()), zap.Error(err))
-			return nil, err
-		}
+	if _, ok := optional["project"]; ok {
+		projectId := optional["project"]
+		delete(optional, "project")
+		condition = condition.Where(optional).Where("project @> ?", projectId).Find(&approval)
+	}
+	err := condition.Where(optional).Find(&approval).Error
+	if err != nil {
+		logs.Error(fmt.Sprintf("Error finding approval receive request user with ID %d with optinoal %s %v", userId, optionalStr, err), zap.Error(err))
+		return nil, err
 	}
 	if len(approval) == 0 {
-		return nil, fmt.Errorf("error finding approval receive request user with ID %d", userId)
+		return nil, fmt.Errorf("error finding approval receive request user with ID %d with optinoal %s", userId, optionalStr)
 	}
-
 	return approval, nil
 }
 
@@ -131,32 +133,38 @@ func (r approvalRepositoryDB) GetByID(id uint) (*models.Approvals, error) {
 }
 
 func mockdata() (list []models.Approvals) {
+	optional := map[string]interface{}{
+		"id": 1,
+	}
+	json, _ := json.Marshal(optional)
 	mock1 := models.Approvals{
 		RequestID:    uuid.New(),
 		To:           pq.Int64Array([]int64{1, 2, 3, 4, 5}),
 		Status:       "pending",
-		Project:      json.RawMessage{},
+		Project:      json,
 		CreationDate: time.Now(),
 		RequestUser:  uint(5),
-		Task:         json.RawMessage{},
+		Task:         json,
 	}
+
 	mock2 := models.Approvals{
 		RequestID:    uuid.New(),
 		To:           pq.Int64Array([]int64{1, 2, 3, 4, 8}),
 		Status:       "pending",
-		Project:      json.RawMessage{},
+		Project:      json,
 		CreationDate: time.Now(),
 		RequestUser:  uint(9),
-		Task:         json.RawMessage{},
+		Task:         json,
 	}
+
 	mock3 := models.Approvals{
 		RequestID:    uuid.New(),
 		To:           pq.Int64Array([]int64{1, 2, 3, 4, 9}),
 		Status:       "pending",
-		Project:      json.RawMessage{},
+		Project:      json,
 		CreationDate: time.Now(),
-		RequestUser:  uint(9),
-		Task:         json.RawMessage{},
+		RequestUser:  uint(20),
+		Task:         json,
 	}
 
 	list = append(list, mock1)

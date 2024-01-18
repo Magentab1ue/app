@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -101,6 +102,21 @@ func (h *approvalHandler) ReceiveRequest(c *fiber.Ctx) error {
 	if requestUser != "" {
 		optional["request_user"] = requestUser
 	}
+	projectId := c.Query("project")
+	if projectId != "" {
+		projectId, err := strconv.Atoi(projectId)
+		if err != nil {
+			logs.Error("Error parsing approval ID:", zap.Error(err))
+			return c.Status(fiber.StatusNotFound).JSON(
+				models.ResponseData{
+					Message:    "project option is number",
+					Status:     fiber.ErrBadRequest.Message,
+					StatusCode: fiber.ErrBadRequest.Code,
+				},
+			)
+		}
+		optional["project"] = fmt.Sprintf(`{"id":%d}`, projectId)
+	}
 
 	apprrovalReceive, err := h.approvalSrv.GetReceiveRequest(uint(id), optional)
 	if err != nil {
@@ -142,14 +158,30 @@ func (h *approvalHandler) SendRequest(c *fiber.Ctx) error {
 	optional := map[string]interface{}{}
 
 	//Optional
-	project := c.Query("project")
-	if project != "" {
-		optional["project"] = project
+	projectId := c.Query("project")
+	if projectId != "" {
+		projectId, err := strconv.Atoi(projectId)
+		if err != nil {
+			logs.Error("Error parsing approval ID:", zap.Error(err))
+			return c.Status(fiber.StatusNotFound).JSON(
+				models.ResponseData{
+					Message:    "project option is number",
+					Status:     fiber.ErrBadRequest.Message,
+					StatusCode: fiber.ErrBadRequest.Code,
+				},
+			)
+		}
+		optional["project"] = fmt.Sprintf(`{"id":%d}`, projectId)
 	}
+
 	to := c.Query("to")
 	if to != "" {
 		to, _ := strconv.Atoi(to)
 		optional["to"] = to
+	}
+	status := c.Query("status")
+	if status != "" {
+		optional["status"] = status
 	}
 
 	apprrovalSend, err := h.approvalSrv.GetSendRequest(uint(id), optional)

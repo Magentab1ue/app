@@ -1,11 +1,11 @@
 package models
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -19,15 +19,15 @@ type RequestSentRequest struct {
 // db
 type Approvals struct {
 	gorm.Model
-	RequestID    uuid.UUID       `json:"request_id"`
-	To           pq.Int64Array   `json:"to" gorm:"type:integer[]"`
-	Approver     uint            `json:"approver"`
-	Status       string          `json:"status"`
-	Project      json.RawMessage `json:"project" gorm:"type:jsonb"` // Assuming your database supports JSONB
-	CreationDate time.Time       `json:"creation_date"`
-	RequestUser  uint            `json:"request_user"`
-	IsSignature  bool            `json:"is_signature"`
-	Task         json.RawMessage `json:"task" gorm:"type:jsonb"` // Assuming your database supports JSONB
+	RequestID    uuid.UUID      `json:"request_id"`
+	To           pq.Int64Array  `json:"to" gorm:"type:integer[]"`
+	Approver     uint           `json:"approver"`
+	Status       string         `json:"status"`
+	Project      datatypes.JSON `json:"project" gorm:"type:jsonb"` // Assuming your database supports JSONB
+	CreationDate time.Time      `json:"creation_date"`
+	RequestUser  uint           `json:"request_user"`
+	IsSignature  bool           `json:"is_signature"`
+	Task         datatypes.JSON `json:"task" gorm:"type:jsonb"` // Assuming your database supports JSONB
 }
 
 type UpdateStatusReq struct {
