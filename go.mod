@@ -64,6 +64,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.52.0
 	github.com/hashicorp/vault/api v1.10.0
 	github.com/joho/godotenv v1.5.1
+	github.com/lib/pq v1.10.9
 	go.uber.org/multierr v1.10.0 // indirect
 	gorm.io/driver/postgres v1.5.4
 )

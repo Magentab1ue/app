@@ -30,7 +30,7 @@ func NewApprovalService(
 	return &approvalService{approvalRepo, produce, Redis}
 }
 
-func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*models.Approval, error) {
+func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*models.Approvals, error) {
 	approvalRes, err := u.approvalRepo.UpdateStatus(id, req)
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*mo
 	return approvalRes, nil
 }
 
-func (u approvalService) GetReceiveRequest(id uint, optional map[string]interface{}) (approvalRes []models.Approval, err error) {
+func (u approvalService) GetReceiveRequest(id uint, optional map[string]interface{}) (approvalRes []models.Approvals, err error) {
 	keyRedis := fmt.Sprintf("GetReceiveRequest:%d,optionnals:%v", id, optional)
 
 	if approvalResJson, err := u.Redis.Get(context.Background(), keyRedis).Result(); err == nil {
@@ -68,7 +68,7 @@ func (u approvalService) GetReceiveRequest(id uint, optional map[string]interfac
 	return approvalRes, nil
 }
 
-func (u approvalService) GetSendRequest(id uint, optional map[string]interface{}) (approvalRes []models.Approval, err error) {
+func (u approvalService) GetSendRequest(id uint, optional map[string]interface{}) (approvalRes []models.Approvals, err error) {
 	keyRedis := fmt.Sprintf("GetSendRequest:%d,optionnals:%v", id, optional)
 	if approvalResJson, err := u.Redis.Get(context.Background(), keyRedis).Result(); err == nil {
 		if json.Unmarshal([]byte(approvalResJson), &approvalRes) == nil {
@@ -107,7 +107,7 @@ func (u approvalService) DeleteApproval(id uint) error {
 	return nil
 }
 
-func (u approvalService) GetByID(id uint) (appprove *models.Approval, err error) {
+func (u approvalService) GetByID(id uint) (appprove *models.Approvals, err error) {
 	key := fmt.Sprintf("service:GetApprovalByID%v", id)
 	//redis get
 	if approvalJson, err := u.Redis.Get(context.Background(), key).Result(); err == nil {
@@ -133,14 +133,14 @@ func (u approvalService) GetByID(id uint) (appprove *models.Approval, err error)
 	return approvalDB, nil
 }
 
-func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*models.Approval, error) {
+func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*models.Approvals, error) {
 
 	request, err := u.approvalRepo.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := u.approvalRepo.Create(&models.Approval{
+	res, err := u.approvalRepo.Create(&models.Approvals{
 		RequestID:    request.RequestID,
 		Status:       "pending",
 		Project:      request.Project,

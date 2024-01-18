@@ -2,7 +2,6 @@ package configs
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"os"
 
@@ -29,11 +28,11 @@ func LoadConfigs(cfg *Config) {
 	}
 
 	//App env
-	cfg.App.Port = secret.Data["APP_PORT"].(json.Number).String()
+	cfg.App.Port = secret.Data["APP_PORT"].(string)
 
 	//postgres env
 	cfg.Postgres.Host = secret.Data["DB_HOST"].(string)
-	cfg.Postgres.Port = secret.Data["DB_PORT"].(json.Number).String()
+	cfg.Postgres.Port = secret.Data["DB_PORT"].(string)
 	cfg.Postgres.Username = secret.Data["DB_USER"].(string)
 	cfg.Postgres.Password = secret.Data["DB_PASSWORD"].(string)
 	cfg.Postgres.DatabaseName = secret.Data["DB_NAME"].(string)
@@ -44,6 +43,6 @@ func LoadConfigs(cfg *Config) {
 	cfg.Kafkas.Group = secret.Data["KAFKA_GROUP"].(string)
 
 	cfg.Redis.Host = secret.Data["REDIS_HOST"].(string)
-	cfg.Redis.Port = secret.Data["REDIS_PORT"].(json.Number).String()
-	cfg.Redis.Password = secret.Data["REDIS_PASSWORD"].(string)
+	cfg.Redis.Port = secret.Data["REDIS_PORT"].(string)
+	//cfg.Redis.Password = secret.Data["REDIS_PASSWORD"].(json.Number).String()
 }
