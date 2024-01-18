@@ -21,7 +21,7 @@ type ApprovalRepository interface {
 	GetReceiveRequest(uint, map[string]interface{}) ([]Approvals, error)
 	UpdateStatus(uint, *UpdateStatusReq) (*Approvals, error)
 	GetSendRequest(userId uint, optional map[string]interface{}) ([]Approvals, error)
-	DeleteApproval(requestId uint) ([]Approvals, error)
+	DeleteApproval(requestId uint) (*Approvals, error)
 }
 
 type ProducerApproval interface {

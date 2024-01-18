@@ -46,3 +46,9 @@ type ProduceReq struct {
 	ID   uint
 	Data interface{}
 }
+
+const (
+	Pending string = "pending"
+	Approve string = "approved"
+	Reject  string = "reject"
+)

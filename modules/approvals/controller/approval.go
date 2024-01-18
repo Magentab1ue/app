@@ -25,7 +25,7 @@ func NewApprovalController(router fiber.Router, approvalSrv models.ApprovalUseca
 	router.Put("approval/send-request/:id", controllers.RequestSent)
 	router.Get("approval/user/:id/receive-request", controllers.ReceiveRequest)
 	router.Get("approval/user/:id/send-request", controllers.SendRequest)
-	router.Delete("approval/:id", controllers.GetApprovalByID)
+	router.Delete("approval/:id", controllers.DeleteApproval)
 
 }
 
@@ -149,7 +149,7 @@ func (h *approvalHandler) SendRequest(c *fiber.Ctx) error {
 	to := c.Query("to")
 	if to != "" {
 		to, _ := strconv.Atoi(to)
-		optional["to"] = []uint{uint(to)}
+		optional["to"] = to
 	}
 
 	apprrovalSend, err := h.approvalSrv.GetSendRequest(uint(id), optional)

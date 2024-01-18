@@ -31,6 +31,12 @@ func NewApprovalService(
 }
 
 func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*models.Approvals, error) {
+	statusList := []string{models.Approve, models.Pending, models.Reject}
+
+	hasStatus := stringInSlice(req.Status, statusList)
+	if !hasStatus {
+		return nil, errors.New("format status incorrect, status should have approved , pending or reject")
+	}
 	approvalRes, err := u.approvalRepo.UpdateStatus(id, req)
 	if err != nil {
 		return nil, err
@@ -98,7 +104,7 @@ func (u approvalService) DeleteApproval(id uint) error {
 	}
 
 	event := events.ApprovalDeletedEvent{
-		Task: approval[0].Task,
+		Task: approval.Task,
 	}
 	err = u.produce.Produce(event)
 	if err != nil {
@@ -155,10 +161,18 @@ func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*
 	return res, nil
 }
 
-// func (u approvalService) GetAll(optional map[string]interface{}) ([]models.Approval, error) {
-// 	approvalRes, err := u.approvalRepo.GetReceiveRequest(id,optional)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return approvalRes, nil
-// }
+//	func (u approvalService) GetAll(optional map[string]interface{}) ([]models.Approval, error) {
+//		approvalRes, err := u.approvalRepo.GetReceiveRequest(id,optional)
+//		if err != nil {
+//			return nil, err
+//		}
+//		return approvalRes, nil
+//	}
+func stringInSlice(str string, list []string) bool {
+	for _, val := range list {
+		if val == str {
+			return true
+		}
+	}
+	return false
+}

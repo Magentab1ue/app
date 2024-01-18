@@ -37,6 +37,6 @@ func (obj *eventProducer) Produce(event events.Event) error {
 		log.Error(err)
 		return err
 	}
-	log.Info(fmt.Sprintf("sent to topic: %v, partition: %v, offset %v", topic, p, o))
+	log.Info(fmt.Sprintf("sent to topic: %v, partition: %v, offset %v\n", topic, p, o))
 	return nil
 }

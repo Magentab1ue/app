@@ -62,10 +62,11 @@ func (r approvalRepositoryDB) GetSendRequest(userId uint, optional map[string]in
 	} else {
 		to := optional["to"]
 		delete(optional, "to")
-		if err := r.db.Where("\"to\" IN  \"?\"", to).Where(optional).Find(&approval).Error; err != nil {
+		if err := r.db.Where(optional).Where("? = ANY(\"to\")", to).Find(&approval).Error; err != nil {
 			logs.Error(fmt.Sprintf("Error finding approval receive request user with ID %d: %v", userId, err), zap.Error(err))
 			return nil, err
 		}
+
 	}
 
 	return approval, nil
@@ -76,25 +77,28 @@ func (r approvalRepositoryDB) GetReceiveRequest(userId uint, optional map[string
 	approval := []models.Approvals{}
 
 	if optional != nil {
-		if err := r.db.Where(optional).Where(" \"to\" IN (?)", []uint{userId}).Find(&approval).Error; err != nil {
-			logs.Error(fmt.Sprintf("Error finding approval receive request user with ID %d: %v", userId, err), zap.Error(err))
+		if err := r.db.Where(optional).Where("? = ANY(\"to\")", []uint{userId}).Find(&approval).Error; err != nil {
+			logs.Error(fmt.Sprintf("Error finding approval receive request user with ID %d: %v", userId, err.Error()), zap.Error(err))
 			return nil, err
 		}
 	} else {
 
-		if err := r.db.Where("to IN ?", []uint{userId}).Find(&approval).Error; err != nil {
-			logs.Error(fmt.Sprintf("Error finding approval receive request user with ID %d: %v", userId, err), zap.Error(err))
+		if err := r.db.Where("? = ANY(\"to\")", []uint{userId}).Find(&approval).Error; err != nil {
+			logs.Error(fmt.Sprintf("Error finding approval receive request user with ID %d: %v", userId, err.Error()), zap.Error(err))
 			return nil, err
 		}
+	}
+	if len(approval) == 0 {
+		return nil, fmt.Errorf("error finding approval receive request user with ID %d", userId)
 	}
 
 	return approval, nil
 }
 
-func (r approvalRepositoryDB) DeleteApproval(requestId uint) ([]models.Approvals, error) {
+func (r approvalRepositoryDB) DeleteApproval(requestId uint) (*models.Approvals, error) {
 
-	approval := []models.Approvals{}
-	if err := r.db.Find(&approval, requestId).Error; err != nil {
+	approval := new(models.Approvals)
+	if err := r.db.First(&approval, requestId).Error; err != nil {
 		logs.Error(fmt.Sprintf("Error cant't finding approval with request ID %d: %v", requestId, err), zap.Error(err))
 		return nil, err
 	}
@@ -145,9 +149,19 @@ func mockdata() (list []models.Approvals) {
 		RequestUser:  uint(9),
 		Task:         json.RawMessage{},
 	}
+	mock3 := models.Approvals{
+		RequestID:    uuid.New(),
+		To:           pq.Int64Array([]int64{1, 2, 3, 4, 9}),
+		Status:       "pending",
+		Project:      json.RawMessage{},
+		CreationDate: time.Now(),
+		RequestUser:  uint(9),
+		Task:         json.RawMessage{},
+	}
 
 	list = append(list, mock1)
 	list = append(list, mock2)
+	list = append(list, mock3)
 	return list
 }
 
