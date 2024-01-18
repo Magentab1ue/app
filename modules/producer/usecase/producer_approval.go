@@ -1,34 +1,33 @@
 package usecase
 
-// import (
-// 	"time"
-// 	"profile-service/modules/entities/events"
-// 	"profile-service/modules/entities/models"
-//
-//
-// )
+import (
+	"time"
 
-// type producerUser struct {
-// 	eventProducer models.EventProducer
-// }
+	"approval-service/modules/entities/events"
+	"approval-service/modules/entities/models"
+)
 
-// func NewProducerServiceUsers(eventProducer models.EventProducer) models.ProducerProfile {
-// 	return &producerUser{eventProducer}
-// }
+type producerUser struct {
+	eventProducer models.EventProducer
+}
 
-// // UserCreated implements ProducerUser.
+func NewProducerServiceApprovals(eventProducer models.EventProducer) models.ProducerApproval {
+	return &producerUser{eventProducer}
+}
 
-// func (obj *producerUser) ProfileCreated(user *models.ProduceReq, timeStamp time.Time) error {
+// UserCreated implements ProducerUser.
 
-// 	return obj.eventProducer.Produce(events.ProfileCreatedEvent{})
-// }
+func (obj *producerUser) RequestCreated(user *models.ProduceReq, timeStamp time.Time) error {
 
-// // UserUpdated implements ProducerUser.
-// func (obj *producerUser) ProfileUpdated(user *models.ProduceReq, timeStamp time.Time) error {
-// 	return obj.eventProducer.Produce(events.ProfileUpdatedEvent{})
-// }
+	return obj.eventProducer.Produce(events.RequestCreatedEvent{})
+}
 
-// // UserDeleted implements ProducerUser.
-// func (obj *producerUser) ProfileDeleted(user uint) error {
-// 	return obj.eventProducer.Produce(events.ProfileDeletedEvent{})
-// }
+// UserUpdated implements ProducerUser.
+func (obj *producerUser) ApprovalUpdated(user *models.ProduceReq, timeStamp time.Time) error {
+	return obj.eventProducer.Produce(events.ApprovalUpdatedEvent{})
+}
+
+// UserDeleted implements ProducerUser.
+func (obj *producerUser) ApprovalDeleted(user uint) error {
+	return obj.eventProducer.Produce(events.ApprovalDeletedEvent{})
+}
