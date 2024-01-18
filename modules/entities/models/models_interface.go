@@ -4,8 +4,8 @@ import "approval-service/modules/entities/events"
 
 type ApprovalUsecase interface {
 	UpdateStatus(uint, *UpdateStatusReq) (*Approval, error)
-	ReceiveRequest(uint, map[string]interface{}) ([]Approval, error)
-	SendRequest(uint, map[string]interface{}) ([]Approval, error)
+	GetReceiveRequest(uint, map[string]interface{}) ([]Approval, error)
+	GetSendRequest(uint, map[string]interface{}) ([]Approval, error)
 	DeleteApproval(id uint) error
 }
 

@@ -104,7 +104,7 @@ func (h *approvalHandler) ReceiveRequest(c *fiber.Ctx) error {
 		optional["requestUser"] = requestUser
 	}
 
-	apprrovalReceive, err := h.approvalSrv.ReceiveRequest(uint(id), optional)
+	apprrovalReceive, err := h.approvalSrv.GetReceiveRequest(uint(id), optional)
 	if err != nil {
 		logs.Error("Error can't get Receive approval ", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
@@ -154,7 +154,7 @@ func (h *approvalHandler) SendRequest(c *fiber.Ctx) error {
 		optional["to"] = []uint{uint(to)}
 	}
 
-	apprrovalSend, err := h.approvalSrv.SendRequest(uint(id), optional)
+	apprrovalSend, err := h.approvalSrv.GetSendRequest(uint(id), optional)
 	if err != nil {
 		logs.Error("Error get send request approval ", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(

@@ -1,20 +1,30 @@
 package usecase
 
 import (
+	"approval-service/logs"
 	"approval-service/modules/entities/events"
 	"approval-service/modules/entities/models"
+	"context"
+	"encoding/json"
+	"fmt"
+	"time"
+
+	"github.com/go-redis/redis/v8"
+	"go.uber.org/zap"
 )
 
 type approvalService struct {
 	approvalRepo models.ApprovalRepository
 	produce      models.EventProducer
+	redis        *redis.Client
 }
 
 func NewApprovalService(
 	approvalRepo models.ApprovalRepository,
 	produce models.EventProducer,
+	redis *redis.Client,
 ) models.ApprovalUsecase {
-	return &approvalService{approvalRepo, produce}
+	return &approvalService{approvalRepo, produce, redis}
 }
 
 func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*models.Approval, error) {
@@ -33,19 +43,45 @@ func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*mo
 	return approvalRes, nil
 }
 
-func (u approvalService) ReceiveRequest(id uint, optional map[string]interface{}) ([]models.Approval, error) {
-	approvalRes, err := u.approvalRepo.GetReceiveRequest(id, optional)
+func (u approvalService) GetReceiveRequest(id uint, optional map[string]interface{}) (approvalRes []models.Approval, err error) {
+	keyRedis := fmt.Sprintf("GetReceiveRequest:%d,optionnals:%v", id, optional)
+	approvalResJson, err := u.redis.Get(context.Background(), keyRedis).Result()
+
+	if json.Unmarshal([]byte(approvalResJson), &approvalRes); err == nil {
+		logs.Debug("Read data from: redis")
+		return approvalRes, nil
+	}
+	approvalRes, err = u.approvalRepo.GetReceiveRequest(id, optional)
 	if err != nil {
 		return nil, err
+	}
+	if data, err := json.Marshal(approvalRes); err == nil {
+		u.redis.Set(context.Background(), keyRedis, string(data), time.Minute*1)
+	} else {
+		logs.Warn("Can't set data to redis", zap.Error(err))
 	}
 	return approvalRes, nil
 }
 
-func (u approvalService) SendRequest(id uint, optional map[string]interface{}) ([]models.Approval, error) {
-	approvalRes, err := u.approvalRepo.GetSendRequest(id, optional)
+func (u approvalService) GetSendRequest(id uint, optional map[string]interface{}) (approvalRes []models.Approval, err error) {
+	keyRedis := fmt.Sprintf("GetSendRequest:%d,optionnals:%v", id, optional)
+	approvalResJson, err := u.redis.Get(context.Background(), keyRedis).Result()
+	if json.Unmarshal([]byte(approvalResJson), &approvalRes); err == nil {
+		logs.Debug("Read data from: redis")
+		return approvalRes, nil
+	}
+
+	approvalRes, err = u.approvalRepo.GetSendRequest(id, optional)
 	if err != nil {
 		return nil, err
 	}
+
+	if data, err := json.Marshal(approvalRes); err == nil {
+		u.redis.Set(context.Background(), keyRedis, string(data), time.Minute*1)
+	} else {
+		logs.Warn("Can't set data to redis", zap.Error(err))
+	}
+
 	return approvalRes, nil
 }
 
