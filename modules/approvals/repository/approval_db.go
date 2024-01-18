@@ -1,8 +1,12 @@
 package repository
 
 import (
+	"fmt"
+
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 
+	"approval-service/logs"
 	"approval-service/modules/entities/models"
 )
 
@@ -16,4 +20,36 @@ func NewapprovalRepositoryDB(db *gorm.DB) approvalRepositoryDB {
 		panic(err)
 	}
 	return approvalRepositoryDB{db: db}
+}
+
+func (r approvalRepositoryDB) UpdateStatus(requestId int, req *models.UpdateStatusReq) (*models.Approval, error) {
+
+	approval := new(models.Approval)
+
+	if err := r.db.First(&approval, requestId).Error; err != nil {
+		logs.Error(fmt.Sprintf("Error finding approval for update with request ID %d: %v", requestId, err), zap.Error(err))
+		return nil, err
+	}
+	//update data
+	approval.Status = req.Status
+	approval.Approver = req.Approver
+
+	//update to database
+	if err := r.db.Save(&approval).Error; err != nil {
+		logs.Error(fmt.Sprintf("Error updating approval with request ID %d: %v", requestId, err), zap.Error(err))
+		return nil, err
+	}
+	return approval, nil
+}
+
+func (r approvalRepositoryDB) GetReceiveRequest(userId int) ([]models.Approval, error) {
+
+	approval := []models.Approval{}
+
+	if err := r.db.Where("request_user = ?", userId).First(&approval).Error; err != nil {
+		logs.Error(fmt.Sprintf("Error finding approval request user with ID %d: %v", userId, err), zap.Error(err))
+		return nil, err
+	}
+
+	return approval, nil
 }
