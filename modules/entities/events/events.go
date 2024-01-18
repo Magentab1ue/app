@@ -35,3 +35,11 @@ type ApprovalUpdatedEvent struct {
 func (ApprovalUpdatedEvent) String() string {
 	return "ApprovalUpdated"
 }
+
+type ApprovalDeletedEvent struct {
+	Task json.RawMessage `json:"task"`
+}
+
+func (ApprovalDeletedEvent) String() string {
+	return "ApprovalDeleted"
+}

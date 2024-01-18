@@ -37,6 +37,13 @@ func (h *approvalHandler) UpdateStatus(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
 		logs.Error("Error parsing approval ID:", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrBadRequest.Message,
+				StatusCode: fiber.ErrBadRequest.Code,
+			},
+		)
 	}
 
 	req := new(models.UpdateStatusReq)
@@ -46,8 +53,8 @@ func (h *approvalHandler) UpdateStatus(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
-				Status:     fiber.ErrNotFound.Message,
-				StatusCode: fiber.ErrNotFound.Code,
+				Status:     fiber.ErrBadRequest.Message,
+				StatusCode: fiber.ErrBadRequest.Code,
 			},
 		)
 	}
@@ -80,7 +87,15 @@ func (h *approvalHandler) ReceiveRequest(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
 		logs.Error("Error parsing approval ID:", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrBadRequest.Message,
+				StatusCode: fiber.ErrBadRequest.Code,
+			},
+		)
 	}
+
 	optional := map[string]interface{}{}
 
 	//Optional
@@ -89,9 +104,9 @@ func (h *approvalHandler) ReceiveRequest(c *fiber.Ctx) error {
 		optional["requestUser"] = requestUser
 	}
 
-	apprrovalUpdated, err := h.approvalSrv.ReceiveRequest(id, optional)
+	apprrovalReceive, err := h.approvalSrv.ReceiveRequest(uint(id), optional)
 	if err != nil {
-		logs.Error("Error update status approval ", zap.Error(err))
+		logs.Error("Error can't get Receive approval ", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -107,17 +122,24 @@ func (h *approvalHandler) ReceiveRequest(c *fiber.Ctx) error {
 			Message:    "Succeed",
 			Status:     "OK",
 			StatusCode: fiber.StatusOK,
-			Data:       apprrovalUpdated,
+			Data:       apprrovalReceive,
 		},
 	)
 }
 
 func (h *approvalHandler) SendRequest(c *fiber.Ctx) error {
-	logs.Info("Attempting to update approval status")
+	logs.Info("Attempting to get request approval")
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
 		logs.Error("Error parsing approval ID:", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrBadRequest.Message,
+				StatusCode: fiber.ErrBadRequest.Code,
+			},
+		)
 	}
 	optional := map[string]interface{}{}
 
@@ -128,12 +150,13 @@ func (h *approvalHandler) SendRequest(c *fiber.Ctx) error {
 	}
 	to := c.Query("to")
 	if to != "" {
-		optional["to"] = to
+		to, _ := strconv.Atoi(to)
+		optional["to"] = []uint{uint(to)}
 	}
 
-	apprrovalUpdated, err := h.approvalSrv.ReceiveRequest(id, optional)
+	apprrovalSend, err := h.approvalSrv.SendRequest(uint(id), optional)
 	if err != nil {
-		logs.Error("Error update status approval ", zap.Error(err))
+		logs.Error("Error get send request approval ", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -149,7 +172,44 @@ func (h *approvalHandler) SendRequest(c *fiber.Ctx) error {
 			Message:    "Succeed",
 			Status:     "OK",
 			StatusCode: fiber.StatusOK,
-			Data:       apprrovalUpdated,
+			Data:       apprrovalSend,
+		},
+	)
+}
+
+func (h *approvalHandler) DeleteApproval(c *fiber.Ctx) error {
+	logs.Info("Attempting to delete approval")
+
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		logs.Error("Error parsing approval ID:", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrBadRequest.Message,
+				StatusCode: fiber.ErrBadRequest.Code,
+			},
+		)
+	}
+
+	err = h.approvalSrv.DeleteApproval(uint(id))
+	if err != nil {
+		logs.Error("Error delete approval ", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrNotFound.Message,
+				StatusCode: fiber.ErrNotFound.Code,
+			},
+		)
+	}
+
+	logs.Info("delete approval successfully")
+	return c.Status(fiber.StatusOK).JSON(
+		models.ResponseData{
+			Message:    "Deleted Succeed",
+			Status:     "OK",
+			StatusCode: fiber.StatusOK,
 		},
 	)
 }
@@ -252,3 +312,41 @@ func (h *approvalHandler) GetApprovalByID(c *fiber.Ctx) error {
 		},
 	)
 }
+
+
+
+// func (h *approvalHandler) GetAllApproval(c *fiber.Ctx) error {
+// 	logs.Info("Attempting to update approval status")
+
+	
+// 	optional := map[string]interface{}{}
+
+// 	//Optional
+// 	requestUser := c.Query("requestUser")
+// 	if requestUser != "" {
+// 		optional["requestUser"] = requestUser
+// 	}
+	
+
+	// apprrovalReceive, err := h.approvalSrv.ReceiveRequest(uint(id), optional)
+	// if err != nil {
+	// 	logs.Error("Error can't get Receive approval ", zap.Error(err))
+	// 	return c.Status(fiber.StatusNotFound).JSON(
+	// 		models.ResponseData{
+	// 			Message:    err.Error(),
+	// 			Status:     fiber.ErrNotFound.Message,
+	// 			StatusCode: fiber.ErrNotFound.Code,
+	// 		},
+	// 	)
+	// }
+
+	// logs.Info("get Receive approval successfully")
+	// return c.Status(fiber.StatusOK).JSON(
+	// 	models.ResponseData{
+	// 		Message:    "Succeed",
+	// 		Status:     "OK",
+	// 		StatusCode: fiber.StatusOK,
+	// 		Data:       apprrovalReceive,
+	// 	},
+	// )
+//}
