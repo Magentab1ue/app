@@ -14,6 +14,7 @@ type RequestSentRequest struct {
 	To           pq.Int64Array `json:"to"`
 	CreationDate time.Time     `json:"creation_date"`
 	RequestUser  uint          `json:"request_user"`
+	IsSignature  bool          `json:"is_signature"`
 }
 
 // db

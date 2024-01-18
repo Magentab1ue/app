@@ -154,16 +154,34 @@ func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*
 		CreationDate: req.CreationDate,
 		RequestUser:  req.RequestUser,
 		Task:         request.Task,
+		IsSignature:  req.IsSignature,
 	})
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
-func (u approvalService) GetAll(optional map[string]interface{}) ([]models.Approvals, error) {
+
+func (u approvalService) GetAll(optional map[string]interface{}) (appprove [] models.Approvals,err error) {
+
+	keyRedis := fmt.Sprintf("GetApprovals:optionnals:%v", optional)
+	//redis get
+	if approvalJson, err := u.Redis.Get(context.Background(), keyRedis).Result(); err == nil {
+		if json.Unmarshal([]byte(approvalJson), &appprove) == nil {
+			log.Debug("Read data from: redis")
+			return appprove, nil
+		}
+	}
+
 	approvalRes, err := u.approvalRepo.GetAll(optional)
 	if err != nil {
 		return nil, err
+	}
+
+	if data, err := json.Marshal(approvalRes); err == nil {
+		u.Redis.Set(context.Background(), keyRedis, string(data), time.Minute*1)
+	} else {
+		logs.Warn("Can't set data to redis", zap.Error(err))
 	}
 	return approvalRes, nil
 }
@@ -175,6 +193,7 @@ func (u approvalService) GetByUserID(id uint, optional map[string]interface{}) (
 	}
 	return approvalRes, nil
 }
+
 func stringInSlice(str string, list []string) bool {
 	for _, val := range list {
 		if val == str {

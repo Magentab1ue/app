@@ -325,6 +325,12 @@ func (h *approvalHandler) GetAllApproval(c *fiber.Ctx) error {
 		optional["to"] = []uint{uint(to)}
 	}
 
+	// pro := c.Query("project")
+	// if to != "" {
+	// 	to, _ := strconv.Atoi(to)
+	// 	optional["project"] = []uint{uint(to)}
+	// }
+
 	apprrovalReceive, err := h.approvalSrv.GetAll(optional)
 	if err != nil {
 		logs.Error("Error can't get Receive approval ", zap.Error(err))
