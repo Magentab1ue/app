@@ -13,6 +13,8 @@ type ApprovalUsecase interface {
 	DeleteApproval(uint) error
 	GetByID(uint) (*Approvals, error)
 	SentRequest(uint, *RequestSentRequest) (*Approvals, error)
+	GetAll(map[string]interface{}) ([]Approvals, error)
+	GetByUserID(uint,map[string]interface{}) ([]Approvals, error)
 }
 
 type ApprovalRepository interface {
@@ -22,6 +24,8 @@ type ApprovalRepository interface {
 	UpdateStatus(uint, *UpdateStatusReq) (*Approvals, error)
 	GetSendRequest(userId uint, optional map[string]interface{}) ([]Approvals, error)
 	DeleteApproval(requestId uint) ([]Approvals, error)
+	GetAll(map[string]interface{}) ([]Approvals, error)
+	GetByUserID(uint, map[string]interface{}) ([]Approvals, error)
 }
 
 type ProducerApproval interface {

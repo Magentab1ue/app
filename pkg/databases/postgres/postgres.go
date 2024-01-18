@@ -1,6 +1,8 @@
 package databases
 
 import (
+	"fmt"
+
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -13,6 +15,11 @@ import (
 func NewPostgresConnection(cfg *configs.Config) (*gorm.DB, error) {
 
 	dsn, err := utils.UrlBuilder("postgres", cfg)
+	fmt.Printf("%v\n", dsn)
+	if err != nil {
+		logs.Error("Can't build url: ", zap.Error(err))
+		return nil, err
+	}
 
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN:                  dsn,

@@ -155,10 +155,18 @@ func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*
 	return res, nil
 }
 
-// func (u approvalService) GetAll(optional map[string]interface{}) ([]models.Approval, error) {
-// 	approvalRes, err := u.approvalRepo.GetReceiveRequest(id,optional)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return approvalRes, nil
-// }
+func (u approvalService) GetAll(optional map[string]interface{}) ([]models.Approvals, error) {
+	approvalRes, err := u.approvalRepo.GetAll(optional)
+	if err != nil {
+		return nil, err
+	}
+	return approvalRes, nil
+}
+
+func (u approvalService) GetByUserID(id uint,optional map[string]interface{}) ([]models.Approvals, error) {
+	approvalRes, err := u.approvalRepo.GetByUserID(id,optional)
+	if err != nil {
+		return nil, err
+	}
+	return approvalRes, nil
+}

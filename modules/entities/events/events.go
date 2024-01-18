@@ -3,6 +3,8 @@ package events
 import (
 	"encoding/json"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 type Event interface {
@@ -14,7 +16,7 @@ var SubscribedTopics = []string{
 }
 
 type RequestCreatedEvent struct {
-	To           []uint
+	To           pq.Int64Array   `json:"to"`
 	Project      json.RawMessage `json:"project"`
 	CreationDate time.Time       `json:"creation_date"`
 	RequestUser  uint            `json:"request_user"`
