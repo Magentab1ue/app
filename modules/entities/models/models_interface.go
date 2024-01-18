@@ -1,12 +1,29 @@
 package models
 
+import "approval-service/modules/entities/events"
+
 type ApprovalUsecase interface {
-	Update(int,*UpdateStatusReq) (*Approval, error)
-	ReceiveRequest(id int,optional map[string]interface{}) ([]Approval, error)
+	UpdateStatus(uint, *UpdateStatusReq) (*Approval, error)
+	ReceiveRequest(id int, optional map[string]interface{}) ([]Approval, error)
 }
 
 type ApprovalRepository interface {
+	Create(*Approval) (*Approval, error)
+	UpdateStatus(uint, *UpdateStatusReq) (*Approval, error)
 }
 
 type ProducerProfile interface {
+}
+
+// consumer
+type EventHandlerConsume interface {
+	Handle(toppic string, eventByte []byte)
+}
+
+type ConsumerUsecase interface {
+	RequestCreated(event events.RequestCreatedEvent) error
+}
+
+type EventProducer interface {
+	Produce(events.Event) error
 }
