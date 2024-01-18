@@ -23,7 +23,7 @@ func NewApprovalController(router fiber.Router, approvalSrv models.ApprovalUseca
 	// //router.Post("/hr-profile", controllers.PullData)
 	// router.Get("/profiles", controllers.getAllProfileData)
 	// router.Get("/profile/:profileId", controllers.GetProfileByID)
-	// router.Get("/profiles/:role", controllers.GetProfileByRole)
+	// router.Get("/profiles/:role/", controllers.GetProfileByRole)
 	// router.Get("/profiles/:email", controllers.GetProfileByEmail)
 	// router.Put("/profile/:profileId", controllers.Update)
 	// router.Delete("/profile/:profileId", controllers.Delete)
@@ -213,3 +213,140 @@ func (h *approvalHandler) DeleteApproval(c *fiber.Ctx) error {
 		},
 	)
 }
+
+func (h *approvalHandler) RequestSent(c *fiber.Ctx) error {
+	logs.Info("Attempting to teamlead sent request to HR or Approver")
+
+	id:= c.Params("id")
+	if id == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(
+			models.ResponseData{
+				Message:    "Require parameters",
+				Status:     fiber.ErrNotFound.Message,
+				StatusCode: fiber.ErrNotFound.Code,
+			},
+		)
+	}
+	
+	idApprove, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrNotFound.Message,
+				StatusCode: fiber.ErrNotFound.Code,
+			},
+		)
+	}
+
+	var requestBody *models.RequestSentRequest
+	if err := c.BodyParser(&requestBody); err != nil {
+		logs.Info("Invalid request", zap.Error(err))
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request",
+		})
+	}
+
+	apprrovalUpdated, err := h.approvalSrv.SentRequest(uint(idApprove), requestBody)
+	if err != nil {
+		logs.Error("Error update status approval ", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrNotFound.Message,
+				StatusCode: fiber.ErrNotFound.Code,
+			},
+		)
+	}
+
+	logs.Info("get send approval successfully")
+	return c.Status(fiber.StatusOK).JSON(
+		models.ResponseData{
+			Message:    "Succeed",
+			Status:     "OK",
+			StatusCode: fiber.StatusOK,
+			Data:       apprrovalUpdated,
+		},
+	)
+}
+
+
+func (h *approvalHandler) GetApprovalByID(c *fiber.Ctx) error {
+
+	id := c.Params("profileId")
+	if id == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(
+			models.ResponseData{
+				Message:    "Require parameters",
+				Status:     fiber.ErrBadRequest.Message,
+				StatusCode: fiber.ErrBadRequest.Code,
+			},
+		)
+	}
+	idProfile, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(
+			models.ResponseData{
+				Message:    "Invalid parameter type",
+				Status:     fiber.ErrBadRequest.Message,
+				StatusCode: fiber.ErrBadRequest.Code,
+			},
+		)
+	}
+	res, err := h.approvalSrv.GetByID(uint(idProfile))
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrNotFound.Message,
+				StatusCode: fiber.ErrNotFound.Code,
+			},
+		)
+	}
+	return c.Status(fiber.StatusOK).JSON(
+		models.ResponseData{
+			Message:    "Succeed",
+			Status:     "OK",
+			StatusCode: fiber.StatusOK,
+			Data:       res,
+		},
+	)
+}
+
+
+
+// func (h *approvalHandler) GetAllApproval(c *fiber.Ctx) error {
+// 	logs.Info("Attempting to update approval status")
+
+	
+// 	optional := map[string]interface{}{}
+
+// 	//Optional
+// 	requestUser := c.Query("requestUser")
+// 	if requestUser != "" {
+// 		optional["requestUser"] = requestUser
+// 	}
+	
+
+	// apprrovalReceive, err := h.approvalSrv.ReceiveRequest(uint(id), optional)
+	// if err != nil {
+	// 	logs.Error("Error can't get Receive approval ", zap.Error(err))
+	// 	return c.Status(fiber.StatusNotFound).JSON(
+	// 		models.ResponseData{
+	// 			Message:    err.Error(),
+	// 			Status:     fiber.ErrNotFound.Message,
+	// 			StatusCode: fiber.ErrNotFound.Code,
+	// 		},
+	// 	)
+	// }
+
+	// logs.Info("get Receive approval successfully")
+	// return c.Status(fiber.StatusOK).JSON(
+	// 	models.ResponseData{
+	// 		Message:    "Succeed",
+	// 		Status:     "OK",
+	// 		StatusCode: fiber.StatusOK,
+	// 		Data:       apprrovalReceive,
+	// 	},
+	// )
+//}

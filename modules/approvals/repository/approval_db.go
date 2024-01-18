@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 
 	"go.uber.org/zap"
@@ -98,3 +99,53 @@ func (r approvalRepositoryDB) DeleteApproval(requestId uint) ([]models.Approval,
 
 	return approval, nil
 }
+
+func (r approvalRepositoryDB) Create(request *models.Approval) (*models.Approval, error) {
+	if err := r.db.Create(request).Error; err != nil {
+		return nil, fmt.Errorf("failed to create request: %v", err)
+	}
+
+	return request, nil
+}
+
+func (r approvalRepositoryDB) GetByID(id uint) (*models.Approval, error) {
+	var approval models.Approval
+	result := r.db.First(&approval, id)
+
+	if result.Error == nil && result.RowsAffected > 0 {
+		return &approval, nil
+	} else {
+		return nil, errors.New("find position by ID not found")
+	}
+}
+
+
+
+
+// func (r approvalRepositoryDB) GetAll(optional map[string]interface{}) ([]models.Approval, error) {
+
+// 	approval := []models.Approval{}
+
+// 	if optional != nil {
+
+// 	err := r.db.Find(&approval).Error
+// 	if err != nil {
+// 		return nil, errors.New("Get dog not found")
+// 	}
+// 	return approval, nil
+
+
+// 		// if err := r.db.Where(optional).Where("to IN (?)", []uint{userId}).Find(&approval).Error; err != nil {
+// 		// 	logs.Error(fmt.Sprintf("Error finding approval receive request user with ID %d: %v", userId, err), zap.Error(err))
+// 		// 	return nil, err
+// 		// }
+// 	} else {
+
+// 		if err := r.db.Where("to IN (?)", []uint{userId}).Find(&approval).Error; err != nil {
+// 			logs.Error(fmt.Sprintf("Error finding approval receive request user with ID %d: %v", userId, err), zap.Error(err))
+// 			return nil, err
+// 		}
+// 	}
+
+// 	return approval, nil
+// }

@@ -14,9 +14,7 @@ var SubscribedTopics = []string{
 }
 
 type RequestCreatedEvent struct {
-	To           string          `json:"to"`
-	Approver     json.RawMessage `json:"approver"`
-	Status       string          `json:"status"`
+	To           []uint
 	Project      json.RawMessage `json:"project"`
 	CreationDate time.Time       `json:"creation_date"`
 	RequestUser  uint            `json:"request_user"`

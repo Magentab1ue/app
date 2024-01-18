@@ -6,13 +6,16 @@ type ApprovalUsecase interface {
 	UpdateStatus(uint, *UpdateStatusReq) (*Approval, error)
 	GetReceiveRequest(uint, map[string]interface{}) ([]Approval, error)
 	GetSendRequest(uint, map[string]interface{}) ([]Approval, error)
-	DeleteApproval(id uint) error
+	DeleteApproval(uint) error
+	GetByID(uint) (*Approval, error)
+	SentRequest(uint, *RequestSentRequest) (*Approval, error)
 }
 
 type ApprovalRepository interface {
 	Create(*Approval) (*Approval, error)
+	GetByID(uint) (*Approval, error)
+	GetReceiveRequest(uint, map[string]interface{}) ([]Approval, error)
 	UpdateStatus(uint, *UpdateStatusReq) (*Approval, error)
-	GetReceiveRequest(userId uint, optional map[string]interface{}) ([]Approval, error)
 	GetSendRequest(userId uint, optional map[string]interface{}) ([]Approval, error)
 	DeleteApproval(requestId uint) ([]Approval, error)
 }
