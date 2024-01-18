@@ -42,12 +42,57 @@ func (r approvalRepositoryDB) UpdateStatus(requestId int, req *models.UpdateStat
 	return approval, nil
 }
 
-func (r approvalRepositoryDB) GetReceiveRequest(userId int) ([]models.Approval, error) {
+func (r approvalRepositoryDB) GetSendRequest(userId uint, optional map[string]interface{}) ([]models.Approval, error) {
+
+	approval := []models.Approval{}
+	optional["request_user"] = userId
+
+	
+	if _, ok := optional["to"]; !ok {
+		if err := r.db.Where(optional).Find(&approval).Error; err != nil {
+			logs.Error(fmt.Sprintf("Error finding approval receive request user with ID %d: %v", userId, err), zap.Error(err))
+			return nil, err
+		}
+	} else {
+		if err := r.db.Where("to IN (?)", optional["to"]).Where(optional).Find(&approval).Error; err != nil {
+			logs.Error(fmt.Sprintf("Error finding approval receive request user with ID %d: %v", userId, err), zap.Error(err))
+			return nil, err
+		}
+	}
+
+	return approval, nil
+}
+
+func (r approvalRepositoryDB) GetReceiveRequest(userId uint, optional map[string]interface{}) ([]models.Approval, error) {
 
 	approval := []models.Approval{}
 
-	if err := r.db.Where("request_user = ?", userId).First(&approval).Error; err != nil {
-		logs.Error(fmt.Sprintf("Error finding approval request user with ID %d: %v", userId, err), zap.Error(err))
+	if optional != nil {
+		if err := r.db.Where(optional).Where("to IN (?)", []uint{userId}).Find(&approval).Error; err != nil {
+			logs.Error(fmt.Sprintf("Error finding approval receive request user with ID %d: %v", userId, err), zap.Error(err))
+			return nil, err
+		}
+	} else {
+
+		if err := r.db.Where("to IN (?)", []uint{userId}).Find(&approval).Error; err != nil {
+			logs.Error(fmt.Sprintf("Error finding approval receive request user with ID %d: %v", userId, err), zap.Error(err))
+			return nil, err
+		}
+	}
+
+	return approval, nil
+}
+
+func (r approvalRepositoryDB) DeleteApproval(requestId uint) ([]models.Approval, error) {
+
+	approval := []models.Approval{}
+	if err := r.db.Find(&approval, requestId).Error; err != nil {
+		logs.Error(fmt.Sprintf("Error cant't finding approval with request ID %d: %v", requestId, err), zap.Error(err))
+		return nil, err
+	}
+
+	if err := r.db.Delete(&approval, requestId).Error; err != nil {
+		logs.Error(fmt.Sprintf("Error cant't delete approval with request ID %d: %v", requestId, err), zap.Error(err))
 		return nil, err
 	}
 

@@ -4,12 +4,17 @@ import "approval-service/modules/entities/events"
 
 type ApprovalUsecase interface {
 	UpdateStatus(uint, *UpdateStatusReq) (*Approval, error)
-	ReceiveRequest(id int, optional map[string]interface{}) ([]Approval, error)
+	ReceiveRequest(uint, map[string]interface{}) ([]Approval, error)
+	SendRequest(uint, map[string]interface{}) ([]Approval, error)
+	DeleteApproval(id uint) error
 }
 
 type ApprovalRepository interface {
 	Create(*Approval) (*Approval, error)
 	UpdateStatus(uint, *UpdateStatusReq) (*Approval, error)
+	GetReceiveRequest(userId uint, optional map[string]interface{}) ([]Approval, error)
+	GetSendRequest(userId uint, optional map[string]interface{}) ([]Approval, error)
+	DeleteApproval(requestId uint) ([]Approval, error)
 }
 
 type ProducerProfile interface {
