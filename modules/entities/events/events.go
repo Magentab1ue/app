@@ -14,7 +14,7 @@ var SubscribedTopics = []string{
 }
 
 type RequestCreatedEvent struct {
-	Approver     json.RawMessage `json:"approver"`
+	To           []uint
 	Project      json.RawMessage `json:"project"`
 	CreationDate time.Time       `json:"creation_date"`
 	RequestUser  uint            `json:"request_user"`
@@ -23,4 +23,15 @@ type RequestCreatedEvent struct {
 
 func (RequestCreatedEvent) String() string {
 	return "RequestCreated"
+}
+
+type ApprovalUpdatedEvent struct {
+	RequestId uint            `json:"requestId"`
+	Approver  uint            `json:"approver"`
+	Status    string          `json:"status"`
+	Task      json.RawMessage `json:"task"`
+}
+
+func (ApprovalUpdatedEvent) String() string {
+	return "ApprovalUpdated"
 }

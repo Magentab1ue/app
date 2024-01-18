@@ -1,6 +1,10 @@
 package usecase
 
 import (
+	"approval-service/modules/entities/events"
+	"approval-service/modules/entities/models"
+)
+import (
 	"context"
 	"encoding/json"
 	"errors"
@@ -11,25 +15,44 @@ import (
 	"github.com/gofiber/fiber/v2/log"
 
 	"approval-service/logs"
-	"approval-service/modules/entities/models"
 )
 
 type approvalService struct {
 	approvalRepo models.ApprovalRepository
+	produce      models.EventProducer
 	Redis        *redis.Client
 }
 
 func NewApprovalService(
 	approvalRepo models.ApprovalRepository,
+	produce models.EventProducer,
 	Redis *redis.Client,
 ) models.ApprovalUsecase {
-	return &approvalService{
-		approvalRepo,
-		Redis,
-	}
+	return &approvalService{approvalRepo, produce, Redis}
 }
 
-func (u approvalService) GetByID(id uint) (appprove *models.Approval,err error) {
+func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*models.Approval, error) {
+	approvalRes, err := u.approvalRepo.UpdateStatus(id, req)
+	if err != nil {
+		return nil, err
+	}
+	event := events.ApprovalUpdatedEvent{
+		RequestId: id,
+		Approver:  req.Approver,
+	}
+	err = u.produce.Produce(event)
+	if err != nil {
+		return nil, err
+	}
+	return approvalRes, nil
+}
+
+func (u approvalService) ReceiveRequest(id int, optional map[string]interface{}) ([]models.Approval, error) {
+
+	return nil, nil
+}
+
+func (u approvalService) GetByID(id uint) (appprove *models.Approval, err error) {
 	key := fmt.Sprintf("service:GetApprovalByID%v", id)
 	//redis get
 	if approvalJson, err := u.Redis.Get(context.Background(), key).Result(); err == nil {
@@ -56,5 +79,23 @@ func (u approvalService) GetByID(id uint) (appprove *models.Approval,err error) 
 }
 
 func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*models.Approval, error) {
-	return nil, nil
+	
+	request,err := u.approvalRepo.GetByID(id)
+	if err != nil {
+		return nil,err
+	}
+	
+	res,err :=u.approvalRepo.Create(&models.Approval{
+		RequestID: request.RequestID,
+		Status: "pending",
+		Project: request.Project,
+		To: req.To,
+		CreationDate: req.CreationDate,
+		RequestUser: req.RequestUser,
+		Task: request.Task,
+	})
+	if err != nil{
+		return nil,err
+	}
+	return res, nil
 }
