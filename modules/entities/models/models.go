@@ -40,3 +40,8 @@ type ResponseData struct {
 	StatusCode int         `json:"status_code"`
 	Data       interface{} `json:"data"`
 }
+
+type ProduceReq struct {
+	ID   uint
+	Data interface{}
+}

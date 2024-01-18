@@ -1,6 +1,10 @@
 package models
 
-import "approval-service/modules/entities/events"
+import (
+	"time"
+
+	"approval-service/modules/entities/events"
+)
 
 type ApprovalUsecase interface {
 	UpdateStatus(uint, *UpdateStatusReq) (*Approval, error)
@@ -20,7 +24,10 @@ type ApprovalRepository interface {
 	DeleteApproval(requestId uint) ([]Approval, error)
 }
 
-type ProducerProfile interface {
+type ProducerApproval interface {
+	RequestCreated(*ProduceReq, time.Time) error
+	ApprovalUpdated(*ProduceReq, time.Time) error
+	ApprovalDeleted(uint) error
 }
 
 // consumer

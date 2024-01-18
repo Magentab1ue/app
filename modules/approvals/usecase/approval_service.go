@@ -37,7 +37,7 @@ func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*mo
 	}
 	event := events.ApprovalUpdatedEvent{
 		RequestId: id,
-		Approver:  req.Approver,
+		Status:    req.Status,
 	}
 	err = u.produce.Produce(event)
 	if err != nil {
@@ -131,7 +131,7 @@ func (u approvalService) GetByID(id uint) (appprove *models.Approval, err error)
 	return approvalDB, nil
 }
 
-func (u approvalService) SentRequest(id uint,req *models.RequestSentRequest) (*models.Approval, error) {
+func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*models.Approval, error) {
 
 	request, err := u.approvalRepo.GetByID(id)
 	if err != nil {

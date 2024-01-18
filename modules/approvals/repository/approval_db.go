@@ -23,7 +23,7 @@ func NewapprovalRepositoryDB(db *gorm.DB) approvalRepositoryDB {
 	return approvalRepositoryDB{db: db}
 }
 
-func (r approvalRepositoryDB) UpdateStatus(requestId int, req *models.UpdateStatusReq) (*models.Approval, error) {
+func (r approvalRepositoryDB) UpdateStatus(requestId uint, req *models.UpdateStatusReq) (*models.Approval, error) {
 
 	approval := new(models.Approval)
 
