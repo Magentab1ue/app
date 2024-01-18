@@ -22,7 +22,7 @@ func NewConsumerUsecase(approvalRepo models.ApprovalRepository) models.ConsumerU
 func (u consumerUsecase) RequestCreated(event events.RequestCreatedEvent) error {
 	_, err := u.approvalRepo.Create(&models.Approval{
 		RequestID:    uuid.New(),
-		To:           event.To,
+		To:           "treamlead",
 		Approver:     event.Approver,
 		Status:       "pending",
 		CreationDate: event.CreationDate,

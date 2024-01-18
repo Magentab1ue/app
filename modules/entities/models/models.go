@@ -7,6 +7,13 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
+//request
+type RequestSentRequest struct{
+	To           string          `json:"to"`
+	Approver     json.RawMessage `json:"approver"`
+	CreationDate time.Time       `json:"creation_date"`
+	RequestUser  uint            `json:"request_user"`
+}
 
 // db
 type Approval struct {
