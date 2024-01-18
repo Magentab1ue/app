@@ -8,7 +8,6 @@ import (
 	"approval-service/logs"
 	"approval-service/modules/entities/events"
 	"approval-service/modules/entities/models"
-
 )
 
 type consumerUsecase struct {
@@ -20,7 +19,7 @@ func NewConsumerUsecase(approvalRepo models.ApprovalRepository) models.ConsumerU
 }
 
 func (u consumerUsecase) RequestCreated(event events.RequestCreatedEvent) error {
-	_, err := u.approvalRepo.Create(&models.Approval{
+	_, err := u.approvalRepo.Create(&models.Approvals{
 		RequestID:    uuid.New(),
 		To:           event.To,
 		Status:       "pending",

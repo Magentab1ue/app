@@ -21,6 +21,7 @@ func NewPostgresConnection(cfg *configs.Config) (*gorm.DB, error) {
 
 	if err != nil {
 		logs.Error("Failed to connect to database: ", zap.Error(err))
+		return nil, err
 	}
 	logs.Info("postgreSQL database has been connected 🐘")
 	return db, nil

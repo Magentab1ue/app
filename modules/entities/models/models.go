@@ -7,15 +7,16 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
-//request
-type RequestSentRequest struct{
-	To           []uint          `json:"to"`
-	CreationDate time.Time       `json:"creation_date"`
-	RequestUser  uint            `json:"request_user"`
+
+// request
+type RequestSentRequest struct {
+	To           []uint    `json:"to"`
+	CreationDate time.Time `json:"creation_date"`
+	RequestUser  uint      `json:"request_user"`
 }
 
 // db
-type Approval struct {
+type Approvals struct {
 	gorm.Model
 	ID           uint            `gorm:"primaryKey" json:"id"`
 	RequestID    uuid.UUID       `json:"request_id"`
