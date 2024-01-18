@@ -1,10 +1,10 @@
 package events
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/lib/pq"
+	"gorm.io/datatypes"
 )
 
 type Event interface {
@@ -16,11 +16,11 @@ var SubscribedTopics = []string{
 }
 
 type RequestCreatedEvent struct {
-	To           pq.Int64Array   `json:"to"`
-	Project      json.RawMessage `json:"project"`
-	CreationDate time.Time       `json:"creation_date"`
-	RequestUser  uint            `json:"request_user"`
-	Task         json.RawMessage `json:"task"`
+	To           pq.Int64Array  `json:"to"`
+	Project      datatypes.JSON `json:"project"`
+	CreationDate time.Time      `json:"creation_date"`
+	RequestUser  uint           `json:"request_user"`
+	Task         datatypes.JSON `json:"task"`
 }
 
 func (RequestCreatedEvent) String() string {
@@ -28,10 +28,10 @@ func (RequestCreatedEvent) String() string {
 }
 
 type ApprovalUpdatedEvent struct {
-	RequestId uint            `json:"requestId"`
-	Approver  uint            `json:"approver"`
-	Status    string          `json:"status"`
-	Task      json.RawMessage `json:"task"`
+	RequestId uint           `json:"requestId"`
+	Approver  uint           `json:"approver"`
+	Status    string         `json:"status"`
+	Task      datatypes.JSON `json:"task"`
 }
 
 func (ApprovalUpdatedEvent) String() string {
@@ -39,7 +39,7 @@ func (ApprovalUpdatedEvent) String() string {
 }
 
 type ApprovalDeletedEvent struct {
-	Task json.RawMessage `json:"task"`
+	Task datatypes.JSON `json:"task"`
 }
 
 func (ApprovalDeletedEvent) String() string {
