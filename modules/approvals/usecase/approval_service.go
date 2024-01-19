@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2/log"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 
 	"approval-service/logs"
@@ -228,9 +229,17 @@ func stringInSlice(str string, list []string) bool {
 	return false
 }
 
-func (u approvalService) CreateRequest(req *models.Approvals) (*models.Approvals, error) {
-	req.Status = "pending"
-	newRequest, err := u.approvalRepo.Create(req)
+func (u approvalService) CreateRequest(req *models.RequestReq) (*models.Approvals, error) {
+	newRequest, err := u.approvalRepo.Create(&models.Approvals{
+		RequestID:    uuid.New(),
+		To:           req.To,
+		Status:       "pending",
+		Project:      req.Project,
+		CreationDate: req.CreationDate,
+		RequestUser:  req.RequestUser,
+		Task:         req.Task,
+		
+	})
 	if err != nil {
 		logs.Error(err)
 		return nil, errors.New("can't create request")

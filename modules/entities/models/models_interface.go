@@ -15,7 +15,7 @@ type ApprovalUsecase interface {
 	SentRequest(uint, *RequestSentRequest) (*Approvals, error)
 	GetAll(map[string]interface{}) ([]Approvals, error)
 	GetByUserID(uint, map[string]interface{}) ([]Approvals, error)
-	CreateRequest(*Approvals) (*Approvals, error)
+	CreateRequest(*RequestReq) (*Approvals, error)
 }
 
 type ApprovalRepository interface {

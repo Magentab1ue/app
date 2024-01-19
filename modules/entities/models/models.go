@@ -17,6 +17,14 @@ type RequestSentRequest struct {
 	IsSignature  bool          `json:"is_signature"`
 }
 
+type RequestReq struct {
+	To           pq.Int64Array  `json:"to" gorm:"type:integer[]"`
+	Project      datatypes.JSON `json:"project" gorm:"type:jsonb"`
+	CreationDate time.Time      `json:"creation_date"`
+	RequestUser  uint           `json:"request_user"`
+	Task         datatypes.JSON `json:"task" gorm:"type:jsonb"`
+}
+
 // db
 type Approvals struct {
 	gorm.Model
