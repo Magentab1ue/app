@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2/log"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 
 	"approval-service/logs"
@@ -30,14 +31,28 @@ func NewApprovalService(
 	return &approvalService{approvalRepo, produce, Redis}
 }
 
-func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*models.Approval, error) {
+func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*models.Approvals, error) {
+	statusList := []string{models.Approve, models.Pending, models.Reject}
+
+	hasStatus := stringInSlice(req.Status, statusList)
+	if !hasStatus {
+		return nil, errors.New("format status incorrect, status should have approved , pending or reject")
+	}
 	approvalRes, err := u.approvalRepo.UpdateStatus(id, req)
 	if err != nil {
 		return nil, err
 	}
 	event := events.ApprovalUpdatedEvent{
-		RequestId: id,
-		Status:    req.Status,
+		ID:           approvalRes.ID,
+		RequestID:    approvalRes.RequestID,
+		To:           approvalRes.To,
+		Approver:     approvalRes.Approver,
+		Status:       approvalRes.Status,
+		Project:      approvalRes.Project,
+		CreationDate: approvalRes.CreationDate,
+		RequestUser:  approvalRes.RequestUser,
+		IsSignature:  approvalRes.IsSignature,
+		Task:         approvalRes.Task,
 	}
 	err = u.produce.Produce(event)
 	if err != nil {
@@ -46,16 +61,20 @@ func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*mo
 	return approvalRes, nil
 }
 
-func (u approvalService) GetReceiveRequest(id uint, optional map[string]interface{}) (approvalRes []models.Approval, err error) {
+func (u approvalService) GetReceiveRequest(id uint, optional map[string]interface{}) (approvalRes []models.Approvals, err error) {
 	keyRedis := fmt.Sprintf("GetReceiveRequest:%d,optionnals:%v", id, optional)
 
-	if approvalResJson, err := u.Redis.Get(context.Background(), keyRedis).Result(); err == nil {
+	approvalResJson, err := u.Redis.Get(context.Background(), keyRedis).Result()
+	if err == nil {
 		if json.Unmarshal([]byte(approvalResJson), &approvalRes) == nil {
-			log.Debug("Read data from: redis")
+			logs.Info("Read data from: redis")
 			return approvalRes, nil
 		}
-	}
 
+	}
+	if err != nil {
+		logs.Warn("Redis error", zap.Error(err))
+	}
 	approvalRes, err = u.approvalRepo.GetReceiveRequest(id, optional)
 	if err != nil {
 		return nil, err
@@ -68,15 +87,19 @@ func (u approvalService) GetReceiveRequest(id uint, optional map[string]interfac
 	return approvalRes, nil
 }
 
-func (u approvalService) GetSendRequest(id uint, optional map[string]interface{}) (approvalRes []models.Approval, err error) {
+func (u approvalService) GetSendRequest(id uint, optional map[string]interface{}) (approvalRes []models.Approvals, err error) {
 	keyRedis := fmt.Sprintf("GetSendRequest:%d,optionnals:%v", id, optional)
-	if approvalResJson, err := u.Redis.Get(context.Background(), keyRedis).Result(); err == nil {
+	approvalResJson, err := u.Redis.Get(context.Background(), keyRedis).Result()
+	if err == nil {
 		if json.Unmarshal([]byte(approvalResJson), &approvalRes) == nil {
-			log.Debug("Read data from: redis")
+			logs.Info("Read data from: redis")
 			return approvalRes, nil
 		}
-	}
 
+	}
+	if err != nil {
+		logs.Warn("Redis error", zap.Error(err))
+	}
 	approvalRes, err = u.approvalRepo.GetSendRequest(id, optional)
 	if err != nil {
 		return nil, err
@@ -98,7 +121,7 @@ func (u approvalService) DeleteApproval(id uint) error {
 	}
 
 	event := events.ApprovalDeletedEvent{
-		Task: approval[0].Task,
+		Task: approval.Task,
 	}
 	err = u.produce.Produce(event)
 	if err != nil {
@@ -107,7 +130,7 @@ func (u approvalService) DeleteApproval(id uint) error {
 	return nil
 }
 
-func (u approvalService) GetByID(id uint) (appprove *models.Approval, err error) {
+func (u approvalService) GetByID(id uint) (appprove *models.Approvals, err error) {
 	key := fmt.Sprintf("service:GetApprovalByID%v", id)
 	//redis get
 	if approvalJson, err := u.Redis.Get(context.Background(), key).Result(); err == nil {
@@ -133,14 +156,14 @@ func (u approvalService) GetByID(id uint) (appprove *models.Approval, err error)
 	return approvalDB, nil
 }
 
-func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*models.Approval, error) {
+func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*models.Approvals, error) {
 
 	request, err := u.approvalRepo.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := u.approvalRepo.Create(&models.Approval{
+	res, err := u.approvalRepo.Create(&models.Approvals{
 		RequestID:    request.RequestID,
 		Status:       "pending",
 		Project:      request.Project,
@@ -148,6 +171,7 @@ func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*
 		CreationDate: req.CreationDate,
 		RequestUser:  req.RequestUser,
 		Task:         request.Task,
+		IsSignature:  req.IsSignature,
 	})
 	if err != nil {
 		return nil, err
@@ -155,10 +179,94 @@ func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*
 	return res, nil
 }
 
-// func (u approvalService) GetAll(optional map[string]interface{}) ([]models.Approval, error) {
-// 	approvalRes, err := u.approvalRepo.GetReceiveRequest(id,optional)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return approvalRes, nil
-// }
+func (u approvalService) GetAll(optional map[string]interface{}) (appprove []models.Approvals, err error) {
+
+	keyRedis := fmt.Sprintf("GetApprovals:optionnals:%v", optional)
+	//redis get
+	if approvalJson, err := u.Redis.Get(context.Background(), keyRedis).Result(); err == nil {
+		if json.Unmarshal([]byte(approvalJson), &appprove) == nil {
+			log.Debug("Read data from: redis")
+			return appprove, nil
+		}
+	}
+
+	log.Debug("Read data from database")
+	approvalRes, err := u.approvalRepo.GetAll(optional)
+	if err != nil {
+		return nil, err
+	}
+
+	if data, err := json.Marshal(approvalRes); err == nil {
+		u.Redis.Set(context.Background(), keyRedis, string(data), time.Minute*1)
+	} else {
+		logs.Warn("Can't set data to redis", zap.Error(err))
+	}
+	return approvalRes, nil
+}
+
+func (u approvalService) GetByUserID(id uint, optional map[string]interface{}) (appprove []models.Approvals, err error) {
+	keyRedis := fmt.Sprintf("GetApprovalByUserId:%v:optionnals:%v", id, optional)
+	//redis get
+	if approvalJson, err := u.Redis.Get(context.Background(), keyRedis).Result(); err == nil {
+		if json.Unmarshal([]byte(approvalJson), &appprove) == nil {
+			log.Debug("Read data from: redis")
+			return appprove, nil
+		}
+	}
+
+	log.Debug("Read data from database")
+	approvalRes, err := u.approvalRepo.GetByUserID(id, optional)
+	if err != nil {
+		return nil, err
+	}
+
+	if data, err := json.Marshal(approvalRes); err == nil {
+		u.Redis.Set(context.Background(), keyRedis, string(data), time.Minute*1)
+	} else {
+		logs.Warn("Can't set data to redis", zap.Error(err))
+	}
+	return approvalRes, nil
+}
+
+func stringInSlice(str string, list []string) bool {
+	for _, val := range list {
+		if val == str {
+			return true
+		}
+	}
+	return false
+}
+
+func (u approvalService) CreateRequest(req *models.RequestReq) (*models.Approvals, error) {
+	newRequest, err := u.approvalRepo.Create(&models.Approvals{
+		RequestID:    uuid.New(),
+		To:           req.To,
+		Status:       "pending",
+		Project:      req.Project,
+		CreationDate: req.CreationDate,
+		RequestUser:  req.RequestUser,
+		Task:         req.Task,
+	})
+	if err != nil {
+		logs.Error(err)
+		return nil, errors.New("can't create request")
+	}
+
+	event := events.RequestCreatedEvent{
+		ID:           newRequest.ID,
+		RequestID:    newRequest.RequestID,
+		To:           newRequest.To,
+		Status:       newRequest.Status,
+		Project:      newRequest.Project,
+		CreationDate: newRequest.CreationDate,
+		RequestUser:  newRequest.RequestUser,
+		Task:         newRequest.Task,
+	}
+	err = u.produce.Produce(event)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Info("create request Successfuly")
+	return newRequest, nil
+}

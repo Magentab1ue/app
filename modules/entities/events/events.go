@@ -1,8 +1,11 @@
 package events
 
 import (
-	"encoding/json"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/lib/pq"
+	"gorm.io/datatypes"
 )
 
 type Event interface {
@@ -14,32 +17,43 @@ var SubscribedTopics = []string{
 }
 
 type RequestCreatedEvent struct {
-	To           []uint
-	Project      json.RawMessage `json:"project"`
-	CreationDate time.Time       `json:"creation_date"`
-	RequestUser  uint            `json:"request_user"`
-	Task         json.RawMessage `json:"task"`
+	ID           uint           `json:"id"`
+	RequestID    uuid.UUID      `json:"request_id"`
+	To           pq.Int64Array  `json:"to" gorm:"type:integer[]"`
+	Approver     uint           `json:"approver"`
+	Status       string         `json:"status"`
+	Project      datatypes.JSON `json:"project" gorm:"type:jsonb"` // Assuming your database supports JSONB
+	CreationDate time.Time      `json:"creation_date"`
+	RequestUser  uint           `json:"request_user"`
+	IsSignature  bool           `json:"is_signature"`
+	Task         datatypes.JSON `json:"task" gorm:"type:jsonb"`
 }
 
 func (RequestCreatedEvent) String() string {
-	return "RequestCreated"
+	return "tcchub-approval-approvalCreated"
 }
 
 type ApprovalUpdatedEvent struct {
-	RequestId uint            `json:"requestId"`
-	Approver  uint            `json:"approver"`
-	Status    string          `json:"status"`
-	Task      json.RawMessage `json:"task"`
+	ID           uint           `json:"id"`
+	RequestID    uuid.UUID      `json:"request_id"`
+	To           pq.Int64Array  `json:"to" gorm:"type:integer[]"`
+	Approver     uint           `json:"approver"`
+	Status       string         `json:"status"`
+	Project      datatypes.JSON `json:"project" gorm:"type:jsonb"` // Assuming your database supports JSONB
+	CreationDate time.Time      `json:"creation_date"`
+	RequestUser  uint           `json:"request_user"`
+	IsSignature  bool           `json:"is_signature"`
+	Task         datatypes.JSON `json:"task" gorm:"type:jsonb"`
 }
 
 func (ApprovalUpdatedEvent) String() string {
-	return "ApprovalUpdated"
+	return "tcchub-approval-approvalUpdated"
 }
 
 type ApprovalDeletedEvent struct {
-	Task json.RawMessage `json:"task"`
+	Task datatypes.JSON `json:"task"`
 }
 
 func (ApprovalDeletedEvent) String() string {
-	return "ApprovalDeleted"
+	return "tcchub-approval-approvalDeleted"
 }

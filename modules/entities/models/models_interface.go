@@ -1,27 +1,31 @@
 package models
 
 import (
-	"time"
-
 	"approval-service/modules/entities/events"
+	"time"
 )
 
 type ApprovalUsecase interface {
-	UpdateStatus(uint, *UpdateStatusReq) (*Approval, error)
-	GetReceiveRequest(uint, map[string]interface{}) ([]Approval, error)
-	GetSendRequest(uint, map[string]interface{}) ([]Approval, error)
+	UpdateStatus(uint, *UpdateStatusReq) (*Approvals, error)
+	GetReceiveRequest(uint, map[string]interface{}) ([]Approvals, error)
+	GetSendRequest(uint, map[string]interface{}) ([]Approvals, error)
 	DeleteApproval(uint) error
-	GetByID(uint) (*Approval, error)
-	SentRequest(uint, *RequestSentRequest) (*Approval, error)
+	GetByID(uint) (*Approvals, error)
+	SentRequest(uint, *RequestSentRequest) (*Approvals, error)
+	GetAll(map[string]interface{}) ([]Approvals, error)
+	GetByUserID(uint, map[string]interface{}) ([]Approvals, error)
+	CreateRequest(*RequestReq) (*Approvals, error)
 }
 
 type ApprovalRepository interface {
-	Create(*Approval) (*Approval, error)
-	GetByID(uint) (*Approval, error)
-	GetReceiveRequest(uint, map[string]interface{}) ([]Approval, error)
-	UpdateStatus(uint, *UpdateStatusReq) (*Approval, error)
-	GetSendRequest(userId uint, optional map[string]interface{}) ([]Approval, error)
-	DeleteApproval(requestId uint) ([]Approval, error)
+	Create(*Approvals) (*Approvals, error)
+	GetByID(uint) (*Approvals, error)
+	GetReceiveRequest(uint, map[string]interface{}) ([]Approvals, error)
+	UpdateStatus(uint, *UpdateStatusReq) (*Approvals, error)
+	GetSendRequest(userId uint, optional map[string]interface{}) ([]Approvals, error)
+	DeleteApproval(requestId uint) (*Approvals, error)
+	GetAll(map[string]interface{}) ([]Approvals, error)
+	GetByUserID(uint, map[string]interface{}) ([]Approvals, error)
 }
 
 type ProducerApproval interface {
@@ -36,7 +40,7 @@ type EventHandlerConsume interface {
 }
 
 type ConsumerUsecase interface {
-	RequestCreated(event events.RequestCreatedEvent) error
+	//RequestCreated(event events.RequestCreatedEvent) error
 }
 
 type EventProducer interface {

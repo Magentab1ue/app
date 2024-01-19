@@ -8,13 +8,14 @@
   - [Authentication](#authentication)
   - [Base URL](#base-url)
   - [Endpoints](#endpoints)
+    - [POST v1/approval/create](#post-v1approvalcreate)
     - [GET v1/approval/:id](#get-v1approvalid)
-    - [GET v1/approvals?status=xxx?to=xxx?](#get-v1approvalsstatusxxxtoxxx)
+    - [GET /v1/approvals?status=xxx?to=xxx?project=xxx?](#get-v1approvalsstatusxxxtoxxxprojectxxx)
     - [PUT v1/approval/update-status/:id](#put-v1approvalupdate-statusid)
-    - [PUT v1/approval/sent-request/:id](#put-v1approvalupdate-statusid)
-    - [GET v1/approval/user/:id?status=xxx?to=xxx?](#get-v1approvaluseridstatusxxxtoxxx)
-    - [GET v1/approval/user/:id/receive-request?requsetUser=xx](#get-v1approvaluseridreceive-request)
-    - [GET v1/approval/user/:id/send-request?to=xxx?project=xxx](#get-v1approvaluseridsend-request)
+    - [PUT v1/approval/sent-request/:id](#put-v1approvalsent-requestid)
+    - [GET /v1/approval/user/:id?status=xxx\&to=xxx\&project=xx](#get-v1approvaluseridstatusxxxtoxxxprojectxx)
+    - [GET /v1/approval/user/:id/receive-request?requsetUser=xx\&project=xx\&status=xx](#get-v1approvaluseridreceive-requestrequsetuserxxprojectxxstatusxx)
+    - [GET /v1/approval/user/:id/send-request?to=xx\&project=xxx\&status=xx](#get-v1approvaluseridsend-requesttoxxprojectxxxstatusxx)
     - [DELETE /v1/approval/:id](#delete-v1approvalid)
   - [Status Codes](#status-codes)
   - [Event topics](#event-topics)
@@ -35,6 +36,49 @@ All Approval service API endpoints are relative to this base
 URL: `https://approval-service:{{app_port}}/`
 
 ## Endpoints
+
+
+### POST v1/approval/create
+
+Update create approval.
+
+**Headers**
+
+```json
+Authorization: JWT YOUR_TOKEN
+```
+
+**Request Body**:
+
+```json
+{
+    "to":,
+    "project" :,
+    "creationDate":,
+    "requestUser" :,
+    "task" :,
+}
+```
+
+**Response**:
+```json
+{
+  "data" : {
+    "id" : ,
+    "requsetId":,
+    "to":,
+    "approver" :,
+    "project" :,
+    "status" :,
+    "creationDate":,
+    "requestUser" :,
+    "task" : [],
+  },
+  "message": "successful",
+  "status": "ok",
+  "status_code": 200
+}
+```
 
 ### GET v1/approval/:id
 
@@ -82,6 +126,11 @@ Get the approvals data. filter
 Authorization: JWT YOUR_TOKEN
 ```
 
+**Paremeters**:
+- to  type: number
+- project type: number
+- status type: string
+
 **Response**:
 
 ```json
@@ -127,6 +176,7 @@ id : (require) type: uint
 {
   "status":,
   "approver":,
+  "Approver":,
 }
 ```
 
@@ -153,7 +203,7 @@ id : (require) type: uint
 
 ### PUT v1/approval/sent-request/:id
 
-Update status approval.
+teamlead request to HR or Approver.
 
 **Headers**
 
@@ -175,6 +225,7 @@ id : (require) type: uint
     "approver" :,
     "creationDate":,
     "requestUser" :,
+    "is_signature":
 }
 ```
 
@@ -199,7 +250,7 @@ id : (require) type: uint
 }
 ```
 
-### GET /v1/approval/user/:id?status=xxx?to=xxx?
+### GET /v1/approval/user/:id?status=xxx&to=xxx&project=xx
 
 get approval from database by user id with filter
 
@@ -212,6 +263,9 @@ Authorization: JWT YOUR_TOKEN
 **Paremeters**:
 
 - id : (require) type: uint
+- requsetUser  type: number
+- project type: number
+- status type: string
 
 **Response**:
 
@@ -236,7 +290,7 @@ Authorization: JWT YOUR_TOKEN
 }
 ```
 
-### GET /v1/approval/user/:id/receive-request/
+### GET /v1/approval/user/:id/receive-request?requsetUser=xx&project=xx&status=xx
 
 get approval from the database receives the user ID.
 
@@ -249,6 +303,9 @@ Authorization: JWT YOUR_TOKEN
 **Paremeters**:
 
 - id : (require) type: uint
+- requsetUser  type: number
+- project type: number
+- status type: string
 
 **Response**:
 
@@ -273,7 +330,7 @@ Authorization: JWT YOUR_TOKEN
 }
 ```
 
-### GET /v1/approval/user/:id/send-request/
+### GET /v1/approval/user/:id/send-request?to=xx&project=xxx&status=xx
 
 get approval from the database sends the user ID.
 
@@ -286,6 +343,9 @@ Authorization: JWT YOUR_TOKEN
 **Paremeters**:
 
 - id : (require) type: uint
+- to  type: number
+- project type: number
+- status type: string
 
 **Response**:
 
@@ -347,9 +407,9 @@ Authorization: JWT YOUR_TOKEN
 
 ## Event topics
 
-**RequstCreated**
+**ApprovalCreated**
 
-**Subscribe** to the `RequestCreate` topic to receive information for create approval
+**Publish** to the `tcchub-approval-approvalCreated` topic to receive information for create approval
 
 **Message**:
 
@@ -371,7 +431,7 @@ Authorization: JWT YOUR_TOKEN
 
 **ApprovalUpdated**
 
-**Publish** information about approval after update to the `ApprovalUpdated` topic
+**Publish** information about approval after update to the `tcchub-approval-approvalUpdated` topic
 
 **Message**:
 
@@ -387,7 +447,7 @@ Authorization: JWT YOUR_TOKEN
 
 **ApprovalDeleted**
 
-**Publish** delete event approval after delete to the `ApprovalDeleted` topic
+**Publish** delete event approval after delete to the `tcchub-approval-approvalDeleted` topic
 
 **Message**:
 

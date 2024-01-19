@@ -7,6 +7,7 @@ import (
 	"github.com/IBM/sarama"
 	"github.com/gofiber/fiber/v2/log"
 
+	"approval-service/logs"
 	"approval-service/modules/entities/events"
 	"approval-service/modules/entities/models"
 )
@@ -37,6 +38,6 @@ func (obj *eventProducer) Produce(event events.Event) error {
 		log.Error(err)
 		return err
 	}
-	log.Info(fmt.Sprintf("sent to topic: %v, partition: %v, offset %v", topic, p, o))
+	logs.Info(fmt.Sprintf("sent to topic: %v, partition: %v, offset %v\n", topic, p, o))
 	return nil
 }

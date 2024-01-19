@@ -59,7 +59,10 @@ func (s *server) Start() {
 		log.Info("Connect to kafa server:", s.Cfg.Kafkas.Hosts, ",Group:", s.Cfg.Kafkas.Group)
 		log.Info("Subscribed topics:", events.SubscribedTopics)
 		for {
-			s.ConsumerGroup.Consume(context.Background(), events.SubscribedTopics, s.consumerGroupHandler)
+			err := s.ConsumerGroup.Consume(context.Background(), events.SubscribedTopics, s.consumerGroupHandler)
+			if err != nil{
+				log.Fatal(err)
+			}
 		}
 	}()
 

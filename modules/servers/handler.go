@@ -15,7 +15,6 @@ func (s *server) Handlers() error {
 
 	// Group a version
 	v1 := s.App.Group("/v1")
-
 	//repo
 	approveRepo := repository.NewapprovalRepositoryDB(s.Db)
 
