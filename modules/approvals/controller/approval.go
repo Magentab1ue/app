@@ -447,3 +447,37 @@ func (h *approvalHandler) GetByUserID(c *fiber.Ctx) error {
 		},
 	)
 }
+
+func (h *approvalHandler) CreateRequest(c *fiber.Ctx) error {
+	logs.Info("Attempting to update approval status")
+
+	approvalBody := new(models.Approvals)
+	if err := c.BodyParser(&approvalBody); err != nil {
+		logs.Info("Invalid request", zap.Error(err))
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request",
+		})
+	}
+
+	apprrovalCreate, err := h.approvalSrv.CreateRequest(approvalBody)
+	if err != nil {
+		logs.Error("Error can't get Receive approval ", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrNotFound.Message,
+				StatusCode: fiber.ErrNotFound.Code,
+			},
+		)
+	}
+
+	logs.Info("get Receive approval successfully")
+	return c.Status(fiber.StatusOK).JSON(
+		models.ResponseData{
+			Message:    "Succeed",
+			Status:     "OK",
+			StatusCode: fiber.StatusOK,
+			Data:       apprrovalCreate,
+		},
+	)
+}

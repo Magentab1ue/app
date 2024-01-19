@@ -162,7 +162,7 @@ func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*
 	return res, nil
 }
 
-func (u approvalService) GetAll(optional map[string]interface{}) (appprove [] models.Approvals,err error) {
+func (u approvalService) GetAll(optional map[string]interface{}) (appprove []models.Approvals, err error) {
 
 	keyRedis := fmt.Sprintf("GetApprovals:optionnals:%v", optional)
 	//redis get
@@ -187,8 +187,8 @@ func (u approvalService) GetAll(optional map[string]interface{}) (appprove [] mo
 	return approvalRes, nil
 }
 
-func (u approvalService) GetByUserID(id uint, optional map[string]interface{}) (appprove []models.Approvals,err error) {
-	keyRedis := fmt.Sprintf("GetApprovalByUserId:%v:optionnals:%v",id, optional)
+func (u approvalService) GetByUserID(id uint, optional map[string]interface{}) (appprove []models.Approvals, err error) {
+	keyRedis := fmt.Sprintf("GetApprovalByUserId:%v:optionnals:%v", id, optional)
 	//redis get
 	if approvalJson, err := u.Redis.Get(context.Background(), keyRedis).Result(); err == nil {
 		if json.Unmarshal([]byte(approvalJson), &appprove) == nil {
@@ -202,7 +202,6 @@ func (u approvalService) GetByUserID(id uint, optional map[string]interface{}) (
 	if err != nil {
 		return nil, err
 	}
-
 
 	if data, err := json.Marshal(approvalRes); err == nil {
 		u.Redis.Set(context.Background(), keyRedis, string(data), time.Minute*1)
@@ -219,4 +218,28 @@ func stringInSlice(str string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func (u approvalService) CreateRequest(req *models.Approvals) (*models.Approvals, error) {
+	req.Status = "pending"
+	newRequest, err := u.approvalRepo.Create(req)
+	if err != nil {
+		logs.Error(err)
+		return nil, errors.New("Can't create request")
+	}
+
+	event := events.RequestCreatedEvent{
+		To:           newRequest.To,
+		Project:      newRequest.Project,
+		CreationDate: newRequest.CreationDate,
+		RequestUser:  newRequest.RequestUser,
+		Task:         newRequest.Task,
+	}
+	err = u.produce.Produce(event)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Info("create request Successfuly")
+	return newRequest, nil
 }
