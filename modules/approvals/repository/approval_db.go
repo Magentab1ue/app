@@ -60,7 +60,7 @@ func (r approvalRepositoryDB) GetSendRequest(userId uint, optional map[string]in
 	if _, ok := optional["project"]; ok {
 		projectId := optional["project"]
 		delete(optional, "project")
-		condition = condition.Where("project ->> \"id\" = ? ", projectId)
+		condition = condition.Where("project ->> 'id' = ? ", projectId)
 	}
 	err := condition.Where(optional).Find(&approval).Error
 	if err != nil {
@@ -77,12 +77,12 @@ func (r approvalRepositoryDB) GetReceiveRequest(userId uint, optional map[string
 
 	approval := []models.Approvals{}
 	optionalStr := fmt.Sprintf("%v", optional)
-	condition := r.db.Where(optional).Where("? = ANY(\"to\")", userId)
+	condition := r.db.Where("? = ANY(\"to\")", userId)
 
 	if _, ok := optional["project"]; ok {
 		projectId := optional["project"]
 		delete(optional, "project")
-		condition = condition.Where(optional).Where("project @> ?", projectId).Find(&approval)
+		condition = condition.Where("project ->> 'id' = ? ", projectId)
 	}
 	err := condition.Where(optional).Find(&approval).Error
 	if err != nil {
@@ -148,7 +148,7 @@ func (r approvalRepositoryDB) GetAll(optional map[string]interface{}) ([]models.
 	if _, ok := optional["project"]; ok {
 		projectId := optional["project"]
 		delete(optional, "project")
-		condition = condition.Where(optional).Where("project @> ?", projectId).Find(&approval)
+		condition = condition.Where("project ->> 'id' = ? ", projectId)
 	}
 
 	err := condition.Where(optional).Find(&approval).Error

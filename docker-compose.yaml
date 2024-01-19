@@ -31,7 +31,7 @@ services:
     volumes:
       - ./data/redis:/data
       - ./config/redis.conf:/redis.conf
-    command: redis-server /redis.conf --requirepass $$REDIS_PASSWORD
+    command: redis-server /redis.conf --requirepass 1234gg
     environment:
       REDIS_PASSWORD: 1234gg
    

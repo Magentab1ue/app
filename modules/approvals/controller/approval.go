@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -119,7 +118,7 @@ func (h *approvalHandler) ReceiveRequest(c *fiber.Ctx) error {
 				},
 			)
 		}
-		optional["project"] = fmt.Sprintf(`{"id":%d}`, projectId)
+		optional["project"] = projectId
 	}
 
 	apprrovalReceive, err := h.approvalSrv.GetReceiveRequest(uint(id), optional)
@@ -369,7 +368,7 @@ func (h *approvalHandler) GetAllApproval(c *fiber.Ctx) error {
 				},
 			)
 		}
-		optional["project"] = fmt.Sprintf(`{"id":%d}`, projectId)
+		optional["project"] = projectId
 	}
 
 	to := c.Query("to")
