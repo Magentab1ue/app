@@ -25,6 +25,7 @@ type PostgresSql struct {
 	Password     string
 	DatabaseName string
 	SslMode      string
+	Schema 		 string
 }
 
 type Kafka struct {

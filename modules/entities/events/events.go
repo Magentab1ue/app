@@ -24,7 +24,7 @@ type RequestCreatedEvent struct {
 }
 
 func (RequestCreatedEvent) String() string {
-	return "RequestCreated"
+	return "tcchub-approval-approvalCreated"
 }
 
 type ApprovalUpdatedEvent struct {
@@ -35,7 +35,7 @@ type ApprovalUpdatedEvent struct {
 }
 
 func (ApprovalUpdatedEvent) String() string {
-	return "ApprovalUpdated"
+	return "tcchub-approval-approvalUpdated"
 }
 
 type ApprovalDeletedEvent struct {
@@ -43,5 +43,5 @@ type ApprovalDeletedEvent struct {
 }
 
 func (ApprovalDeletedEvent) String() string {
-	return "ApprovalDeleted"
+	return "tcchub-approval-approvalDeleted"
 }

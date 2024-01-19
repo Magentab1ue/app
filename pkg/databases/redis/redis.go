@@ -15,6 +15,7 @@ func NewRedisClient(cfg *configs.Config) *redis.Client {
 		logs.Error(zap.Error(err))
 	}
 	return redis.NewClient(&redis.Options{
-		Addr: url,
+		Addr:     url,
+		Password: cfg.Redis.Password,
 	})
 }

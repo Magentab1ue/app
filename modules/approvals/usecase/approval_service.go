@@ -55,13 +55,17 @@ func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*mo
 func (u approvalService) GetReceiveRequest(id uint, optional map[string]interface{}) (approvalRes []models.Approvals, err error) {
 	keyRedis := fmt.Sprintf("GetReceiveRequest:%d,optionnals:%v", id, optional)
 
-	if approvalResJson, err := u.Redis.Get(context.Background(), keyRedis).Result(); err == nil {
+	approvalResJson, err := u.Redis.Get(context.Background(), keyRedis).Result()
+	if err == nil {
 		if json.Unmarshal([]byte(approvalResJson), &approvalRes) == nil {
-			log.Debug("Read data from: redis")
+			logs.Info("Read data from: redis")
 			return approvalRes, nil
 		}
-	}
 
+	}
+	if err != nil {
+		logs.Warn("Redis error", zap.Error(err))
+	}
 	approvalRes, err = u.approvalRepo.GetReceiveRequest(id, optional)
 	if err != nil {
 		return nil, err
@@ -76,13 +80,17 @@ func (u approvalService) GetReceiveRequest(id uint, optional map[string]interfac
 
 func (u approvalService) GetSendRequest(id uint, optional map[string]interface{}) (approvalRes []models.Approvals, err error) {
 	keyRedis := fmt.Sprintf("GetSendRequest:%d,optionnals:%v", id, optional)
-	if approvalResJson, err := u.Redis.Get(context.Background(), keyRedis).Result(); err == nil {
+	approvalResJson, err := u.Redis.Get(context.Background(), keyRedis).Result()
+	if err == nil {
 		if json.Unmarshal([]byte(approvalResJson), &approvalRes) == nil {
-			log.Debug("Read data from: redis")
+			logs.Info("Read data from: redis")
 			return approvalRes, nil
 		}
-	}
 
+	}
+	if err != nil {
+		logs.Warn("Redis error", zap.Error(err))
+	}
 	approvalRes, err = u.approvalRepo.GetSendRequest(id, optional)
 	if err != nil {
 		return nil, err
