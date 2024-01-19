@@ -43,8 +43,16 @@ func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*mo
 		return nil, err
 	}
 	event := events.ApprovalUpdatedEvent{
-		RequestId: id,
-		Status:    req.Status,
+		ID:           approvalRes.ID,
+		RequestID:    approvalRes.RequestID,
+		To:           approvalRes.To,
+		Approver:     approvalRes.Approver,
+		Status:       approvalRes.Status,
+		Project:      approvalRes.Project,
+		CreationDate: approvalRes.CreationDate,
+		RequestUser:  approvalRes.RequestUser,
+		IsSignature:  approvalRes.IsSignature,
+		Task:         approvalRes.Task,
 	}
 	err = u.produce.Produce(event)
 	if err != nil {
@@ -238,7 +246,6 @@ func (u approvalService) CreateRequest(req *models.RequestReq) (*models.Approval
 		CreationDate: req.CreationDate,
 		RequestUser:  req.RequestUser,
 		Task:         req.Task,
-		
 	})
 	if err != nil {
 		logs.Error(err)
@@ -246,7 +253,10 @@ func (u approvalService) CreateRequest(req *models.RequestReq) (*models.Approval
 	}
 
 	event := events.RequestCreatedEvent{
+		ID:           newRequest.ID,
+		RequestID:    newRequest.RequestID,
 		To:           newRequest.To,
+		Status:       newRequest.Status,
 		Project:      newRequest.Project,
 		CreationDate: newRequest.CreationDate,
 		RequestUser:  newRequest.RequestUser,

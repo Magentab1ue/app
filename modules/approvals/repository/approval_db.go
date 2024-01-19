@@ -37,6 +37,7 @@ func (r approvalRepositoryDB) UpdateStatus(requestId uint, req *models.UpdateSta
 	//update data
 	approval.Status = req.Status
 	approval.Approver = req.Approver
+	approval.IsSignature = req.IsSignature
 
 	//update to database
 	if err := r.db.Save(&approval).Error; err != nil {

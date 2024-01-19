@@ -40,8 +40,9 @@ type Approvals struct {
 }
 
 type UpdateStatusReq struct {
-	Status   string `json:"status"`
-	Approver uint
+	IsSignature bool   `json:"is_signature"`
+	Status      string `json:"status"`
+	Approver    uint
 }
 
 type ResponseData struct {

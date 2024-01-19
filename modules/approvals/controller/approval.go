@@ -27,7 +27,7 @@ func NewApprovalController(router fiber.Router, approvalSrv models.ApprovalUseca
 	router.Get("/approval/user/:id/receive-request", controllers.ReceiveRequest)
 	router.Get("/approval/user/:id/send-request", controllers.SendRequest)
 	router.Delete("/approval/:id", controllers.DeleteApproval)
-	router.Delete("/approval/create", controllers.CreateRequest)
+	router.Post("/approval/create", controllers.CreateRequest)
 }
 
 func (h *approvalHandler) UpdateStatus(c *fiber.Ctx) error {

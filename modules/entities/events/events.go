@@ -3,6 +3,7 @@ package events
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
 )
@@ -16,11 +17,16 @@ var SubscribedTopics = []string{
 }
 
 type RequestCreatedEvent struct {
-	To           pq.Int64Array  `json:"to"`
-	Project      datatypes.JSON `json:"project"`
+	ID           uint           `json:"id"`
+	RequestID    uuid.UUID      `json:"request_id"`
+	To           pq.Int64Array  `json:"to" gorm:"type:integer[]"`
+	Approver     uint           `json:"approver"`
+	Status       string         `json:"status"`
+	Project      datatypes.JSON `json:"project" gorm:"type:jsonb"` // Assuming your database supports JSONB
 	CreationDate time.Time      `json:"creation_date"`
 	RequestUser  uint           `json:"request_user"`
-	Task         datatypes.JSON `json:"task"`
+	IsSignature  bool           `json:"is_signature"`
+	Task         datatypes.JSON `json:"task" gorm:"type:jsonb"`
 }
 
 func (RequestCreatedEvent) String() string {
@@ -28,10 +34,16 @@ func (RequestCreatedEvent) String() string {
 }
 
 type ApprovalUpdatedEvent struct {
-	RequestId uint           `json:"requestId"`
-	Approver  uint           `json:"approver"`
-	Status    string         `json:"status"`
-	Task      datatypes.JSON `json:"task"`
+	ID           uint           `json:"id"`
+	RequestID    uuid.UUID      `json:"request_id"`
+	To           pq.Int64Array  `json:"to" gorm:"type:integer[]"`
+	Approver     uint           `json:"approver"`
+	Status       string         `json:"status"`
+	Project      datatypes.JSON `json:"project" gorm:"type:jsonb"` // Assuming your database supports JSONB
+	CreationDate time.Time      `json:"creation_date"`
+	RequestUser  uint           `json:"request_user"`
+	IsSignature  bool           `json:"is_signature"`
+	Task         datatypes.JSON `json:"task" gorm:"type:jsonb"`
 }
 
 func (ApprovalUpdatedEvent) String() string {

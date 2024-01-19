@@ -1,9 +1,8 @@
 package models
 
 import (
-	"time"
-
 	"approval-service/modules/entities/events"
+	"time"
 )
 
 type ApprovalUsecase interface {
