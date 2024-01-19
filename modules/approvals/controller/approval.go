@@ -175,7 +175,7 @@ func (h *approvalHandler) SendRequest(c *fiber.Ctx) error {
 				},
 			)
 		}
-		optional["project"] = fmt.Sprintf(`{"id":%d}`, projectId)
+		optional["project"] = projectId
 	}
 
 	to := c.Query("to")

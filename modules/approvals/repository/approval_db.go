@@ -55,12 +55,12 @@ func (r approvalRepositoryDB) GetSendRequest(userId uint, optional map[string]in
 	if _, ok := optional["to"]; ok {
 		to := optional["to"]
 		delete(optional, "to")
-		condition = condition.Where(optional).Where("? = ANY(\"to\")", to)
+		condition = condition.Where("? = ANY(\"to\")", to)
 	}
 	if _, ok := optional["project"]; ok {
 		projectId := optional["project"]
 		delete(optional, "project")
-		condition = condition.Where(optional).Where("project @> ?", projectId).Find(&approval)
+		condition = condition.Where("project ->> \"id\" = ? ", projectId)
 	}
 	err := condition.Where(optional).Find(&approval).Error
 	if err != nil {
