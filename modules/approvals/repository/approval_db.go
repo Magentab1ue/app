@@ -1,13 +1,9 @@
 package repository
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"time"
 
-	"github.com/google/uuid"
-	"github.com/lib/pq"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
@@ -24,8 +20,6 @@ func NewapprovalRepositoryDB(db *gorm.DB) approvalRepositoryDB {
 	if err != nil {
 		panic(err)
 	}
-	mock := mockdata()
-	db.Save(mock)
 	return approvalRepositoryDB{db: db}
 }
 
@@ -35,7 +29,10 @@ func (r approvalRepositoryDB) UpdateStatus(requestId uint, req *models.UpdateSta
 
 	if err := r.db.First(&approval, requestId).Error; err != nil {
 		logs.Error(fmt.Sprintf("Error finding approval for update with request ID %d: %v", requestId, err), zap.Error(err))
-		return nil, err
+		return nil, fmt.Errorf("error cant't finding approval with request ID %d", requestId)
+	}
+	if approval.Status == req.Status {
+		return nil, errors.New("this approval status is the same")
 	}
 	//update data
 	approval.Status = req.Status
@@ -44,7 +41,7 @@ func (r approvalRepositoryDB) UpdateStatus(requestId uint, req *models.UpdateSta
 	//update to database
 	if err := r.db.Save(&approval).Error; err != nil {
 		logs.Error(fmt.Sprintf("Error updating approval with request ID %d: %v", requestId, err), zap.Error(err))
-		return nil, err
+		return nil, fmt.Errorf("error cant't updating approval with request ID %d", requestId)
 	}
 	return approval, nil
 }
@@ -67,7 +64,7 @@ func (r approvalRepositoryDB) GetSendRequest(userId uint, optional map[string]in
 	err := condition.Where(optional).Find(&approval).Error
 	if err != nil {
 		logs.Error(fmt.Sprintf("Error finding approval Send request user with ID %d with optional %s : %v", userId, optionalStr, err), zap.Error(err))
-		return nil, err
+		return nil, fmt.Errorf("error cant't finding approval Send request user with ID %d with optional %s", userId, optionalStr)
 	}
 	if len(approval) == 0 {
 		return nil, fmt.Errorf("error finding approval Send request user with ID %d with optional %s ", userId, optionalStr)
@@ -89,7 +86,7 @@ func (r approvalRepositoryDB) GetReceiveRequest(userId uint, optional map[string
 	err := condition.Where(optional).Find(&approval).Error
 	if err != nil {
 		logs.Error(fmt.Sprintf("Error finding approval receive request user with ID %d with optinoal %s %v", userId, optionalStr, err), zap.Error(err))
-		return nil, err
+		return nil, fmt.Errorf("error finding approval receive request user with ID %d with optinoal %s", userId, optionalStr)
 	}
 	if len(approval) == 0 {
 		return nil, fmt.Errorf("error finding approval receive request user with ID %d with optinoal %s", userId, optionalStr)
@@ -102,12 +99,12 @@ func (r approvalRepositoryDB) DeleteApproval(requestId uint) (*models.Approvals,
 	approval := new(models.Approvals)
 	if err := r.db.First(&approval, requestId).Error; err != nil {
 		logs.Error(fmt.Sprintf("Error cant't finding approval with request ID %d: %v", requestId, err), zap.Error(err))
-		return nil, err
+		return nil, fmt.Errorf("error cant't finding approval with request ID %d: %v", requestId, err)
 	}
 
 	if err := r.db.Delete(&approval, requestId).Error; err != nil {
 		logs.Error(fmt.Sprintf("Error cant't delete approval with request ID %d: %v", requestId, err), zap.Error(err))
-		return nil, err
+		return nil, fmt.Errorf("error cant't delete approval with request ID %d: %v", requestId, err)
 	}
 
 	return approval, nil
@@ -132,47 +129,6 @@ func (r approvalRepositoryDB) GetByID(id uint) (*models.Approvals, error) {
 	}
 }
 
-func mockdata() (list []models.Approvals) {
-	optional := map[string]interface{}{
-		"id": 1,
-	}
-	json, _ := json.Marshal(optional)
-	mock1 := models.Approvals{
-		RequestID:    uuid.New(),
-		To:           pq.Int64Array([]int64{1, 2, 3, 4, 5}),
-		Status:       "pending",
-		Project:      json,
-		CreationDate: time.Now(),
-		RequestUser:  uint(5),
-		Task:         json,
-	}
-
-	mock2 := models.Approvals{
-		RequestID:    uuid.New(),
-		To:           pq.Int64Array([]int64{1, 2, 3, 4, 8}),
-		Status:       "pending",
-		Project:      json,
-		CreationDate: time.Now(),
-		RequestUser:  uint(9),
-		Task:         json,
-	}
-
-	mock3 := models.Approvals{
-		RequestID:    uuid.New(),
-		To:           pq.Int64Array([]int64{1, 2, 3, 4, 9}),
-		Status:       "pending",
-		Project:      json,
-		CreationDate: time.Now(),
-		RequestUser:  uint(20),
-		Task:         json,
-	}
-
-	list = append(list, mock1)
-	list = append(list, mock2)
-	list = append(list, mock3)
-	return list
-}
-
 func (r approvalRepositoryDB) GetAll(optional map[string]interface{}) ([]models.Approvals, error) {
 
 	approval := []models.Approvals{}
@@ -181,7 +137,7 @@ func (r approvalRepositoryDB) GetAll(optional map[string]interface{}) ([]models.
 
 	if _, ok := optional["status"]; ok {
 		condition = condition.Where("status = ?", optional["status"])
-		
+
 	}
 	if _, ok := optional["to"]; ok {
 		to := optional["to"]
@@ -200,34 +156,34 @@ func (r approvalRepositoryDB) GetAll(optional map[string]interface{}) ([]models.
 		return nil, err
 	}
 	if len(approval) == 0 {
-		return nil, fmt.Errorf("error finding approvals optional %s ",  optionalStr)
+		return nil, fmt.Errorf("error finding approvals optional %s ", optionalStr)
 	}
 	return approval, nil
 
 }
 
 func (r approvalRepositoryDB) GetByUserID(id uint, optional map[string]interface{}) ([]models.Approvals, error) {
-	
+
 	approval := []models.Approvals{}
 	optionalStr := fmt.Sprintf("%v", optional)
 	condition := r.db.Where("request_user = ?", id)
 
 	if _, ok := optional["status"]; ok {
 		condition = condition.Where("status = ?", optional["status"])
-		
+
 	}
 	if _, ok := optional["to"]; ok {
 		condition = condition.Where("? = ANY(\"to\")", optional["to"])
-		
+
 	}
 
 	err := condition.Where(optional).Find(&approval).Error
 	if err != nil {
-		logs.Error(fmt.Sprintf("Error finding approvals by userid %d with optional %s : %v",id, optionalStr, err), zap.Error(err))
+		logs.Error(fmt.Sprintf("Error finding approvals by userid %d with optional %s : %v", id, optionalStr, err), zap.Error(err))
 		return nil, err
 	}
 	if len(approval) == 0 {
-		return nil, fmt.Errorf("error finding approvals by userid %d optional %s ",id,  optionalStr)
+		return nil, fmt.Errorf("error finding approvals by userid %d optional %s ", id, optionalStr)
 	}
 
 	return approval, nil

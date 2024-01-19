@@ -2,6 +2,7 @@ package configs
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -37,12 +38,15 @@ func LoadConfigs(cfg *Config) {
 	cfg.Postgres.Password = secret.Data["DB_PASSWORD"].(string)
 	cfg.Postgres.DatabaseName = secret.Data["DB_NAME"].(string)
 	cfg.Postgres.SslMode = secret.Data["DB_SSLMODE"].(string)
+	cfg.Postgres.Schema = secret.Data["DB_SCHEMA"].(string)
 
 	// Kafka
-	cfg.Kafkas.Hosts = []string{secret.Data["KAFKA_BROKER_1"].(string)}
+	cfg.Kafkas.Hosts = []string{secret.Data["KAFKA_SERVER"].(string)}
 	cfg.Kafkas.Group = secret.Data["KAFKA_GROUP"].(string)
 
 	cfg.Redis.Host = secret.Data["REDIS_HOST"].(string)
 	cfg.Redis.Port = secret.Data["REDIS_PORT"].(string)
-	//cfg.Redis.Password = secret.Data["REDIS_PASSWORD"].(json.Number).String()
+	cfg.Redis.Password = secret.Data["REDIS_PASSWORD"].(string)
+
+	fmt.Printf("%s\n\n", cfg.Redis.Password)
 }
