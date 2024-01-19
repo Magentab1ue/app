@@ -176,6 +176,7 @@ id : (require) type: uint
 {
   "status":,
   "approver":,
+  "Approver":,
 }
 ```
 
@@ -202,7 +203,7 @@ id : (require) type: uint
 
 ### PUT v1/approval/sent-request/:id
 
-Update status approval.
+teamlead request to HR or Approver.
 
 **Headers**
 
@@ -224,6 +225,7 @@ id : (require) type: uint
     "approver" :,
     "creationDate":,
     "requestUser" :,
+    "is_signature":
 }
 ```
 
