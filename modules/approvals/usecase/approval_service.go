@@ -233,7 +233,7 @@ func (u approvalService) CreateRequest(req *models.Approvals) (*models.Approvals
 	newRequest, err := u.approvalRepo.Create(req)
 	if err != nil {
 		logs.Error(err)
-		return nil, errors.New("Can't create request")
+		return nil, errors.New("can't create request")
 	}
 
 	event := events.RequestCreatedEvent{

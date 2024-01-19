@@ -27,6 +27,7 @@ func NewApprovalController(router fiber.Router, approvalSrv models.ApprovalUseca
 	router.Get("/approval/user/:id/receive-request", controllers.ReceiveRequest)
 	router.Get("/approval/user/:id/send-request", controllers.SendRequest)
 	router.Delete("/approval/:id", controllers.DeleteApproval)
+	router.Delete("/approval/create", controllers.CreateRequest)
 }
 
 func (h *approvalHandler) UpdateStatus(c *fiber.Ctx) error {
@@ -100,6 +101,10 @@ func (h *approvalHandler) ReceiveRequest(c *fiber.Ctx) error {
 	requestUser := c.Query("requestUser")
 	if requestUser != "" {
 		optional["request_user"] = requestUser
+	}
+	status := c.Query("status")
+	if requestUser != "" {
+		optional["request_user"] = status
 	}
 	projectId := c.Query("project")
 	if projectId != "" {
