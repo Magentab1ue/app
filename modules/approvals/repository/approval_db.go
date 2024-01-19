@@ -176,7 +176,7 @@ func mockdata() (list []models.Approvals) {
 func (r approvalRepositoryDB) GetAll(optional map[string]interface{}) ([]models.Approvals, error) {
 
 	approval := []models.Approvals{}
-
+	optionalStr := fmt.Sprintf("%v", optional)
 	condition := r.db
 
 	if _, ok := optional["status"]; ok {
@@ -184,12 +184,24 @@ func (r approvalRepositoryDB) GetAll(optional map[string]interface{}) ([]models.
 		
 	}
 	if _, ok := optional["to"]; ok {
-		condition = condition.Where("? = ANY(\"to\")", optional["to"])
-		
+		to := optional["to"]
+		delete(optional, "to")
+		condition = condition.Where(optional).Where("? = ANY(\"to\")", to)
+	}
+	if _, ok := optional["project"]; ok {
+		projectId := optional["project"]
+		delete(optional, "project")
+		condition = condition.Where(optional).Where("project @> ?", projectId).Find(&approval)
 	}
 
-	condition.Find(&approval)
-
+	err := condition.Where(optional).Find(&approval).Error
+	if err != nil {
+		logs.Error(fmt.Sprintf("Error finding approvals with optional %s : %v", optionalStr, err), zap.Error(err))
+		return nil, err
+	}
+	if len(approval) == 0 {
+		return nil, fmt.Errorf("error finding approvals optional %s ",  optionalStr)
+	}
 	return approval, nil
 
 }
@@ -197,7 +209,7 @@ func (r approvalRepositoryDB) GetAll(optional map[string]interface{}) ([]models.
 func (r approvalRepositoryDB) GetByUserID(id uint, optional map[string]interface{}) ([]models.Approvals, error) {
 	
 	approval := []models.Approvals{}
-
+	optionalStr := fmt.Sprintf("%v", optional)
 	condition := r.db.Where("request_user = ?", id)
 
 	if _, ok := optional["status"]; ok {
@@ -209,7 +221,14 @@ func (r approvalRepositoryDB) GetByUserID(id uint, optional map[string]interface
 		
 	}
 
-	condition.Find(&approval)
+	err := condition.Where(optional).Find(&approval).Error
+	if err != nil {
+		logs.Error(fmt.Sprintf("Error finding approvals by userid %d with optional %s : %v",id, optionalStr, err), zap.Error(err))
+		return nil, err
+	}
+	if len(approval) == 0 {
+		return nil, fmt.Errorf("error finding approvals by userid %d optional %s ",id,  optionalStr)
+	}
 
 	return approval, nil
 }

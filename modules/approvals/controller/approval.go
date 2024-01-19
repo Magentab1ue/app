@@ -351,17 +351,28 @@ func (h *approvalHandler) GetAllApproval(c *fiber.Ctx) error {
 	if status != "" {
 		optional["status"] = status
 	}
+	//Optional
+	projectId := c.Query("project")
+	if projectId != "" {
+		projectId, err := strconv.Atoi(projectId)
+		if err != nil {
+			logs.Error("Error parsing approval ID:", zap.Error(err))
+			return c.Status(fiber.StatusNotFound).JSON(
+				models.ResponseData{
+					Message:    "project option is number",
+					Status:     fiber.ErrBadRequest.Message,
+					StatusCode: fiber.ErrBadRequest.Code,
+				},
+			)
+		}
+		optional["project"] = fmt.Sprintf(`{"id":%d}`, projectId)
+	}
+
 	to := c.Query("to")
 	if to != "" {
 		to, _ := strconv.Atoi(to)
-		optional["to"] = []uint{uint(to)}
+		optional["to"] = to
 	}
-
-	// pro := c.Query("project")
-	// if to != "" {
-	// 	to, _ := strconv.Atoi(to)
-	// 	optional["project"] = []uint{uint(to)}
-	// }
 
 	apprrovalReceive, err := h.approvalSrv.GetAll(optional)
 	if err != nil {

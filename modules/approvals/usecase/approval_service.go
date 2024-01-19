@@ -173,6 +173,7 @@ func (u approvalService) GetAll(optional map[string]interface{}) (appprove [] mo
 		}
 	}
 
+	log.Debug("Read data from database")
 	approvalRes, err := u.approvalRepo.GetAll(optional)
 	if err != nil {
 		return nil, err
@@ -186,10 +187,27 @@ func (u approvalService) GetAll(optional map[string]interface{}) (appprove [] mo
 	return approvalRes, nil
 }
 
-func (u approvalService) GetByUserID(id uint, optional map[string]interface{}) ([]models.Approvals, error) {
+func (u approvalService) GetByUserID(id uint, optional map[string]interface{}) (appprove []models.Approvals,err error) {
+	keyRedis := fmt.Sprintf("GetApprovalByUserId:%v:optionnals:%v",id, optional)
+	//redis get
+	if approvalJson, err := u.Redis.Get(context.Background(), keyRedis).Result(); err == nil {
+		if json.Unmarshal([]byte(approvalJson), &appprove) == nil {
+			log.Debug("Read data from: redis")
+			return appprove, nil
+		}
+	}
+
+	log.Debug("Read data from database")
 	approvalRes, err := u.approvalRepo.GetByUserID(id, optional)
 	if err != nil {
 		return nil, err
+	}
+
+
+	if data, err := json.Marshal(approvalRes); err == nil {
+		u.Redis.Set(context.Background(), keyRedis, string(data), time.Minute*1)
+	} else {
+		logs.Warn("Can't set data to redis", zap.Error(err))
 	}
 	return approvalRes, nil
 }
