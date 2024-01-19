@@ -270,3 +270,29 @@ func (u approvalService) CreateRequest(req *models.RequestReq) (*models.Approval
 	log.Info("create request Successfuly")
 	return newRequest, nil
 }
+
+func (u approvalService) GetByRequestID(id uuid.UUID) (appprove []models.Approvals, err error) {
+	key := fmt.Sprintf("service:GetApprovalByRequestID%v", id)
+	//redis get
+	if approvalJson, err := u.Redis.Get(context.Background(), key).Result(); err == nil {
+		if json.Unmarshal([]byte(approvalJson), &appprove) == nil {
+			log.Debug("Read data from: redis")
+			return appprove, nil
+		}
+	}
+
+	// Data not found in cache, fetch from the database
+	log.Debug("Read data from database")
+	approvalDB, err := u.approvalRepo.GetByRequestID(id)
+	if err != nil {
+		logs.Error(err)
+		return nil, errors.New("couldn't get profile data")
+	}
+
+	//redis set
+	if data, err := json.Marshal(approvalDB); err == nil {
+		u.Redis.Set(context.Background(), key, string(data), time.Minute*1)
+	}
+
+	return approvalDB, nil
+}

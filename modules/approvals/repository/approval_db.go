@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
@@ -143,7 +144,7 @@ func (r approvalRepositoryDB) GetAll(optional map[string]interface{}) ([]models.
 	if _, ok := optional["to"]; ok {
 		to := optional["to"]
 		delete(optional, "to")
-		condition = condition.Where(optional).Where("? = ANY(\"to\")", to)
+		condition = condition.Where("? = ANY(\"to\")", to)
 	}
 	if _, ok := optional["project"]; ok {
 		projectId := optional["project"]
@@ -167,15 +168,21 @@ func (r approvalRepositoryDB) GetByUserID(id uint, optional map[string]interface
 
 	approval := []models.Approvals{}
 	optionalStr := fmt.Sprintf("%v", optional)
-	condition := r.db.Where("request_user = ?", id)
+	condition := r.db
 
 	if _, ok := optional["status"]; ok {
 		condition = condition.Where("status = ?", optional["status"])
 
 	}
 	if _, ok := optional["to"]; ok {
-		condition = condition.Where("? = ANY(\"to\")", optional["to"])
-
+		to := optional["to"]
+		delete(optional, "to")
+		condition = condition.Where("? = ANY(\"to\")", to)
+	}
+	if _, ok := optional["project"]; ok {
+		projectId := optional["project"]
+		delete(optional, "project")
+		condition = condition.Where("project ->> 'id' = ? ", projectId)
 	}
 
 	err := condition.Where(optional).Find(&approval).Error
@@ -190,6 +197,19 @@ func (r approvalRepositoryDB) GetByUserID(id uint, optional map[string]interface
 	return approval, nil
 }
 
+func (r approvalRepositoryDB) GetByRequestID(id uuid.UUID) ([]models.Approvals, error) {
+	approval := []models.Approvals{}
 
+	err := r.db.Where("request_id = ?", id).Find(&approval).Error
+	if err != nil {
+		logs.Error(fmt.Sprintf("Error finding approvals by request_id : %v  : %v", id, err), zap.Error(err))
+		return nil, err
+	}
+	if len(approval) == 0 {
+		return nil, fmt.Errorf("error finding approvals by request_id : %v ", id)
+	}
+
+	return approval, nil
+}
 
 //test

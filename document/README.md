@@ -8,15 +8,16 @@
   - [Authentication](#authentication)
   - [Base URL](#base-url)
   - [Endpoints](#endpoints)
-    - [POST v1/approval/create](#post-v1approvalcreate)
-    - [GET v1/approval/:id](#get-v1approvalid)
-    - [GET /v1/approvals?status=xxx?to=xxx?project=xxx?](#get-v1approvalsstatusxxxtoxxxprojectxxx)
-    - [PUT v1/approval/update-status/:id](#put-v1approvalupdate-statusid)
-    - [PUT v1/approval/sent-request/:id](#put-v1approvalsent-requestid)
-    - [GET /v1/approval/user/:id?status=xxx\&to=xxx\&project=xx](#get-v1approvaluseridstatusxxxtoxxxprojectxx)
-    - [GET /v1/approval/user/:id/receive-request?requsetUser=xx\&project=xx\&status=xx](#get-v1approvaluseridreceive-requestrequsetuserxxprojectxxstatusxx)
-    - [GET /v1/approval/user/:id/send-request?to=xx\&project=xxx\&status=xx](#get-v1approvaluseridsend-requesttoxxprojectxxxstatusxx)
-    - [DELETE /v1/approval/:id](#delete-v1approvalid)
+    - [POST v1/approval/create](#post-v1-approval-create)
+    - [GET v1/approval/:id](#get-v1-approval-id)
+    - [GET v1/approvals/:requestId](#get-v1-approvals-requestId)
+    - [GET /v1/approvals?status=xxx?to=xxx?project=xxx?](#get-v1-approvals-statusxxx-toxxx-projectxxx)
+    - [PUT v1/approval/update-status/:id](#put-v1-approval-update-status-id)
+    - [PUT v1/approval/sent-request/:id](#put-v1-approval-sent-request-id)
+    - [GET /v1/approval/user/:id?status=xxx\&to=xxx\&project=xx](#get-v1-approval-userid-statusxxx-toxxx-projectxx)
+    - [GET /v1/approval/user/:id/receive-request?requsetUser=xx\&project=xx\&status=xx](#get-v1-approval-user-id-receive-request-requsetuserxx-projectxx-statusxx)
+    - [GET /v1/approval/user/:id/send-request?to=xx\&project=xxx\&status=xx](#get-v1-approval-user-id-send-request-toxx-projectxxx-statusxx)
+    - [DELETE /v1/approval/:id](#delete-v1-approval-id)
   - [Status Codes](#status-codes)
   - [Event topics](#event-topics)
 
@@ -113,6 +114,40 @@ id : (require) type: uint
   },
   "message": "successful",
   "status": "ok",
+  "status_code": 200
+}
+```
+### GET /v1/approvals/:requestId
+
+Get the approvals by requestId
+**Headers**:
+
+```
+Authorization: JWT YOUR_TOKEN
+```
+
+**Paremeters**:
+- requestId (uuid)
+
+**Response**:
+
+```json
+{
+
+  "data" : [{
+    "id" : ,
+    "requsetId":,
+    "to":,
+    "approver" :,
+    "project" :,
+    "status" :,
+    "creationDate":,
+    "requestUser" :,
+    "task" : [],
+  },
+    {.....},// ... other profiles
+  ],
+  "status": "OK",
   "status_code": 200
 }
 ```
