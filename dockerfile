@@ -9,7 +9,7 @@ RUN go mod download
 RUN go build -o main
 
 
-# Final stage
+#Final stage
 FROM scratch
 
 ARG APP_PORT
@@ -20,6 +20,7 @@ EXPOSE ${APP_PORT}
 WORKDIR /app/app
 
 COPY --from=builder /app/app/main .
+COPY  ./.env /app/.env
+
 
 CMD ["/app/app/main"]
-
