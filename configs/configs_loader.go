@@ -15,12 +15,15 @@ func LoadConfigs(cfg *Config) {
 	config := vault.DefaultConfig()
 
 	config.Address = os.Getenv("VAULT_ADDR")
+	logs.Info(fmt.Sprintf("Env VAULT_ADDR : %s", config.Address))
+
 	client, err := vault.NewClient(config)
 	if err != nil {
 		log.Fatalf("unable to initialize Vault client: %v", err)
 	}
 
 	client.SetToken(os.Getenv("VAULT_TOKEN"))
+	logs.Info(fmt.Sprintf("Env VAULT_TOKEN : %s", os.Getenv("VAULT_TOKEN")))
 
 	ctx := context.Background()
 
@@ -28,7 +31,9 @@ func LoadConfigs(cfg *Config) {
 	if err != nil {
 		log.Fatalf("unable to read secret: %v", err)
 	}
+	logs.Info(fmt.Sprintf("Env VAULT_TYPE : %s", os.Getenv("VAULT_TYPE")))
 
+	logs.Info(fmt.Sprintf("Env VAULT_PATH : %s", os.Getenv("VAULT_PATH")))
 	//App env
 	cfg.App.Port = secret.Data["APP_PORT"].(string)
 	logs.Info(fmt.Sprintf("Env APP_PORT : %s", cfg.App.Port))
@@ -63,7 +68,6 @@ func LoadConfigs(cfg *Config) {
 
 	cfg.Kafkas.Group = secret.Data["KAFKA_CLIENT_ID"].(string)
 	logs.Info(fmt.Sprintf("Env KAFKA_CLIENT_ID : %s", cfg.Kafkas.ClientID))
-
 
 	//redis
 	cfg.Redis.Host = secret.Data["REDIS_HOST"].(string)
