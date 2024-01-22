@@ -8,14 +8,16 @@
   - [Authentication](#authentication)
   - [Base URL](#base-url)
   - [Endpoints](#endpoints)
-    - [GET v1/approval/:id](#get-v1approvalid)
-    - [GET v1/approvals?status=xxx?to=xxx?](#get-v1approvalsstatusxxxtoxxx)
-    - [PUT v1/approval/update-status/:id](#put-v1approvalupdate-statusid)
-    - [PUT v1/approval/sent-request/:id](#put-v1approvalupdate-statusid)
-    - [GET v1/approval/user/:id?status=xxx?to=xxx?](#get-v1approvaluseridstatusxxxtoxxx)
-    - [GET v1/approval/user/:id/receive-request?requsetUser=xx](#get-v1approvaluseridreceive-request)
-    - [GET v1/approval/user/:id/send-request?to=xxx?project=xxx](#get-v1approvaluseridsend-request)
-    - [DELETE /v1/approval/:id](#delete-v1approvalid)
+    - [POST v1/approval/create](#post-v1-approval-create)
+    - [GET v1/approval/:id](#get-v1-approval-id)
+    - [GET v1/approvals/:requestId](#get-v1-approvals-requestId)
+    - [GET /v1/approvals?status=xxx?to=xxx?project=xxx?](#get-v1-approvals-statusxxx-toxxx-projectxxx)
+    - [PUT v1/approval/update-status/:id](#put-v1-approval-update-status-id)
+    - [PUT v1/approval/sent-request/:id](#put-v1-approval-sent-request-id)
+    - [GET /v1/approval/user/:id?status=xxx&to=xxx&project=xx](#get-v1-approval-userid-statusxxx-toxxx-projectxx)
+    - [GET /v1/approval/user/:id/receive-request?requsetUser=xx&project=xx&status=xx](#get-v1-approval-user-id-receive-request-requsetuserxx-projectxx-statusxx)
+    - [GET /v1/approval/user/:id/send-request?to=xx&project=xxx&status=xx](#get-v1-approval-user-id-send-request-toxx-projectxxx-statusxx)
+    - [DELETE /v1/approval/:id](#delete-v1-approval-id)
   - [Status Codes](#status-codes)
   - [Event topics](#event-topics)
 
@@ -35,6 +37,50 @@ All Approval service API endpoints are relative to this base
 URL: `https://approval-service:{{app_port}}/`
 
 ## Endpoints
+
+### POST v1/approval/create
+
+worker create request approval.
+
+**Headers**
+
+```json
+Authorization: JWT YOUR_TOKEN
+```
+
+**Request Body**:
+
+```json
+{
+    "to":[1,2,3],
+    "project": {"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "creation_date":1-10-5864,
+    "request_user" :1,
+    "task" :{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},
+}
+```
+
+**Response**:
+
+```json
+{
+  "data" : {
+    "id" : 1,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
+    "to":[1,2,3],
+    "approver" :,
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "status" :"pending",
+    "creationDate":1-10-5864,
+    "requestUser" :1,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "IsSignature":false
+  },
+  "message": "successful",
+  "status": "ok",
+  "status_code": 200
+}
+```
 
 ### GET v1/approval/:id
 
@@ -57,15 +103,16 @@ id : (require) type: uint
 ```json
 {
   "data" : {
-    "id" : ,
-    "requsetId":,
-    "to":,
+    "id" : 1,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
+    "to":[1,2,3],
     "approver" :,
-    "project" :,
-    "status" :,
-    "creationDate":,
-    "requestUser" :,
-    "task" : [],
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "status" :"pending",
+    "creationDate":1-10-5864,
+    "requestUser" :1,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "IsSignature":false
   },
   "message": "successful",
   "status": "ok",
@@ -73,14 +120,18 @@ id : (require) type: uint
 }
 ```
 
-### GET /v1/approvals?status=xxx?to=xxx?project=xxx?
+### GET /v1/approvals/:requestId
 
-Get the approvals data. filter
+Get the approvals by requestId
 **Headers**:
 
 ```
 Authorization: JWT YOUR_TOKEN
 ```
+
+**Paremeters**:
+
+- requestId (uuid)
 
 **Response**:
 
@@ -88,15 +139,55 @@ Authorization: JWT YOUR_TOKEN
 {
 
   "data" : [{
-    "id" : ,
-    "requsetId":,
-    "to":,
+    "id" : 1,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
+    "to":[1,2,3],
     "approver" :,
-    "project" :,
-    "status" :,
-    "creationDate":,
-    "requestUser" :,
-    "task" : [],
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "status" :"pending",
+    "creationDate":1-10-5864,
+    "requestUser" :1,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "IsSignature":false
+  },
+    {.....},// ... other profiles
+  ],
+  "status": "OK",
+  "status_code": 200
+}
+```
+
+### GET /v1/approvals?status=xxx?to=xxx?project=xxx?
+
+Get All the approvals data. filter
+**Headers**:
+
+```
+Authorization: JWT YOUR_TOKEN
+```
+
+**Paremeters**:
+
+- to type: number
+- project type: number
+- status type: string
+
+**Response**:
+
+```json
+{
+
+  "data" : [{
+    "id" : 1,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
+    "to":[1,2,3],
+    "approver" :,
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "status" :"pending",
+    "creationDate":1-10-5864,
+    "requestUser" :1,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "IsSignature":false
   },
     {.....},// ... other profiles
   ],
@@ -125,8 +216,9 @@ id : (require) type: uint
 
 ```json
 {
-  "status":,
-  "approver":,
+  "status":"approved",
+  "approver":1,
+  "is_signature":true,
 }
 ```
 
@@ -135,15 +227,16 @@ id : (require) type: uint
 ```json
 {
   "data" : {
-    "id" : ,
-    "requsetId":,
-    "to":,
-    "approver" :,
-    "project" :,
-    "status" :,
-    "creationDate":,
-    "requestUser" :,
-    "task" : [],
+    "id" : 1,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
+    "to":[1,2,3],
+    "approver" :1,
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "status" :"approved",
+    "creationDate":1-10-5864,
+    "requestUser" :1,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "IsSignature":true
   },
   "message": "status changed",
   "status": "ok",
@@ -153,7 +246,7 @@ id : (require) type: uint
 
 ### PUT v1/approval/sent-request/:id
 
-Update status approval.
+teamlead request to HR or Approver.
 
 **Headers**
 
@@ -171,10 +264,11 @@ id : (require) type: uint
 
 ```json
 {
-    "to":,
+    "to":[1,2,3],
     "approver" :,
-    "creationDate":,
-    "requestUser" :,
+    "creation_date":10-10-5864,
+    "request_user" :2,
+    "is_signature":false
 }
 ```
 
@@ -183,15 +277,16 @@ id : (require) type: uint
 ```json
 {
   "data" : {
-    "id" : ,
-    "requsetId":,
-    "to":,
+    "id" : 2,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f55e",
+    "to":[1,2,3],
     "approver" :,
-    "project" :,
-    "status" :,
-    "creationDate":,
-    "requestUser" :,
-    "task" : [],
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "status" :"pending",
+    "creationDate":1-10-5864,
+    "requestUser" :2,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "IsSignature":false
   },
   "message": "status changed",
   "status": "ok",
@@ -199,7 +294,7 @@ id : (require) type: uint
 }
 ```
 
-### GET /v1/approval/user/:id?status=xxx?to=xxx?
+### GET /v1/approval/user/:id?status=xxx&to=xxx&project=xx
 
 get approval from database by user id with filter
 
@@ -212,21 +307,25 @@ Authorization: JWT YOUR_TOKEN
 **Paremeters**:
 
 - id : (require) type: uint
+- requsetUser type: number
+- project type: number
+- status type: string
 
 **Response**:
 
 ```json
 {
   "data" : [{
-    "id" : ,
-    "requsetId":,
-    "to":,
-    "approver" :,
-    "project" :,
-    "status" :,
-    "creationDate":,
-    "requestUser" :,
-    "task" : [],
+    "id" : 1,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
+    "to":[1,2,3],
+    "approver" :1,
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "status" :"approved",
+    "creationDate":1-10-5864,
+    "requestUser" :1,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "IsSignature":true
   },
     {.....},// ... other profiles
   ],
@@ -236,7 +335,7 @@ Authorization: JWT YOUR_TOKEN
 }
 ```
 
-### GET /v1/approval/user/:id/receive-request/
+### GET /v1/approval/user/:id/receive-request?requsetUser=xx&project=xx&status=xx
 
 get approval from the database receives the user ID.
 
@@ -249,21 +348,25 @@ Authorization: JWT YOUR_TOKEN
 **Paremeters**:
 
 - id : (require) type: uint
+- requsetUser type: number
+- project type: number
+- status type: string
 
 **Response**:
 
 ```json
 {
   "data" : [{
-    "id" : ,
-    "requsetId":,
-    "to":,
-    "approver" :,
-    "project" :,
-    "status" :,
-    "creationDate":,
-    "requestUser" :,
-    "task" : [],
+   "id" : 1,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
+    "to":[1,2,3],
+    "approver" :1,
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "status" :"approved",
+    "creationDate":1-10-5864,
+    "requestUser" :1,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "IsSignature":true
   },
     {.....},// ... other profiles
   ],
@@ -273,7 +376,7 @@ Authorization: JWT YOUR_TOKEN
 }
 ```
 
-### GET /v1/approval/user/:id/send-request/
+### GET /v1/approval/user/:id/send-request?to=xx&project=xxx&status=xx
 
 get approval from the database sends the user ID.
 
@@ -286,21 +389,25 @@ Authorization: JWT YOUR_TOKEN
 **Paremeters**:
 
 - id : (require) type: uint
+- to type: number
+- project type: number
+- status type: string
 
 **Response**:
 
 ```json
 {
   "data" : [{
-    "id" : ,
-    "requsetId":,
-    "to":,
-    "approver" :,
-    "project" :,
-    "status" :,
-    "creationDate":,
-    "requestUser" :,
-    "task" : [],
+    "id" : 1,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
+    "to":[1,2,3],
+    "approver" :1,
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "status" :"approved",
+    "creationDate":1-10-5864,
+    "requestUser" :1,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "IsSignature":true
   },
     {.....},// ... other profiles
   ],
@@ -347,9 +454,9 @@ Authorization: JWT YOUR_TOKEN
 
 ## Event topics
 
-**RequstCreated**
+**ApprovalCreated**
 
-**Subscribe** to the `RequestCreate` topic to receive information for create approval
+**Publish** to the `tcchub-approval-approvalCreated` topic to receive information for create approval
 
 **Message**:
 
@@ -371,7 +478,7 @@ Authorization: JWT YOUR_TOKEN
 
 **ApprovalUpdated**
 
-**Publish** information about approval after update to the `ApprovalUpdated` topic
+**Publish** information about approval after update to the `tcchub-approval-approvalUpdated` topic
 
 **Message**:
 
@@ -387,7 +494,7 @@ Authorization: JWT YOUR_TOKEN
 
 **ApprovalDeleted**
 
-**Publish** delete event approval after delete to the `ApprovalDeleted` topic
+**Publish** delete event approval after delete to the `tcchub-approval-approvalDeleted` topic
 
 **Message**:
 

@@ -1,0 +1,83 @@
+version: '3.9'
+
+services:
+
+  zookeeper:
+    image: zookeeper
+    container_name: zookeeper
+    volumes:
+      - ./zookeeper:/data
+
+  kafka:
+    image: bitnami/kafka
+    container_name: kafka
+    ports:
+      - 9092:9092
+    volumes:
+      - ./kafka:/bitnami/kafka/data
+    environment:
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+    depends_on:
+      - zookeeper
+
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - ./data/redis:/data
+      - ./config/redis.conf:/redis.conf
+    command: redis-server /redis.conf --requirepass 1234gg
+    environment:
+      REDIS_PASSWORD: 1234gg
+   
+  
+  postgres:
+    image: postgres
+    container_name: postgres_profile
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=approval_service
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234gg
+
+  # minio:
+  #   image: minio/minio
+  #   container_name: minio
+  #   ports:
+  #     - "9000:9000"
+  #     - "9001:9001"
+  #   volumes:
+  #     - ./data/minio:/data
+  #   environment:
+  #     MINIO_ACCESS_KEY: minioaccesskey
+  #     MINIO_SECRET_KEY: Pr0f1lesecretkey
+  #   command: server /data --console-address ":9001"
+
+  # mc:
+  #   image: minio/mc
+  #   depends_on:
+  #     - minio
+  #   entrypoint: sh
+  #   command: -c "mc config host add minio http://minio:9000 minioaccesskey Pr0f1lesecretkey && tail -f /dev/null"
+
+  # minio:
+  #   image: minio/minio
+  #   container_name: minio
+  #   ports:
+  #     - 9000:9000
+  #   volumes:
+  #     - ./data/minio:/data
+  #   environment:
+  #     MINIO_ACCESS_KEY: minioaccesskey
+  #     MINIO_SECRET_KEY: Pr0f1lesecretkey
+  #   command: server /data
+
+

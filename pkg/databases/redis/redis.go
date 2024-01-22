@@ -1,12 +1,12 @@
 package databases
 
 import (
+	"github.com/go-redis/redis/v8"
+	"go.uber.org/zap"
+
 	"approval-service/configs"
 	"approval-service/logs"
 	"approval-service/pkg/utils"
-
-	"github.com/go-redis/redis/v8"
-	"go.uber.org/zap"
 )
 
 func NewRedisClient(cfg *configs.Config) *redis.Client {
@@ -15,6 +15,7 @@ func NewRedisClient(cfg *configs.Config) *redis.Client {
 		logs.Error(zap.Error(err))
 	}
 	return redis.NewClient(&redis.Options{
-		Addr: url,
+		Addr:     url,
+		Password: cfg.Redis.Password,
 	})
 }
