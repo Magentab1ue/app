@@ -23,3 +23,4 @@ COPY --from=builder /app/app/main .
 
 CMD ["/app/app/main"]
 
+

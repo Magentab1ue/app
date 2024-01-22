@@ -5,8 +5,10 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/joho/godotenv"
+	"go.uber.org/zap"
 
 	"approval-service/configs"
+	"approval-service/logs"
 	"approval-service/modules/servers"
 	databases "approval-service/pkg/databases/postgres"
 	redis "approval-service/pkg/databases/redis"
@@ -14,8 +16,9 @@ import (
 
 func main() {
 
-	if err := godotenv.Load("../.env"); err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+	if err := godotenv.Load(); err != nil {
+
+		logs.Warn("Error loading .env file: %v", zap.Error(err))
 	}
 
 	cfg := new(configs.Config)
