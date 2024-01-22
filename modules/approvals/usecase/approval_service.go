@@ -162,6 +162,20 @@ func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*
 	if err != nil {
 		return nil, err
 	}
+	event := events.RequestCreatedEvent{
+		ID:           request.ID,
+		RequestID:    request.RequestID,
+		To:           request.To,
+		Status:       request.Status,
+		Project:      request.Project,
+		CreationDate: request.CreationDate,
+		RequestUser:  request.RequestUser,
+		Task:         request.Task,
+	}
+	err = u.produce.Produce(event)
+	if err != nil {
+		return nil, err
+	}
 
 	res, err := u.approvalRepo.Create(&models.Approvals{
 		RequestID:    request.RequestID,
