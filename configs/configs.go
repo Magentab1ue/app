@@ -1,10 +1,10 @@
 package configs
 
 type Config struct {
-	App       Fiber
-	Postgres  PostgresSql
-	Kafkas    Kafka
-	Redis     Redis
+	App      Fiber
+	Postgres PostgresSql
+	Kafkas   Kafka
+	Redis    Redis
 }
 
 type Redis struct {
@@ -12,7 +12,6 @@ type Redis struct {
 	Port     string
 	Password string
 }
-
 
 type Fiber struct {
 	Port string
@@ -25,10 +24,11 @@ type PostgresSql struct {
 	Password     string
 	DatabaseName string
 	SslMode      string
-	Schema 		 string
+	Schema       string
 }
 
 type Kafka struct {
-	Hosts []string
-	Group string
+	Hosts    []string
+	Group    string
+	ClientID string
 }

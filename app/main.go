@@ -30,7 +30,10 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	producer, err := sarama.NewSyncProducer(cfg.Kafkas.Hosts, nil)
+	kafkaConfig := sarama.NewConfig()
+    kafkaConfig.ClientID = cfg.Kafkas.ClientID
+
+	producer, err := sarama.NewSyncProducer(cfg.Kafkas.Hosts, kafkaConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
