@@ -32,43 +32,47 @@ func LoadConfigs(cfg *Config) {
 	//App env
 	cfg.App.Port = secret.Data["APP_PORT"].(string)
 	logs.Info(fmt.Sprintf("Env APP_PORT : %s", cfg.App.Port))
-
 	//postgres env
+	cfg.Postgres.DatabaseName = secret.Data["DB_DATABASE_APPROVAL"].(string)
+	logs.Info(fmt.Sprintf("Env DB_DATABASE_APPROVAL : %s", cfg.Postgres.DatabaseName))
+
 	cfg.Postgres.Host = secret.Data["DB_HOST"].(string)
 	logs.Info(fmt.Sprintf("Env DB_HOST : %s", cfg.Postgres.Host))
+
+	cfg.Postgres.Password = secret.Data["DB_PASSWORD_APPROVAL"].(string)
+	logs.Info(fmt.Sprintf("Env DB_PASSWORD_APPROVAL : %s", cfg.Postgres.Password))
 
 	cfg.Postgres.Port = secret.Data["DB_PORT"].(string)
 	logs.Info(fmt.Sprintf("Env DB_PORT : %s", cfg.Postgres.Port))
 
-	cfg.Postgres.Username = secret.Data["DB_USER"].(string)
-	logs.Info(fmt.Sprintf("Env DB_USER : %s", cfg.Postgres.Username))
-
-	cfg.Postgres.Password = secret.Data["DB_PASSWORD"].(string)
-	logs.Info(fmt.Sprintf("Env DB_PASSWORD : %s", cfg.Postgres.Port))
-
-	cfg.Postgres.DatabaseName = secret.Data["DB_NAME"].(string)
-	logs.Info(fmt.Sprintf("Env DB_NAME : %s", cfg.Postgres.Password))
+	cfg.Postgres.Schema = secret.Data["DB_SCHEMA_APPROVAL"].(string)
+	logs.Info(fmt.Sprintf("Env DB_SCHEMA_APPROVAL : %s", cfg.Postgres.Schema))
 
 	cfg.Postgres.SslMode = secret.Data["DB_SSLMODE"].(string)
 	logs.Info(fmt.Sprintf("Env DB_SSLMODE : %s", cfg.Postgres.SslMode))
 
-	cfg.Postgres.Schema = secret.Data["DB_SCHEMA"].(string)
-	logs.Info(fmt.Sprintf("Env DB_SCHEMA : %s", cfg.Postgres.Schema))
+	cfg.Postgres.Username = secret.Data["DB_USERNAME_APPROVAL"].(string)
+	logs.Info(fmt.Sprintf("Env DB_USERNAME_APPROVAL : %s", cfg.Postgres.Username))
 
 	// Kafka
-	cfg.Kafkas.Hosts = []string{secret.Data["KAFKA_SERVER"].(string)}
-	logs.Info(fmt.Sprintf("Env APP_PORT : %s", cfg.Kafkas.Hosts))
+	cfg.Kafkas.Hosts = []string{secret.Data["KAFKA_SERVERS"].(string)}
+	logs.Info(fmt.Sprintf("Env KAFKA_SERVERS : %s", cfg.Kafkas.Hosts))
 
-	cfg.Kafkas.Group = secret.Data["KAFKA_GROUP"].(string)
-	logs.Info(fmt.Sprintf("Env APP_PORT : %s", cfg.Kafkas.Group))
+	cfg.Kafkas.Group = secret.Data["KAFKA_GROUP_ID"].(string)
+	logs.Info(fmt.Sprintf("Env KAFKA_GROUP_ID : %s", cfg.Kafkas.Group))
 
+	cfg.Kafkas.Group = secret.Data["KAFKA_CLIENT_ID"].(string)
+	logs.Info(fmt.Sprintf("Env KAFKA_CLIENT_ID : %s", cfg.Kafkas.ClientID))
+
+
+	//redis
 	cfg.Redis.Host = secret.Data["REDIS_HOST"].(string)
-	logs.Info(fmt.Sprintf("Env APP_PORT : %s", cfg.Redis.Host))
+	logs.Info(fmt.Sprintf("Env REDIS_HOST : %s", cfg.Redis.Host))
 
 	cfg.Redis.Port = secret.Data["REDIS_PORT"].(string)
-	logs.Info(fmt.Sprintf("Env APP_PORT : %s", cfg.Redis.Port))
+	logs.Info(fmt.Sprintf("Env REDIS_PORT : %s", cfg.Redis.Port))
 
 	cfg.Redis.Password = secret.Data["REDIS_PASSWORD"].(string)
-	logs.Info(fmt.Sprintf("Env APP_PORT : %s", cfg.Redis.Password))
+	logs.Info(fmt.Sprintf("Env REDIS_PASSWORD : %s", cfg.Redis.Password))
 
 }

@@ -1,8 +1,6 @@
 package databases
 
 import (
-	"fmt"
-
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -16,7 +14,6 @@ import (
 func NewPostgresConnection(cfg *configs.Config) (*gorm.DB, error) {
 
 	dsn, err := utils.UrlBuilder("postgres", cfg)
-	fmt.Printf("%v\n", dsn)
 	if err != nil {
 		logs.Error("Can't build url: ", zap.Error(err))
 		return nil, err
@@ -26,7 +23,7 @@ func NewPostgresConnection(cfg *configs.Config) (*gorm.DB, error) {
 		DSN:                  dsn,
 		PreferSimpleProtocol: true,
 	}), &gorm.Config{NamingStrategy: schema.NamingStrategy{
-		TablePrefix: cfg.Postgres.Schema, 
+		TablePrefix: cfg.Postgres.Schema,
 	}})
 
 	if err != nil {
