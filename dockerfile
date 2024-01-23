@@ -29,4 +29,3 @@ COPY pkg /app/pkg
 COPY config.env /app/
 
 CMD ["/app/main"]
-
