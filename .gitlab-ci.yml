@@ -1,0 +1,165 @@
+include:
+  - template: Security/Dependency-Scanning.gitlab-ci.yml #SCA
+  - template: Security/SAST.gitlab-ci.yml #SAST
+  - template: Security/Container-Scanning.gitlab-ci.yml #Container Scaning
+
+# Container Scan
+container_scanning:
+  variables:
+    CS_DOCKERFILE_PATH: dockerfile
+    GIT_STRATEGY: fetch
+# config SAST
+semgrep-sast:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "trunk"
+# override the dependency scanning job
+gemnasium-dependency_scanning:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "trunk"
+    - if: $CI_MERGE_REQUEST_IID
+
+image: docker:20.10.16
+services:
+  - docker:20.10.16-dind
+stages:
+  - Build
+  - test
+  - Push
+  - Update Chart
+  - Deploy
+
+##############################################################################
+##                              Variables                                   ##
+##############################################################################
+
+variables:
+  APP_NAME: approval-service
+  SUP_NAME: backend
+  CD_GIT_TOKEN_NAME: hub-gitops
+  CD_CHART_REPO: cluster-manager
+  CD_GIT_REPOSITORY: https://$CD_GIT_TOKEN_NAME:$CI_ACCESS_TOKEN@git.lab.tcctech.app/tcc-hub/$CD_CHART_REPO.git
+  CD_DEPLOYMENT_FILE: deployment.yaml
+  CHART_FOLDER: dev-tcchub-approvalservice
+
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://docker:2376
+  DOCKER_TLS_CERTDIR: '/certs'
+  DOCKER_TLS_VERIFY: 1
+  DOCKER_CERT_PATH: '$DOCKER_TLS_CERTDIR/client'
+
+  NAME: ${PROJECT_NAME}-${SUP_NAME}-${APP_NAME}-${CI_ENVIRONMENT_SLUG}
+
+  DOCKER_IMAGE: $KK_SANDBOX_REGISTRY/$PROJECT_NAME/$SUP_NAME/$APP_NAME:development-$CI_COMMIT_SHORT_SHA
+
+  # Registry credentials for Container Scanning
+  CS_REGISTRY_USER: $CI_REGISTRY_USER
+  CS_REGISTRY_PASSWORD: $CI_REGISTRY_PASS
+  #DS_DISABLE_DIND: 'true'
+
+
+##############################################################################
+##                Setup and Enable SSH                                      ##
+##############################################################################
+.enable_ssh: &enable_ssh |-
+  apk --no-cache add git
+  apk --no-cache add curl bash
+  until docker info; do sleep 1; done
+
+
+##############################################################################
+##                Setup and Config Cluster                                  ##
+##############################################################################
+.deploy_common:
+  stage: deploy
+  image: alpine/k8s:1.24.15
+  script:
+    - |
+      kubectl version --short;
+      kubectl config set-cluster k8s --server=https://$K8S_API_URL --insecure-skip-tls-verify=true;
+      kubectl config set-credentials k8s --token=$K8S_API_TOKEN;
+      kubectl config set-context k8s --cluster k8s --user k8s --namespace=$K8S_NAMESPACE;
+    - kubectl config use-context k8s
+
+##############################################################################
+##                             Build Image                                  ##
+##############################################################################
+Build:
+  stage: Build
+  environment:
+    name: development
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASS $CI_REGISTRY
+    - docker build --pull --compress --network host -t 
+      $CI_REGISTRY/$PROJECT_NAME/$SUP_NAME/$APP_NAME:$CI_ENVIRONMENT_SLUG-$CI_COMMIT_SHORT_SHA .
+    - docker push $CI_REGISTRY/$PROJECT_NAME/$SUP_NAME/$APP_NAME:$CI_ENVIRONMENT_SLUG-$CI_COMMIT_SHORT_SHA
+    - docker logout
+
+
+##############################################################################
+##                             Test                                         ##
+##############################################################################
+Test:
+  stage: test
+  script:
+    - echo "Run test ..."
+
+
+##############################################################################
+##                       Push to Registry                                   ##
+##############################################################################
+Push:
+  stage: Push
+  environment:
+    name: development
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASS $CI_REGISTRY
+    - docker pull $CI_REGISTRY/$PROJECT_NAME/$SUP_NAME/$APP_NAME:$CI_ENVIRONMENT_SLUG-$CI_COMMIT_SHORT_SHA
+    - docker tag $CI_REGISTRY/$PROJECT_NAME/$SUP_NAME/$APP_NAME:$CI_ENVIRONMENT_SLUG-$CI_COMMIT_SHORT_SHA $CI_REGISTRY/$PROJECT_NAME/$SUP_NAME/$APP_NAME:latest
+    - docker push $CI_REGISTRY/$PROJECT_NAME/$SUP_NAME/$APP_NAME:latest
+    - docker logout
+
+update_chart_manifest:
+  stage: Update Chart
+  environment:
+    name: development
+  only:
+    - trunk
+  needs:
+    - Push
+  variables:
+    GIT_STRATEGY: none
+    IMAGE_TAG: $CI_REGISTRY/$PROJECT_NAME/$SUP_NAME/$APP_NAME:$CI_ENVIRONMENT_SLUG-$CI_COMMIT_SHORT_SHA
+  retry: 2
+  before_script:
+    - *enable_ssh
+  script:
+    # Configure Git
+    - git config --global user.name $APP_NAME
+    - git config --global user.email $APP_NAME"@gitlab.com"
+    - git clone --single-branch --branch trunk $CD_GIT_REPOSITORY
+    - cd $CD_CHART_REPO
+    - cd $CHART_FOLDER
+    # HELM Update
+    - echo $IMAGE_TAG
+    - 'sed -i "s|image:.*|image: $IMAGE_TAG|g" $CD_DEPLOYMENT_FILE'
+    #- 'sed -i "/metadata:/,/imagePullSecrets:/!b; /name: $NAME/s|name: $NAME|name: $NAME|" $CD_DEPLOYMENT_FILE'
+    - 'sed -i "s|app:.*|app: $NAME|g" $CD_DEPLOYMENT_FILE'
+    #- 'sed -i "s|name:.*|name: $NAME|g" ingress.yaml'
+    #- 'sed -i "s|secretName:.*|secretName: $NAME-cert|g" ingress.yaml'
+    - 'sed -i "s|name:.*|name: $NAME|g" service.yaml'
+    - 'sed -i "s|app:.*|app: $NAME|g" service.yaml'
+    - cat $CD_DEPLOYMENT_FILE | grep "image:"
+    - cd ..
+    - git commit -am "🔥 update image tag" && git push origin trunk
+
+##############################################################################
+##                             Deploy                                       ##
+##############################################################################
+Deploy:
+  stage: Deploy
+  extends: .deploy_common
+  environment:
+    name: development
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "trunk"
+
