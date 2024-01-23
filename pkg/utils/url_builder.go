@@ -13,7 +13,7 @@ func UrlBuilder(urlType string, cfg *configs.Config) (string, error) {
 
 	switch urlType {
 	case "fiber":
-		url = fmt.Sprintf(":%s", cfg.App.Port)
+		url = fmt.Sprintf("%s:%s", cfg.App.Host, cfg.App.Port)
 	case "postgres":
 		url = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s search_path=%s ",
 			cfg.Postgres.Host,
