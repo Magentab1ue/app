@@ -1,12 +1,22 @@
 version: '3.9'
 
 services:
+  # app:
+  #   build: .
+  #   ports:
+  #     - 3000:3000
+  #   network_mode: host
+  #   environment:
+  #     VAULT_ADDR: http://127.0.0.1:8200
+  #     VAULT_TOKEN: hvs.24nUgrqPEstqr6Lj8RAnklIQ
+  #     VAULT_TYPE: secret
+  #     VAULT_PATH: conf_env
 
   zookeeper:
     image: zookeeper
     container_name: zookeeper
     volumes:
-      - ./zookeeper:/data
+      - ./data/zookeeper:/data
 
   kafka:
     image: bitnami/kafka
@@ -14,7 +24,7 @@ services:
     ports:
       - 9092:9092
     volumes:
-      - ./kafka:/bitnami/kafka/data
+      - ./data/kafka:/bitnami/kafka/data
     environment:
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
@@ -30,7 +40,7 @@ services:
       - 6379:6379
     volumes:
       - ./data/redis:/data
-      - ./config/redis.conf:/redis.conf
+      - ./data/config/redis.conf:/redis.conf
     command: redis-server /redis.conf --requirepass 1234gg
     environment:
       REDIS_PASSWORD: 1234gg

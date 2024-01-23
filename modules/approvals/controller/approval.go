@@ -32,7 +32,7 @@ func NewApprovalController(router fiber.Router, approvalSrv models.ApprovalUseca
 }
 
 func (h *approvalHandler) UpdateStatus(c *fiber.Ctx) error {
-	logs.Info("Attempting to update approval status")
+	logs.Info("Put : Attempting to update approval status")
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
@@ -82,7 +82,7 @@ func (h *approvalHandler) UpdateStatus(c *fiber.Ctx) error {
 }
 
 func (h *approvalHandler) ReceiveRequest(c *fiber.Ctx) error {
-	logs.Info("Attempting to update approval status")
+	logs.Info("Get : Attempting to ReceiveRequest approval ")
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
@@ -147,7 +147,7 @@ func (h *approvalHandler) ReceiveRequest(c *fiber.Ctx) error {
 }
 
 func (h *approvalHandler) SendRequest(c *fiber.Ctx) error {
-	logs.Info("Attempting to get request approval")
+	logs.Info("Get : Attempting to get request approval")
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
@@ -213,7 +213,7 @@ func (h *approvalHandler) SendRequest(c *fiber.Ctx) error {
 }
 
 func (h *approvalHandler) DeleteApproval(c *fiber.Ctx) error {
-	logs.Info("Attempting to delete approval")
+	logs.Info("Delete : Attempting to delete approval")
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
@@ -250,7 +250,7 @@ func (h *approvalHandler) DeleteApproval(c *fiber.Ctx) error {
 }
 
 func (h *approvalHandler) RequestSent(c *fiber.Ctx) error {
-	logs.Info("Attempting to teamlead sent request to HR or Approver")
+	logs.Info("PUT : Attempting to teamlead sent request to HR or Approver")
 
 	id := c.Params("id")
 	if id == "" {
@@ -284,7 +284,7 @@ func (h *approvalHandler) RequestSent(c *fiber.Ctx) error {
 
 	apprrovalUpdated, err := h.approvalSrv.SentRequest(uint(idApprove), requestBody)
 	if err != nil {
-		logs.Error("Error update status approval ", zap.Error(err))
+		logs.Error("Error can't send approval", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -306,6 +306,7 @@ func (h *approvalHandler) RequestSent(c *fiber.Ctx) error {
 }
 
 func (h *approvalHandler) GetApprovalByID(c *fiber.Ctx) error {
+	logs.Info("GET : Attempting to GET approval By id")
 
 	id := c.Params("profileId")
 	if id == "" {
@@ -348,7 +349,7 @@ func (h *approvalHandler) GetApprovalByID(c *fiber.Ctx) error {
 }
 
 func (h *approvalHandler) GetAllApproval(c *fiber.Ctx) error {
-	logs.Info("Attempting to update approval status")
+	logs.Info("GET : Attempting to get all approval")
 
 	optional := map[string]interface{}{}
 	//Optional
@@ -380,7 +381,7 @@ func (h *approvalHandler) GetAllApproval(c *fiber.Ctx) error {
 
 	apprrovalReceive, err := h.approvalSrv.GetAll(optional)
 	if err != nil {
-		logs.Error("Error can't get Receive approval ", zap.Error(err))
+		logs.Error("Error can't get all approval ", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -390,7 +391,7 @@ func (h *approvalHandler) GetAllApproval(c *fiber.Ctx) error {
 		)
 	}
 
-	logs.Info("get Receive approval successfully")
+	logs.Info("get all approval successfully")
 	return c.Status(fiber.StatusOK).JSON(
 		models.ResponseData{
 			Message:    "Succeed",
@@ -402,7 +403,7 @@ func (h *approvalHandler) GetAllApproval(c *fiber.Ctx) error {
 }
 
 func (h *approvalHandler) GetByUserID(c *fiber.Ctx) error {
-	logs.Info("Attempting to update approval status")
+	logs.Info("GET : Attempting approval by id")
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
@@ -446,7 +447,7 @@ func (h *approvalHandler) GetByUserID(c *fiber.Ctx) error {
 
 	apprrovalReceive, err := h.approvalSrv.GetByUserID(uint(id), optional)
 	if err != nil {
-		logs.Error("Error can't get Receive approval ", zap.Error(err))
+		logs.Error("Error can't get approval by id", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -468,7 +469,7 @@ func (h *approvalHandler) GetByUserID(c *fiber.Ctx) error {
 }
 
 func (h *approvalHandler) CreateRequest(c *fiber.Ctx) error {
-	logs.Info("Attempting to update approval status")
+	logs.Info("POST : Attempting to create approval")
 
 	approvalBody := new(models.RequestReq)
 	if err := c.BodyParser(&approvalBody); err != nil {
@@ -480,7 +481,7 @@ func (h *approvalHandler) CreateRequest(c *fiber.Ctx) error {
 
 	apprrovalCreate, err := h.approvalSrv.CreateRequest(approvalBody)
 	if err != nil {
-		logs.Error("Error can't get Receive approval ", zap.Error(err))
+		logs.Error("Error can't Create approval ", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -490,7 +491,7 @@ func (h *approvalHandler) CreateRequest(c *fiber.Ctx) error {
 		)
 	}
 
-	logs.Info("get Receive approval successfully")
+	logs.Info("Create approval successfully")
 	return c.Status(fiber.StatusOK).JSON(
 		models.ResponseData{
 			Message:    "Succeed",

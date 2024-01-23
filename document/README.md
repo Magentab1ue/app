@@ -8,16 +8,16 @@
   - [Authentication](#authentication)
   - [Base URL](#base-url)
   - [Endpoints](#endpoints)
-    - [POST v1/approval/create](#post-v1-approval-create)
-    - [GET v1/approval/:id](#get-v1-approval-id)
-    - [GET v1/approvals/:requestId](#get-v1-approvals-requestId)
-    - [GET /v1/approvals?status=xxx?to=xxx?project=xxx?](#get-v1-approvals-statusxxx-toxxx-projectxxx)
-    - [PUT v1/approval/update-status/:id](#put-v1-approval-update-status-id)
-    - [PUT v1/approval/sent-request/:id](#put-v1-approval-sent-request-id)
-    - [GET /v1/approval/user/:id?status=xxx&to=xxx&project=xx](#get-v1-approval-userid-statusxxx-toxxx-projectxx)
-    - [GET /v1/approval/user/:id/receive-request?requsetUser=xx&project=xx&status=xx](#get-v1-approval-user-id-receive-request-requsetuserxx-projectxx-statusxx)
-    - [GET /v1/approval/user/:id/send-request?to=xx&project=xxx&status=xx](#get-v1-approval-user-id-send-request-toxx-projectxxx-statusxx)
-    - [DELETE /v1/approval/:id](#delete-v1-approval-id)
+    - [POST v1/approval/create](#post-v1approvalcreate)
+    - [GET v1/approval/:id](#get-v1approvalid)
+    - [GET /v1/approvals/:requestId](#get-v1approvalsrequestid)
+    - [GET /v1/approvals?status=xxx?to=xxx?project=xxx?](#get-v1approvalsstatusxxxtoxxxprojectxxx)
+    - [PUT v1/approval/update-status/:id](#put-v1approvalupdate-statusid)
+    - [PUT v1/approval/sent-request/:id](#put-v1approvalsent-requestid)
+    - [GET /v1/approval/user/:id?status=xxx\&to=xxx\&project=xx](#get-v1approvaluseridstatusxxxtoxxxprojectxx)
+    - [GET /v1/approval/user/:id/receive-request?requsetUser=xx\&project=xx\&status=xx](#get-v1approvaluseridreceive-requestrequsetuserxxprojectxxstatusxx)
+    - [GET /v1/approval/user/:id/send-request?to=xx\&project=xxx\&status=xx](#get-v1approvaluseridsend-requesttoxxprojectxxxstatusxx)
+    - [DELETE /v1/approval/:id](#delete-v1approvalid)
   - [Status Codes](#status-codes)
   - [Event topics](#event-topics)
 
@@ -68,12 +68,12 @@ Authorization: JWT YOUR_TOKEN
     "id" : 1,
     "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
     "to":[1,2,3],
-    "approver" :,
-    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "approver" :, 
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"}, //json
     "status" :"pending",
     "creationDate":1-10-5864,
     "requestUser" :1,
-    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}], //json
     "IsSignature":false
   },
   "message": "successful",
@@ -107,11 +107,11 @@ id : (require) type: uint
     "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
     "to":[1,2,3],
     "approver" :,
-    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"}, //json
     "status" :"pending",
     "creationDate":1-10-5864,
     "requestUser" :1,
-    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}], //json
     "IsSignature":false
   },
   "message": "successful",
@@ -182,11 +182,11 @@ Authorization: JWT YOUR_TOKEN
     "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
     "to":[1,2,3],
     "approver" :,
-    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"}, //json
     "status" :"pending",
     "creationDate":1-10-5864,
     "requestUser" :1,
-    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}], //json
     "IsSignature":false
   },
     {.....},// ... other profiles
@@ -231,11 +231,11 @@ id : (require) type: uint
     "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
     "to":[1,2,3],
     "approver" :1,
-    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"}, //json
     "status" :"approved",
     "creationDate":1-10-5864,
     "requestUser" :1,
-    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}], //json
     "IsSignature":true
   },
   "message": "status changed",
@@ -281,11 +281,11 @@ id : (require) type: uint
     "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f55e",
     "to":[1,2,3],
     "approver" :,
-    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"}, //json
     "status" :"pending",
     "creationDate":1-10-5864,
     "requestUser" :2,
-    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}], //json
     "IsSignature":false
   },
   "message": "status changed",
@@ -320,11 +320,11 @@ Authorization: JWT YOUR_TOKEN
     "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
     "to":[1,2,3],
     "approver" :1,
-    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"}, //json
     "status" :"approved",
     "creationDate":1-10-5864,
     "requestUser" :1,
-    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}], //json
     "IsSignature":true
   },
     {.....},// ... other profiles
@@ -361,11 +361,11 @@ Authorization: JWT YOUR_TOKEN
     "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
     "to":[1,2,3],
     "approver" :1,
-    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"}, //json
     "status" :"approved",
     "creationDate":1-10-5864,
     "requestUser" :1,
-    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}], //json
     "IsSignature":true
   },
     {.....},// ... other profiles
@@ -456,13 +456,13 @@ Authorization: JWT YOUR_TOKEN
 
 **ApprovalCreated**
 
-**Publish** to the `tcchub-approval-approvalCreated` topic to receive information for create approval
+**Publish** to the `tcchub-approval-approvalCreated` topic to publish information for create approval
 
 **Message**:
 
 ```json
 {
- "request" : {
+ "approval" : {
     "id" : ,
     "requsetId":,
     "to":,
@@ -484,12 +484,19 @@ Authorization: JWT YOUR_TOKEN
 
 ```json
 
-    {
-      "status":,
-      "approver":,
-      "task":[]
-   }
-
+{
+ "approval" : {
+    "id" : ,
+    "requsetId":,
+    "to":,
+    "approver" :,
+    "project" :,
+    "status" :,
+    "creationDate":,
+    "requestUser" :,
+    "task" : [],
+  },
+}
 ```
 
 **ApprovalDeleted**
@@ -500,7 +507,7 @@ Authorization: JWT YOUR_TOKEN
 
 ```json
 {
-  "task": []
+  "id": 
 }
 ```
 

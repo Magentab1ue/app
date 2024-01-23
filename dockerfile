@@ -11,13 +11,31 @@ COPY . .
 RUN go build -o main ./app/main.go
 
 # Final stage
-FROM scratch
+FROM alpine:latest
 
+<<<<<<< HEAD
 ARG APP_PORT
 ENV APP_PORT=8080
 
 EXPOSE 8080
+=======
+WORKDIR /app
 
+# Copy the binary from the builder stage
+COPY --from=builder /app/main /app/
+
+# Copy necessary directories
+# COPY assets /app/assets
+COPY configs /app/configs
+COPY modules /app/modules
+COPY pkg /app/pkg
+
+# Assuming .env file is at the root of your project
+# Copy the .env file for environment variables
+COPY config.env /app/
+>>>>>>> 3d6bf4a104189f02f618081a0207e9cad1c4f78d
+
+CMD ["/app/main"]
 
 WORKDIR /app
 

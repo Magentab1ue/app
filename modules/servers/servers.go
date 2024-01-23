@@ -2,6 +2,7 @@ package servers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/IBM/sarama"
 	"github.com/go-redis/redis/v8"
@@ -56,8 +57,8 @@ func (s *server) Start() {
 
 	// Start consumer
 	go func() {
-		log.Info("Connect to kafa server:", s.Cfg.Kafkas.Hosts, ",Group:", s.Cfg.Kafkas.Group)
-		log.Info("Subscribed topics:", events.SubscribedTopics)
+		logs.Info(fmt.Sprintf("Connect to kafa server: %v Port : %v Group: %v",s.Cfg.Kafkas.Servers,s.Cfg.Kafkas.Port,s.Cfg.Kafkas.Group))
+		logs.Info(fmt.Sprintf("Subscribed topics: %s", events.SubscribedTopics))
 		for {
 			err := s.ConsumerGroup.Consume(context.Background(), events.SubscribedTopics, s.consumerGroupHandler)
 			if err != nil{

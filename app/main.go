@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/IBM/sarama"
@@ -16,8 +17,7 @@ import (
 
 func main() {
 
-	if err := godotenv.Load(); err != nil {
-
+	if err := godotenv.Load("../config.env"); err != nil {
 		logs.Warn("Error loading .env file: %v", zap.Error(err))
 	}
 
@@ -29,17 +29,27 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	// Append port to Kafka server addresses
+	var kafkaServersWithPort []string
+	for _, server := range cfg.Kafkas.Servers {
+		serverWithPort := fmt.Sprintf("%s:%s", server, cfg.Kafkas.Port)
+		kafkaServersWithPort = append(kafkaServersWithPort, serverWithPort)
+	}
+	producerConfig := sarama.NewConfig()
+	producerConfig.Producer.Return.Successes = true
+	producerConfig.ClientID = cfg.Kafkas.ClientID
 
-	kafkaConfig := sarama.NewConfig()
-    kafkaConfig.ClientID = cfg.Kafkas.ClientID
-
-	producer, err := sarama.NewSyncProducer(cfg.Kafkas.Hosts, kafkaConfig)
+	producer, err := sarama.NewSyncProducer(kafkaServersWithPort, producerConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer producer.Close()
 
-	consumer, err := sarama.NewConsumerGroup(cfg.Kafkas.Hosts, cfg.Kafkas.Group, nil)
+	// Configure Kafka consumer
+	consumerConfig := sarama.NewConfig()
+	consumerConfig.ClientID = cfg.Kafkas.ClientID
+
+	consumer, err := sarama.NewConsumerGroup(kafkaServersWithPort, cfg.Kafkas.Group, consumerConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
