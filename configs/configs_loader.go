@@ -15,64 +15,61 @@ func LoadConfigs(cfg *Config) {
 	config := vault.DefaultConfig()
 
 	config.Address = os.Getenv("VAULT_ADDR")
+	logs.Info(fmt.Sprintf("Env VAULT_ADDR : %s", config.Address))
+
 	client, err := vault.NewClient(config)
 	if err != nil {
 		log.Fatalf("unable to initialize Vault client: %v", err)
 	}
 
 	client.SetToken(os.Getenv("VAULT_TOKEN"))
+	logs.Info(fmt.Sprintf("Env VAULT_TOKEN : %s", os.Getenv("VAULT_TOKEN")))
 
 	ctx := context.Background()
 
 	secret, err := client.KVv2((os.Getenv("VAULT_TYPE"))).Get(ctx, os.Getenv("VAULT_PATH"))
+	logs.Info(fmt.Sprintf("Env VAULT_TYPE : %s", os.Getenv("VAULT_TYPE")))
+	logs.Info(fmt.Sprintf("Env VAULT_PATH : %s", os.Getenv("VAULT_PATH")))
 	if err != nil {
 		log.Fatalf("unable to read secret: %v", err)
 	}
 
+	setData := func(key string) string {
+		if val, ok := secret.Data[key]; ok {
+			if strVal, ok := val.(string); ok {
+				logs.Info(fmt.Sprintf("Env %s : %s", key, strVal))
+				return strVal
+			}
+		}
+		logs.Error("Key " + key + " not found or not a string in Vault secret")
+		return ""
+	}
+
 	//App env
-	cfg.App.Port = secret.Data["APP_PORT"].(string)
-	logs.Info(fmt.Sprintf("Env APP_PORT : %s", cfg.App.Port))
+	cfg.App.Host = setData("APP_HOST")
+	if cfg.App.Host == "" {
+		cfg.App.Port = "localhost"
+	}
+	cfg.App.Port = setData("APP_PORT")
+
 	//postgres env
-	cfg.Postgres.DatabaseName = secret.Data["DB_DATABASE_APPROVAL"].(string)
-	logs.Info(fmt.Sprintf("Env DB_DATABASE_APPROVAL : %s", cfg.Postgres.DatabaseName))
-
-	cfg.Postgres.Host = secret.Data["DB_HOST"].(string)
-	logs.Info(fmt.Sprintf("Env DB_HOST : %s", cfg.Postgres.Host))
-
-	cfg.Postgres.Password = secret.Data["DB_PASSWORD_APPROVAL"].(string)
-	logs.Info(fmt.Sprintf("Env DB_PASSWORD_APPROVAL : %s", cfg.Postgres.Password))
-
-	cfg.Postgres.Port = secret.Data["DB_PORT"].(string)
-	logs.Info(fmt.Sprintf("Env DB_PORT : %s", cfg.Postgres.Port))
-
-	cfg.Postgres.Schema = secret.Data["DB_SCHEMA_APPROVAL"].(string)
-	logs.Info(fmt.Sprintf("Env DB_SCHEMA_APPROVAL : %s", cfg.Postgres.Schema))
-
-	cfg.Postgres.SslMode = secret.Data["DB_SSLMODE"].(string)
-	logs.Info(fmt.Sprintf("Env DB_SSLMODE : %s", cfg.Postgres.SslMode))
-
-	cfg.Postgres.Username = secret.Data["DB_USERNAME_APPROVAL"].(string)
-	logs.Info(fmt.Sprintf("Env DB_USERNAME_APPROVAL : %s", cfg.Postgres.Username))
+	cfg.Postgres.DatabaseName = setData("DB_DATABASE_APPROVAL")
+	cfg.Postgres.Host = setData("DB_HOST")
+	cfg.Postgres.Password = setData("DB_PASSWORD_APPROVAL")
+	cfg.Postgres.Port = setData("DB_PORT")
+	cfg.Postgres.Schema = setData("DB_SCHEMA_APPROVAL")
+	cfg.Postgres.SslMode = setData("DB_SSLMODE")
+	cfg.Postgres.Username = setData("DB_USERNAME_APPROVAL")
 
 	// Kafka
-	cfg.Kafkas.Hosts = []string{secret.Data["KAFKA_SERVERS"].(string)}
-	logs.Info(fmt.Sprintf("Env KAFKA_SERVERS : %s", cfg.Kafkas.Hosts))
-
-	cfg.Kafkas.Group = secret.Data["KAFKA_GROUP_ID"].(string)
-	logs.Info(fmt.Sprintf("Env KAFKA_GROUP_ID : %s", cfg.Kafkas.Group))
-
-	cfg.Kafkas.Group = secret.Data["KAFKA_CLIENT_ID"].(string)
-	logs.Info(fmt.Sprintf("Env KAFKA_CLIENT_ID : %s", cfg.Kafkas.ClientID))
-
+	cfg.Kafkas.Servers = []string{setData("KAFKA_SERVERS")}
+	cfg.Kafkas.Port = setData("KAFKA_PORT")
+	cfg.Kafkas.Group = setData("KAFKA_GROUP_ID")
+	cfg.Kafkas.Group = setData("KAFKA_CLIENT_ID")
 
 	//redis
-	cfg.Redis.Host = secret.Data["REDIS_HOST"].(string)
-	logs.Info(fmt.Sprintf("Env REDIS_HOST : %s", cfg.Redis.Host))
-
-	cfg.Redis.Port = secret.Data["REDIS_PORT"].(string)
-	logs.Info(fmt.Sprintf("Env REDIS_PORT : %s", cfg.Redis.Port))
-
-	cfg.Redis.Password = secret.Data["REDIS_PASSWORD"].(string)
-	logs.Info(fmt.Sprintf("Env REDIS_PASSWORD : %s", cfg.Redis.Password))
+	cfg.Redis.Host = setData("REDIS_HOST")
+	cfg.Redis.Port = setData("REDIS_PORT")
+	cfg.Redis.Password = setData("REDIS_PASSWORD")
 
 }
