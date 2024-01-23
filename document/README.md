@@ -10,6 +10,7 @@
   - [Endpoints](#endpoints)
     - [POST v1/approval/create](#post-v1approvalcreate)
     - [GET v1/approval/:id](#get-v1approvalid)
+    - [GET /v1/approvals/:requestId](#get-v1approvalsrequestid)
     - [GET /v1/approvals?status=xxx?to=xxx?project=xxx?](#get-v1approvalsstatusxxxtoxxxprojectxxx)
     - [PUT v1/approval/update-status/:id](#put-v1approvalupdate-statusid)
     - [PUT v1/approval/sent-request/:id](#put-v1approvalsent-requestid)
@@ -37,10 +38,9 @@ URL: `https://approval-service:{{app_port}}/`
 
 ## Endpoints
 
-
 ### POST v1/approval/create
 
-Update create approval.
+worker create request approval.
 
 **Headers**
 
@@ -52,27 +52,29 @@ Authorization: JWT YOUR_TOKEN
 
 ```json
 {
-    "to":,
-    "project" :,
-    "creationDate":,
-    "requestUser" :,
-    "task" :,
+    "to":[1,2,3],
+    "project": {"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "creation_date":1-10-5864,
+    "request_user" :1,
+    "task" :{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},
 }
 ```
 
 **Response**:
+
 ```json
 {
   "data" : {
-    "id" : ,
-    "requsetId":,
-    "to":,
+    "id" : 1,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
+    "to":[1,2,3],
     "approver" :, 
-    "project" :, //json
-    "status" :,
-    "creationDate":,
-    "requestUser" :,
-    "task" : [], //json
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"}, //json
+    "status" :"pending",
+    "creationDate":1-10-5864,
+    "requestUser" :1,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}], //json
+    "IsSignature":false
   },
   "message": "successful",
   "status": "ok",
@@ -101,15 +103,16 @@ id : (require) type: uint
 ```json
 {
   "data" : {
-    "id" : ,
-    "requsetId":,
-    "to":,
+    "id" : 1,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
+    "to":[1,2,3],
     "approver" :,
-    "project" :, //json
-    "status" :,
-    "creationDate":,
-    "requestUser" :,
-    "task" : [], //json
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"}, //json
+    "status" :"pending",
+    "creationDate":1-10-5864,
+    "requestUser" :1,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}], //json
+    "IsSignature":false
   },
   "message": "successful",
   "status": "ok",
@@ -117,9 +120,9 @@ id : (require) type: uint
 }
 ```
 
-### GET /v1/approvals?status=xxx?to=xxx?project=xxx?
+### GET /v1/approvals/:requestId
 
-Get the approvals data. filter
+Get the approvals by requestId
 **Headers**:
 
 ```
@@ -127,7 +130,45 @@ Authorization: JWT YOUR_TOKEN
 ```
 
 **Paremeters**:
-- to  type: number
+
+- requestId (uuid)
+
+**Response**:
+
+```json
+{
+
+  "data" : [{
+    "id" : 1,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
+    "to":[1,2,3],
+    "approver" :,
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "status" :"pending",
+    "creationDate":1-10-5864,
+    "requestUser" :1,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "IsSignature":false
+  },
+    {.....},// ... other profiles
+  ],
+  "status": "OK",
+  "status_code": 200
+}
+```
+
+### GET /v1/approvals?status=xxx?to=xxx?project=xxx?
+
+Get All the approvals data. filter
+**Headers**:
+
+```
+Authorization: JWT YOUR_TOKEN
+```
+
+**Paremeters**:
+
+- to type: number
 - project type: number
 - status type: string
 
@@ -137,15 +178,16 @@ Authorization: JWT YOUR_TOKEN
 {
 
   "data" : [{
-    "id" : ,
-    "requsetId":,
-    "to":,
+    "id" : 1,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
+    "to":[1,2,3],
     "approver" :,
-    "project" :, //json
-    "status" :,
-    "creationDate":,
-    "requestUser" :,
-    "task" : [], //json
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"}, //json
+    "status" :"pending",
+    "creationDate":1-10-5864,
+    "requestUser" :1,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}], //json
+    "IsSignature":false
   },
     {.....},// ... other profiles
   ],
@@ -174,9 +216,9 @@ id : (require) type: uint
 
 ```json
 {
-  "status":,
-  "approver":,
-  "Approver":,
+  "status":"approved",
+  "approver":1,
+  "is_signature":true,
 }
 ```
 
@@ -185,15 +227,16 @@ id : (require) type: uint
 ```json
 {
   "data" : {
-    "id" : ,
-    "requsetId":,
-    "to":,
-    "approver" :,
-    "project" :, //json
-    "status" :,
-    "creationDate":,
-    "requestUser" :,
-    "task" : [], //json
+    "id" : 1,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
+    "to":[1,2,3],
+    "approver" :1,
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"}, //json
+    "status" :"approved",
+    "creationDate":1-10-5864,
+    "requestUser" :1,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}], //json
+    "IsSignature":true
   },
   "message": "status changed",
   "status": "ok",
@@ -221,11 +264,11 @@ id : (require) type: uint
 
 ```json
 {
-    "to":,
+    "to":[1,2,3],
     "approver" :,
-    "creationDate":,
-    "requestUser" :,
-    "is_signature":
+    "creation_date":10-10-5864,
+    "request_user" :2,
+    "is_signature":false
 }
 ```
 
@@ -234,15 +277,16 @@ id : (require) type: uint
 ```json
 {
   "data" : {
-    "id" : ,
-    "requsetId":,
-    "to":,
+    "id" : 2,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f55e",
+    "to":[1,2,3],
     "approver" :,
-    "project" :, //json
-    "status" :,
-    "creationDate":,
-    "requestUser" :,
-    "task" : [], //json
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"}, //json
+    "status" :"pending",
+    "creationDate":1-10-5864,
+    "requestUser" :2,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}], //json
+    "IsSignature":false
   },
   "message": "status changed",
   "status": "ok",
@@ -263,7 +307,7 @@ Authorization: JWT YOUR_TOKEN
 **Paremeters**:
 
 - id : (require) type: uint
-- requsetUser  type: number
+- requsetUser type: number
 - project type: number
 - status type: string
 
@@ -272,15 +316,16 @@ Authorization: JWT YOUR_TOKEN
 ```json
 {
   "data" : [{
-    "id" : ,
-    "requsetId":,
-    "to":,
-    "approver" :,
-    "project" :, //json
-    "status" :,
-    "creationDate":,
-    "requestUser" :,
-    "task" : [], //json
+    "id" : 1,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
+    "to":[1,2,3],
+    "approver" :1,
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"}, //json
+    "status" :"approved",
+    "creationDate":1-10-5864,
+    "requestUser" :1,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}], //json
+    "IsSignature":true
   },
     {.....},// ... other profiles
   ],
@@ -303,7 +348,7 @@ Authorization: JWT YOUR_TOKEN
 **Paremeters**:
 
 - id : (require) type: uint
-- requsetUser  type: number
+- requsetUser type: number
 - project type: number
 - status type: string
 
@@ -312,15 +357,16 @@ Authorization: JWT YOUR_TOKEN
 ```json
 {
   "data" : [{
-    "id" : ,
-    "requsetId":,
-    "to":,
-    "approver" :,
-    "project" :, //json
-    "status" :,
-    "creationDate":,
-    "requestUser" :,
-    "task" : [], //json
+   "id" : 1,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
+    "to":[1,2,3],
+    "approver" :1,
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"}, //json
+    "status" :"approved",
+    "creationDate":1-10-5864,
+    "requestUser" :1,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}], //json
+    "IsSignature":true
   },
     {.....},// ... other profiles
   ],
@@ -343,7 +389,7 @@ Authorization: JWT YOUR_TOKEN
 **Paremeters**:
 
 - id : (require) type: uint
-- to  type: number
+- to type: number
 - project type: number
 - status type: string
 
@@ -352,15 +398,16 @@ Authorization: JWT YOUR_TOKEN
 ```json
 {
   "data" : [{
-    "id" : ,
-    "requsetId":,
-    "to":,
-    "approver" :,
-    "project" :,
-    "status" :,
-    "creationDate":,
-    "requestUser" :,
-    "task" : [],
+    "id" : 1,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
+    "to":[1,2,3],
+    "approver" :1,
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "status" :"approved",
+    "creationDate":1-10-5864,
+    "requestUser" :1,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "IsSignature":true
   },
     {.....},// ... other profiles
   ],

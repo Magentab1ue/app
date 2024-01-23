@@ -1,8 +1,11 @@
 package models
 
 import (
-	"approval-service/modules/entities/events"
 	"time"
+
+	"github.com/google/uuid"
+
+	"approval-service/modules/entities/events"
 )
 
 type ApprovalUsecase interface {
@@ -15,6 +18,7 @@ type ApprovalUsecase interface {
 	GetAll(map[string]interface{}) ([]Approvals, error)
 	GetByUserID(uint, map[string]interface{}) ([]Approvals, error)
 	CreateRequest(*RequestReq) (*Approvals, error)
+	GetByRequestID(uuid.UUID) ([]Approvals, error)
 }
 
 type ApprovalRepository interface {
@@ -26,6 +30,7 @@ type ApprovalRepository interface {
 	DeleteApproval(requestId uint) (*Approvals, error)
 	GetAll(map[string]interface{}) ([]Approvals, error)
 	GetByUserID(uint, map[string]interface{}) ([]Approvals, error)
+	GetByRequestID(uuid.UUID) ([]Approvals, error)
 }
 
 type ProducerApproval interface {

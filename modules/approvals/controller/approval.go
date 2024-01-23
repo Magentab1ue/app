@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 
 	"approval-service/logs"
@@ -25,6 +26,7 @@ func NewApprovalController(router fiber.Router, approvalSrv models.ApprovalUseca
 	router.Put("/approval/send-request/:id", controllers.RequestSent)
 	router.Get("/approval/user/:id/receive-request", controllers.ReceiveRequest)
 	router.Get("/approval/user/:id/send-request", controllers.SendRequest)
+	router.Get("/approvals/:requestId", controllers.GetApprovalByRequestID)
 	router.Delete("/approval/:id", controllers.DeleteApproval)
 	router.Post("/approval/create", controllers.CreateRequest)
 }
@@ -103,7 +105,7 @@ func (h *approvalHandler) ReceiveRequest(c *fiber.Ctx) error {
 	}
 	status := c.Query("status")
 	if requestUser != "" {
-		optional["request_user"] = status
+		optional["status"] = status
 	}
 	projectId := c.Query("project")
 	if projectId != "" {
@@ -351,11 +353,6 @@ func (h *approvalHandler) GetAllApproval(c *fiber.Ctx) error {
 
 	optional := map[string]interface{}{}
 	//Optional
-	status := c.Query("status")
-	if status != "" {
-		optional["status"] = status
-	}
-	//Optional
 	projectId := c.Query("project")
 	if projectId != "" {
 		projectId, err := strconv.Atoi(projectId)
@@ -376,6 +373,10 @@ func (h *approvalHandler) GetAllApproval(c *fiber.Ctx) error {
 	if to != "" {
 		to, _ := strconv.Atoi(to)
 		optional["to"] = to
+	}
+	status := c.Query("status")
+	if status != "" {
+		optional["status"] = status
 	}
 
 	apprrovalReceive, err := h.approvalSrv.GetAll(optional)
@@ -404,8 +405,6 @@ func (h *approvalHandler) GetAllApproval(c *fiber.Ctx) error {
 func (h *approvalHandler) GetByUserID(c *fiber.Ctx) error {
 	logs.Info("GET : Attempting approval by id")
 
-	optional := map[string]interface{}{}
-
 	id, err := c.ParamsInt("id")
 	if err != nil {
 		logs.Error("Error parsing approval ID:", zap.Error(err))
@@ -418,15 +417,32 @@ func (h *approvalHandler) GetByUserID(c *fiber.Ctx) error {
 		)
 	}
 
+	optional := map[string]interface{}{}
 	//Optional
-	status := c.Query("status")
-	if status != "" {
-		optional["status"] = status
+	projectId := c.Query("project")
+	if projectId != "" {
+		projectId, err := strconv.Atoi(projectId)
+		if err != nil {
+			logs.Error("Error parsing approval ID:", zap.Error(err))
+			return c.Status(fiber.StatusNotFound).JSON(
+				models.ResponseData{
+					Message:    "project option is number",
+					Status:     fiber.ErrBadRequest.Message,
+					StatusCode: fiber.ErrBadRequest.Code,
+				},
+			)
+		}
+		optional["project"] = projectId
 	}
+
 	to := c.Query("to")
 	if to != "" {
 		to, _ := strconv.Atoi(to)
-		optional["to"] = []uint{uint(to)}
+		optional["to"] = to
+	}
+	status := c.Query("status")
+	if status != "" {
+		optional["status"] = status
 	}
 
 	apprrovalReceive, err := h.approvalSrv.GetByUserID(uint(id), optional)
@@ -485,3 +501,49 @@ func (h *approvalHandler) CreateRequest(c *fiber.Ctx) error {
 		},
 	)
 }
+
+func (h *approvalHandler) GetApprovalByRequestID(c *fiber.Ctx) error {
+
+	id := c.Params("requestId")
+	if id == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(
+			models.ResponseData{
+				Message:    "Require parameters",
+				Status:     fiber.ErrBadRequest.Message,
+				StatusCode: fiber.ErrBadRequest.Code,
+			},
+		)
+	}
+	// Convert id to UUID
+	uuid, err := uuid.Parse(id)
+	if err != nil {
+		// Handle the error when the conversion fails
+		return c.Status(fiber.StatusBadRequest).JSON(
+			models.ResponseData{
+				Message:    "Invalid UUID format",
+				Status:     fiber.ErrBadRequest.Message,
+				StatusCode: fiber.ErrBadRequest.Code,
+			},
+		)
+	}
+	res, err := h.approvalSrv.GetByRequestID(uuid)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrNotFound.Message,
+				StatusCode: fiber.ErrNotFound.Code,
+			},
+		)
+	}
+	return c.Status(fiber.StatusOK).JSON(
+		models.ResponseData{
+			Message:    "Succeed",
+			Status:     "OK",
+			StatusCode: fiber.StatusOK,
+			Data:       res,
+		},
+	)
+}
+
+//test
