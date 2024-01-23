@@ -4,7 +4,6 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/schema"
 
 	"approval-service/configs"
 	"approval-service/logs"
@@ -22,9 +21,7 @@ func NewPostgresConnection(cfg *configs.Config) (*gorm.DB, error) {
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN:                  dsn,
 		PreferSimpleProtocol: true,
-	}), &gorm.Config{NamingStrategy: schema.NamingStrategy{
-		TablePrefix: cfg.Postgres.Schema,
-	}})
+	}), nil)
 
 	if err != nil {
 		logs.Error("Failed to connect to database: ", zap.Error(err))

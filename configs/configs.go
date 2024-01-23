@@ -14,6 +14,7 @@ type Redis struct {
 }
 
 type Fiber struct {
+	Host string
 	Port string
 }
 
@@ -28,7 +29,8 @@ type PostgresSql struct {
 }
 
 type Kafka struct {
-	Hosts    []string
+	Servers  []string
+	Port     string
 	Group    string
 	ClientID string
 }

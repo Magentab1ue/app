@@ -67,12 +67,12 @@ Authorization: JWT YOUR_TOKEN
     "id" : ,
     "requsetId":,
     "to":,
-    "approver" :,
-    "project" :,
+    "approver" :, 
+    "project" :, //json
     "status" :,
     "creationDate":,
     "requestUser" :,
-    "task" : [],
+    "task" : [], //json
   },
   "message": "successful",
   "status": "ok",
@@ -105,11 +105,11 @@ id : (require) type: uint
     "requsetId":,
     "to":,
     "approver" :,
-    "project" :,
+    "project" :, //json
     "status" :,
     "creationDate":,
     "requestUser" :,
-    "task" : [],
+    "task" : [], //json
   },
   "message": "successful",
   "status": "ok",
@@ -141,11 +141,11 @@ Authorization: JWT YOUR_TOKEN
     "requsetId":,
     "to":,
     "approver" :,
-    "project" :,
+    "project" :, //json
     "status" :,
     "creationDate":,
     "requestUser" :,
-    "task" : [],
+    "task" : [], //json
   },
     {.....},// ... other profiles
   ],
@@ -189,11 +189,11 @@ id : (require) type: uint
     "requsetId":,
     "to":,
     "approver" :,
-    "project" :,
+    "project" :, //json
     "status" :,
     "creationDate":,
     "requestUser" :,
-    "task" : [],
+    "task" : [], //json
   },
   "message": "status changed",
   "status": "ok",
@@ -238,11 +238,11 @@ id : (require) type: uint
     "requsetId":,
     "to":,
     "approver" :,
-    "project" :,
+    "project" :, //json
     "status" :,
     "creationDate":,
     "requestUser" :,
-    "task" : [],
+    "task" : [], //json
   },
   "message": "status changed",
   "status": "ok",
@@ -276,11 +276,11 @@ Authorization: JWT YOUR_TOKEN
     "requsetId":,
     "to":,
     "approver" :,
-    "project" :,
+    "project" :, //json
     "status" :,
     "creationDate":,
     "requestUser" :,
-    "task" : [],
+    "task" : [], //json
   },
     {.....},// ... other profiles
   ],
@@ -316,11 +316,11 @@ Authorization: JWT YOUR_TOKEN
     "requsetId":,
     "to":,
     "approver" :,
-    "project" :,
+    "project" :, //json
     "status" :,
     "creationDate":,
     "requestUser" :,
-    "task" : [],
+    "task" : [], //json
   },
     {.....},// ... other profiles
   ],
@@ -409,13 +409,13 @@ Authorization: JWT YOUR_TOKEN
 
 **ApprovalCreated**
 
-**Publish** to the `tcchub-approval-approvalCreated` topic to receive information for create approval
+**Publish** to the `tcchub-approval-approvalCreated` topic to publish information for create approval
 
 **Message**:
 
 ```json
 {
- "request" : {
+ "approval" : {
     "id" : ,
     "requsetId":,
     "to":,
@@ -437,12 +437,19 @@ Authorization: JWT YOUR_TOKEN
 
 ```json
 
-    {
-      "status":,
-      "approver":,
-      "task":[]
-   }
-
+{
+ "approval" : {
+    "id" : ,
+    "requsetId":,
+    "to":,
+    "approver" :,
+    "project" :,
+    "status" :,
+    "creationDate":,
+    "requestUser" :,
+    "task" : [],
+  },
+}
 ```
 
 **ApprovalDeleted**
@@ -453,7 +460,7 @@ Authorization: JWT YOUR_TOKEN
 
 ```json
 {
-  "task": []
+  "id": 
 }
 ```
 
