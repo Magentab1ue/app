@@ -17,16 +17,20 @@ var SubscribedTopics = []string{
 }
 
 type RequestCreatedEvent struct {
-	ID           uint           `json:"id"`
-	RequestID    uuid.UUID      `json:"request_id"`
-	To           pq.Int64Array  `json:"to" gorm:"type:integer[]"`
-	Approver     uint           `json:"approver"`
-	Status       string         `json:"status"`
-	Project      datatypes.JSON `json:"project" gorm:"type:jsonb"` // Assuming your database supports JSONB
-	CreationDate time.Time      `json:"creation_date"`
-	RequestUser  uint           `json:"request_user"`
-	IsSignature  bool           `json:"is_signature"`
-	Task         datatypes.JSON `json:"task" gorm:"type:jsonb"`
+	ID              uint           `json:"id"`
+	RequestID       uuid.UUID      `json:"request_id"`
+	To              pq.Int64Array  `json:"to" gorm:"type:integer[]"`
+	Approver        uint           `json:"approver"`
+	Status          string         `json:"status"`
+	Project         datatypes.JSON `json:"project" gorm:"type:jsonb"` // Assuming your database supports JSONB
+	CreationDate    time.Time      `json:"creation_date"`
+	RequestUser     uint           `json:"request_user"`
+	IsSignature     bool           `json:"is_signature"`
+	Task            datatypes.JSON `json:"task" gorm:"type:jsonb"`
+	Name            string         `json:"name"`
+	Detail          string         `json:"detail"`
+	NameRequestUser string         `json:"name_request_user"`
+	ToRole          string         `json:"to_role"`
 }
 
 func (RequestCreatedEvent) String() string {

@@ -162,34 +162,42 @@ func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*
 	if err != nil {
 		return nil, err
 	}
+	res, err := u.approvalRepo.Create(&models.Approvals{
+		RequestID:       request.RequestID,
+		Status:          "pending",
+		Project:         request.Project,
+		To:              req.To,
+		CreationDate:    req.CreationDate,
+		RequestUser:     req.RequestUser,
+		Task:            request.Task,
+		IsSignature:     req.IsSignature,
+		Name:            req.Name,
+		Detail:          req.Detail,
+		NameRequestUser: req.NameRequestUser,
+		ToRole:          req.ToRole,
+	})
+	if err != nil {
+		return nil, err
+	}
 	event := events.RequestCreatedEvent{
-		ID:           request.ID,
-		RequestID:    request.RequestID,
-		To:           request.To,
-		Status:       request.Status,
-		Project:      request.Project,
-		CreationDate: request.CreationDate,
-		RequestUser:  request.RequestUser,
-		Task:         request.Task,
+		ID:              res.ID,
+		RequestID:       res.RequestID,
+		To:              res.To,
+		Status:          res.Status,
+		Project:         res.Project,
+		CreationDate:    res.CreationDate,
+		RequestUser:     res.RequestUser,
+		Task:            res.Task,
+		Name:            res.Name,
+		Detail:          res.Detail,
+		NameRequestUser: res.NameRequestUser,
+		ToRole:          res.ToRole,
 	}
 	err = u.produce.Produce(event)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := u.approvalRepo.Create(&models.Approvals{
-		RequestID:    request.RequestID,
-		Status:       "pending",
-		Project:      request.Project,
-		To:           req.To,
-		CreationDate: req.CreationDate,
-		RequestUser:  req.RequestUser,
-		Task:         request.Task,
-		IsSignature:  req.IsSignature,
-	})
-	if err != nil {
-		return nil, err
-	}
 	return res, nil
 }
 
@@ -253,13 +261,17 @@ func stringInSlice(str string, list []string) bool {
 
 func (u approvalService) CreateRequest(req *models.RequestReq) (*models.Approvals, error) {
 	newRequest, err := u.approvalRepo.Create(&models.Approvals{
-		RequestID:    uuid.New(),
-		To:           req.To,
-		Status:       "pending",
-		Project:      req.Project,
-		CreationDate: req.CreationDate,
-		RequestUser:  req.RequestUser,
-		Task:         req.Task,
+		RequestID:       uuid.New(),
+		To:              req.To,
+		Status:          "pending",
+		Project:         req.Project,
+		CreationDate:    req.CreationDate,
+		RequestUser:     req.RequestUser,
+		Task:            req.Task,
+		Name:            req.Name,
+		Detail:          req.Detail,
+		NameRequestUser: req.NameRequestUser,
+		ToRole:          "teamlead ",
 	})
 	if err != nil {
 		logs.Error(err)
@@ -267,14 +279,18 @@ func (u approvalService) CreateRequest(req *models.RequestReq) (*models.Approval
 	}
 
 	event := events.RequestCreatedEvent{
-		ID:           newRequest.ID,
-		RequestID:    newRequest.RequestID,
-		To:           newRequest.To,
-		Status:       newRequest.Status,
-		Project:      newRequest.Project,
-		CreationDate: newRequest.CreationDate,
-		RequestUser:  newRequest.RequestUser,
-		Task:         newRequest.Task,
+		ID:              newRequest.ID,
+		RequestID:       newRequest.RequestID,
+		To:              newRequest.To,
+		Status:          newRequest.Status,
+		Project:         newRequest.Project,
+		CreationDate:    newRequest.CreationDate,
+		RequestUser:     newRequest.RequestUser,
+		Task:            newRequest.Task,
+		Name:            newRequest.Name,
+		Detail:          newRequest.Detail,
+		NameRequestUser: newRequest.NameRequestUser,
+		ToRole:          newRequest.ToRole,
 	}
 	err = u.produce.Produce(event)
 	if err != nil {
