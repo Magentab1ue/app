@@ -52,15 +52,52 @@ Authorization: JWT YOUR_TOKEN
 
 ```json
 {
-    "to":[1,2,3],
-    "project": {"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
-    "creation_date":1-10-5864,
-    "request_user" :1,
-    "task" :{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},
-    "name":"Timessheet for October 20 days",
-	  "detail":"test test",
-	  "name_request_user":"แทนไทย ทดสอบ",
-	  "to_role":"teamlead",
+  "project": { //json type
+    "id": 1,
+    "teamleads": [
+      {
+        "id": 1,
+        "role": [
+          "role1"
+        ]
+        //...ข้อมูลเพิ่มเติม
+      }
+    ],
+    "approvers": [
+      {
+        "id": 2,
+        "role": [
+          "Approver"
+        ]
+        //...ข้อมูลเพิ่มเติม
+      },
+      {
+        "id": 3,
+        "role": [
+          "HR"
+        ]
+        //...ข้อมูลเพิ่มเติม
+      }
+    ],
+      //...ข้อมูลเพิ่มเติม
+  },
+  "task": [ 
+    {
+      "id": 1,
+      //...ข้อมูลเพิ่มเติม
+    },
+    {
+      "id": 3
+      //...ข้อมูลเพิ่มเติม
+    },
+    {
+      "id": 2
+      //...ข้อมูลเพิ่มเติม
+    }
+  ],
+  "request_user": 1,
+  "name": "Timesheet for october 20 day",
+  "name_request_user": "Mongkol"
 }
 ```
 
@@ -288,15 +325,12 @@ id : (require) type: uint
 
 ```json
 {
-    "to":[1,2,3],
-    "approver" :,
-    "creation_date":10-10-5864,
-    "request_user" :2,
-    "name":"Timessheet for October 20 days",
-	  "detail":"test test",
-	  "name_request_user":"แทนไทย ทดสอบ",
-	  "to_role":"HR",
-    "is_signature":false
+  "request_user": 2,
+  "is_signature": true,
+  "name": "Timesheet for october 20 day",
+  "detail": "Timesheet for october 20 day",
+  "name_request_user": "teamleads naja",
+  "to_role": "Approver"
 }
 ```
 

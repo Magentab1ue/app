@@ -471,7 +471,7 @@ func (h *approvalHandler) GetByUserID(c *fiber.Ctx) error {
 func (h *approvalHandler) CreateRequest(c *fiber.Ctx) error {
 	logs.Info("POST : Attempting to create approval")
 
-	approvalBody := new(models.RequestReq)
+	approvalBody := new(models.CreateReq)
 	if err := c.BodyParser(&approvalBody); err != nil {
 		logs.Info("Invalid request", zap.Error(err))
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{

@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"go.uber.org/zap"
 
 	"approval-service/logs"
@@ -157,17 +159,44 @@ func (u approvalService) GetByID(id uint) (appprove *models.Approvals, err error
 }
 
 func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*models.Approvals, error) {
-
+	if req.ToRole != "Approver" && req.ToRole != "HR" {
+		return nil, errors.New("to_role field should be Approver or HR")
+	}
 	request, err := u.approvalRepo.GetByID(id)
 	if err != nil {
 		return nil, err
+	}
+
+	project := new(models.Project)
+	err = json.Unmarshal(request.Project, project)
+	if err != nil {
+		return nil, errors.New("this approval have project formatted incorrectly")
+	}
+
+	projectCheck := reflect.TypeOf(project)
+	if projectCheck.Kind() == reflect.Ptr {
+		projectCheck = projectCheck.Elem()
+	}
+	_, ok := projectCheck.FieldByName("Approvers")
+	if !ok {
+		return nil, errors.New("this project dont have a approvers")
+	}
+
+	var to pq.Int64Array
+	for _, approver := range project.Approvers {
+		for _, role := range approver.Role {
+			if role == req.ToRole {
+				to = append(to, int64(approver.ID))
+				break
+			}
+		}
 	}
 	res, err := u.approvalRepo.Create(&models.Approvals{
 		RequestID:       request.RequestID,
 		Status:          "pending",
 		Project:         request.Project,
-		To:              req.To,
-		CreationDate:    req.CreationDate,
+		To:              to,
+		CreationDate:    time.Now(),
 		RequestUser:     req.RequestUser,
 		Task:            request.Task,
 		IsSignature:     req.IsSignature,
@@ -259,13 +288,33 @@ func stringInSlice(str string, list []string) bool {
 	return false
 }
 
-func (u approvalService) CreateRequest(req *models.RequestReq) (*models.Approvals, error) {
+func (u approvalService) CreateRequest(req *models.CreateReq) (*models.Approvals, error) {
+
+	project := new(models.Project)
+	err := json.Unmarshal(req.Project, project)
+	if err != nil {
+		return nil, errors.New("project is formatted incorrectly")
+	}
+	projectCheck := reflect.TypeOf(project)
+	if projectCheck.Kind() == reflect.Ptr {
+		projectCheck = projectCheck.Elem()
+	}
+	_, okApprover := projectCheck.FieldByName("Approvers")
+	_, okTeamlead := projectCheck.FieldByName("TeamLeads")
+	if !okTeamlead || !okApprover {
+		return nil, errors.New("project should have a teamleads or approvers")
+	}
+	var to pq.Int64Array
+	for _, teamLead := range project.TeamLeads {
+		to = append(to, int64(teamLead.ID))
+	}
+
 	newRequest, err := u.approvalRepo.Create(&models.Approvals{
 		RequestID:       uuid.New(),
-		To:              req.To,
+		To:              to,
 		Status:          "pending",
 		Project:         req.Project,
-		CreationDate:    req.CreationDate,
+		CreationDate:    time.Now(),
 		RequestUser:     req.RequestUser,
 		Task:            req.Task,
 		Name:            req.Name,
