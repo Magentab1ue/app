@@ -40,7 +40,24 @@ func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*mo
 	if !hasStatus {
 		return nil, errors.New("format status incorrect, status should have approved , pending or reject")
 	}
-	approvalRes, err := u.approvalRepo.UpdateStatus(id, req)
+	//validation
+	approvalCheck, err := u.approvalRepo.GetByID(id)
+	if err != nil {
+		logs.Error(fmt.Sprintf("Error finding approval for update with request ID %d: %v", id, err), zap.Error(err))
+		return nil, fmt.Errorf("error cant't finding approval with request ID %d", id)
+	}
+	if approvalCheck.Status == req.Status {
+		return nil, errors.New("this approval status already exists")
+	}
+	// has approver in send to
+	checkPermission := intInSlice(int64(req.Approver), approvalCheck.To)
+	if checkPermission {
+		return nil, fmt.Errorf("this user id %d dont have permission to update status this approval", int(req.Approver))
+	}
+	approvalCheck.Approver = req.Approver
+	approvalCheck.IsSignature = req.IsSignature
+	approvalCheck.Status = req.Status
+	approvalRes, err := u.approvalRepo.Update(approvalCheck)
 	if err != nil {
 		return nil, err
 	}
@@ -162,17 +179,30 @@ func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*
 	if req.ToRole != "Approver" && req.ToRole != "HR" {
 		return nil, errors.New("to_role field should be Approver or HR")
 	}
+	//validation
 	request, err := u.approvalRepo.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
-
+	if request.Status != models.Approve {
+		return nil, errors.New("this approvals has not yet been approved")
+	}
+	requestLast, err := u.approvalRepo.GetByRequestIDLast(request.RequestID)
+	if err != nil {
+		return nil, err
+	}
+	if requestLast.ToRole == "Approver" && requestLast.Status == models.Approve {
+		return nil, errors.New("this approval has been approved by approver")
+	}
+	if requestLast.Status == models.Pending {
+		return nil, errors.New("the approval has already been sent")
+	}
+	//filter to using to_role in project
 	project := new(models.Project)
 	err = json.Unmarshal(request.Project, project)
 	if err != nil {
 		return nil, errors.New("this approval have project formatted incorrectly")
 	}
-
 	projectCheck := reflect.TypeOf(project)
 	if projectCheck.Kind() == reflect.Ptr {
 		projectCheck = projectCheck.Elem()
@@ -374,4 +404,13 @@ func (u approvalService) GetByRequestID(id uuid.UUID) (appprove []models.Approva
 	}
 
 	return approvalDB, nil
+}
+
+func intInSlice(variable int64, list pq.Int64Array) bool {
+	for _, val := range list {
+		if val == variable {
+			return true
+		}
+	}
+	return false
 }

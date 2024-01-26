@@ -25,12 +25,13 @@ type ApprovalRepository interface {
 	Create(*Approvals) (*Approvals, error)
 	GetByID(uint) (*Approvals, error)
 	GetReceiveRequest(uint, map[string]interface{}) ([]Approvals, error)
-	UpdateStatus(uint, *UpdateStatusReq) (*Approvals, error)
+	Update(*Approvals) (*Approvals, error)
 	GetSendRequest(userId uint, optional map[string]interface{}) ([]Approvals, error)
 	DeleteApproval(requestId uint) (*Approvals, error)
 	GetAll(map[string]interface{}) ([]Approvals, error)
 	GetByUserID(uint, map[string]interface{}) ([]Approvals, error)
 	GetByRequestID(uuid.UUID) ([]Approvals, error)
+	GetByRequestIDLast(uuid.UUID) (*Approvals, error)
 }
 
 type ProducerApproval interface {
