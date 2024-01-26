@@ -5,12 +5,19 @@ type Config struct {
 	Postgres PostgresSql
 	Kafkas   Kafka
 	Redis    Redis
+	Cors     Cors
 }
 
 type Redis struct {
 	Host     string
 	Port     string
 	Password string
+}
+
+type Cors struct {
+	AllowOrigins string
+	// AllowMethods string
+	// AllowHeaders string
 }
 
 type Fiber struct {

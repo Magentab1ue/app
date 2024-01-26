@@ -2,6 +2,7 @@ package servers
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 
 	"approval-service/modules/approvals/controller"
 	"approval-service/modules/approvals/repository"
@@ -12,6 +13,12 @@ import (
 )
 
 func (s *server) Handlers() error {
+
+	//middleware cors allow
+	s.App.Use(cors.New(cors.Config{
+		AllowOrigins: s.Cfg.Cors.AllowOrigins,
+		AllowHeaders: "Content-Type",
+	}))
 
 	// Group a version
 	v1 := s.App.Group("/v1")
