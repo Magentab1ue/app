@@ -58,7 +58,7 @@ func LoadConfigs(cfg *Config) {
 	cfg.Postgres.Password = setData("DB_PASSWORD_APPROVAL")
 	cfg.Postgres.Port = setData("DB_PORT")
 	cfg.Postgres.Schema = setData("DB_SCHEMA_APPROVAL")
-	cfg.Postgres.SslMode = setData("DB_SSLMODE")
+	cfg.Postgres.SslMode = setData("DB_SSLMOD")
 	cfg.Postgres.Username = setData("DB_USERNAME_APPROVAL")
 
 	// Kafka
