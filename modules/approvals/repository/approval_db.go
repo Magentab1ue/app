@@ -24,28 +24,14 @@ func NewapprovalRepositoryDB(db *gorm.DB) approvalRepositoryDB {
 	return approvalRepositoryDB{db: db}
 }
 
-func (r approvalRepositoryDB) UpdateStatus(requestId uint, req *models.UpdateStatusReq) (*models.Approvals, error) {
-
-	approval := new(models.Approvals)
-
-	if err := r.db.First(&approval, requestId).Error; err != nil {
-		logs.Error(fmt.Sprintf("Error finding approval for update with request ID %d: %v", requestId, err), zap.Error(err))
-		return nil, fmt.Errorf("error cant't finding approval with request ID %d", requestId)
-	}
-	if approval.Status == req.Status {
-		return nil, errors.New("this approval status is the same")
-	}
-	//update data
-	approval.Status = req.Status
-	approval.Approver = req.Approver
-	approval.IsSignature = req.IsSignature
+func (r approvalRepositoryDB) Update(req *models.Approvals) (*models.Approvals, error) {
 
 	//update to database
-	if err := r.db.Save(&approval).Error; err != nil {
-		logs.Error(fmt.Sprintf("Error updating approval with request ID %d: %v", requestId, err), zap.Error(err))
-		return nil, fmt.Errorf("error cant't updating approval with request ID %d", requestId)
+	if err := r.db.Save(&req).Error; err != nil {
+		logs.Error(fmt.Sprintf("Error updating approval with request ID %d: %v", req.ID, err), zap.Error(err))
+		return nil, fmt.Errorf("error cant't updating approval with request ID %d", req.ID)
 	}
-	return approval, nil
+	return req, nil
 }
 
 func (r approvalRepositoryDB) GetSendRequest(userId uint, optional map[string]interface{}) ([]models.Approvals, error) {
@@ -207,6 +193,18 @@ func (r approvalRepositoryDB) GetByRequestID(id uuid.UUID) ([]models.Approvals, 
 	}
 	if len(approval) == 0 {
 		return nil, fmt.Errorf("error finding approvals by request_id : %v ", id)
+	}
+
+	return approval, nil
+}
+
+func (r approvalRepositoryDB) GetByRequestIDLast(id uuid.UUID) (*models.Approvals, error) {
+	approval := new(models.Approvals)
+
+	err := r.db.Where("request_id = ?", id).Last(&approval).Error
+	if err != nil {
+		logs.Error(fmt.Sprintf("Error finding approvals by request_id : %v  : %v to validation", id, err), zap.Error(err))
+		return nil, err
 	}
 
 	return approval, nil
