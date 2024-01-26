@@ -20,6 +20,7 @@
     - [DELETE /v1/approval/:id](#delete-v1approvalid)
   - [Status Codes](#status-codes)
   - [Event topics](#event-topics)
+- [Status Codes](#status-codes-1)
 
 ## Introduction
 
@@ -540,18 +541,21 @@ Authorization: JWT YOUR_TOKEN
 
 ```json
 {
- "approval" : {
-    "id" : ,
-    "requsetId":,
-    "to":,
-    "approver" :,
-    "project" :,
-    "status" :,
-    "creationDate":,
-    "requestUser" :,
-    "task" : [],
-  },
-}
+    "id" : 1,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
+    "name":"Timessheet for October 20 days",
+	  "detail":"test test",
+	  "name_request_user":"แทนไทย ทดสอบ",
+	  "to_role":"teamlead",
+    "to":[1,2,3],
+    "approver" :1,
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "status" :"approved",
+    "creationDate":1-10-5864,
+    "requestUser" :1,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "IsSignature":true
+  }
 ```
 
 **ApprovalUpdated**
@@ -563,18 +567,21 @@ Authorization: JWT YOUR_TOKEN
 ```json
 
 {
- "approval" : {
-    "id" : ,
-    "requsetId":,
-    "to":,
-    "approver" :,
-    "project" :,
-    "status" :,
-    "creationDate":,
-    "requestUser" :,
-    "task" : [],
-  },
-}
+    "id" : 1,
+    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
+    "name":"Timessheet for October 20 days",
+	  "detail":"test test",
+	  "name_request_user":"แทนไทย ทดสอบ",
+	  "to_role":"teamlead",
+    "to":[1,2,3],
+    "approver" :1,
+    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
+    "status" :"approved",
+    "creationDate":1-10-5864,
+    "requestUser" :1,
+    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
+    "IsSignature":true
+  }
 ```
 
 **ApprovalDeleted**
@@ -585,8 +592,21 @@ Authorization: JWT YOUR_TOKEN
 
 ```json
 {
-  "id":
+  "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}]
 }
 ```
 
-API Documentation version:1 17/01/2024
+
+# Status Codes
+
+<ul>
+  <li>200 : OK. Request was successful.</li>
+  <li>201 : Created. Resource was successfully created.</li>
+  <li>400 : Bad request. The request was invalid or cannot be served.</li>
+  <li>401 : Unauthorized. The request lacks valid authentication credentials.</li>
+  <li>403 : Forbidden. The server understood the request, but it refuses to authorize it. This status code is similar to 401, but indicates that the client must authenticate itself to get permission.</li>
+  <li>500 : Internal Server Error. The server has encountered a situation it does not know how to handle.</li>
+</ul>
+
+
+API Documentation version:1 26/01/2024

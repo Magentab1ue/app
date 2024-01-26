@@ -48,7 +48,7 @@ func LoadConfigs(cfg *Config) {
 	//App env
 	cfg.App.Host = setData("APP_HOST")
 	if cfg.App.Host == "" {
-		cfg.App.Port = "localhost"
+		cfg.App.Host = "localhost"
 	}
 	cfg.App.Port = setData("APP_PORT")
 
