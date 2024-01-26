@@ -57,11 +57,11 @@ func (s *server) Start() {
 
 	// Start consumer
 	go func() {
-		logs.Info(fmt.Sprintf("Connect to kafa server: %v Port : %v Group: %v",s.Cfg.Kafkas.Servers,s.Cfg.Kafkas.Port,s.Cfg.Kafkas.Group))
+		logs.Info(fmt.Sprintf("Connect to kafa server: %v Port : %v Group: %v", s.Cfg.Kafkas.Servers, s.Cfg.Kafkas.Port, s.Cfg.Kafkas.Group))
 		logs.Info(fmt.Sprintf("Subscribed topics: %s", events.SubscribedTopics))
 		for {
 			err := s.ConsumerGroup.Consume(context.Background(), events.SubscribedTopics, s.consumerGroupHandler)
-			if err != nil{
+			if err != nil {
 				log.Fatal(err)
 			}
 		}

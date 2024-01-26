@@ -40,8 +40,8 @@ type Approvals struct {
 	RequestUser     uint           `json:"request_user"`
 	IsSignature     bool           `json:"is_signature"`
 	Task            datatypes.JSON `json:"task" gorm:"type:jsonb"` // Assuming your database supports JSONB
-	Name            string         `json:"name"`
-	Detail          string         `json:"detail"`
+	Name            string         `json:"name"`                   // name timesheet
+	Detail          string         `json:"detail"`                 //detail timesheet
 	NameRequestUser string         `json:"name_request_user"`
 	ToRole          string         `json:"to_role"`
 }

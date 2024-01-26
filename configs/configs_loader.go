@@ -72,4 +72,6 @@ func LoadConfigs(cfg *Config) {
 	cfg.Redis.Port = setData("REDIS_PORT")
 	cfg.Redis.Password = setData("REDIS_PASSWORD")
 
+	//Cors allow
+	cfg.Cors.AllowOrigins = setData("AUTH_CORS_ALLOW_ORIGIN")
 }
