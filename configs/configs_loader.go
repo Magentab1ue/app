@@ -65,7 +65,7 @@ func LoadConfigs(cfg *Config) {
 	cfg.Kafkas.Servers = []string{setData("KAFKA_SERVERS")}
 	cfg.Kafkas.Port = setData("KAFKA_PORT")
 	cfg.Kafkas.Group = setData("KAFKA_GROUP_ID")
-	cfg.Kafkas.Group = setData("KAFKA_CLIENT_ID")
+	cfg.Kafkas.ClientID = setData("KAFKA_CLIENT_ID")
 
 	//redis
 	cfg.Redis.Host = setData("REDIS_HOST")
