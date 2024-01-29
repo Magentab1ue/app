@@ -13,7 +13,7 @@ type Event interface {
 }
 
 var SubscribedTopics = []string{
-	RequestCreatedEvent{}.String(),
+	//RequestCreatedEvent{}.String(),
 }
 
 type RequestCreatedEvent struct {
