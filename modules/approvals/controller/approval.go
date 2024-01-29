@@ -338,6 +338,7 @@ func (h *approvalHandler) GetApprovalByID(c *fiber.Ctx) error {
 			},
 		)
 	}
+	logs.Info("GET : Attempting to GET approval By id successfully")
 	return c.Status(fiber.StatusOK).JSON(
 		models.ResponseData{
 			Message:    "Succeed",
@@ -503,6 +504,7 @@ func (h *approvalHandler) CreateRequest(c *fiber.Ctx) error {
 }
 
 func (h *approvalHandler) GetApprovalByRequestID(c *fiber.Ctx) error {
+	logs.Info("GET : Attempting to Approva bu request id")
 
 	id := c.Params("requestId")
 	if id == "" {
@@ -536,6 +538,7 @@ func (h *approvalHandler) GetApprovalByRequestID(c *fiber.Ctx) error {
 			},
 		)
 	}
+	logs.Info("GET : Attempting to Approva bu request id successfully")
 	return c.Status(fiber.StatusOK).JSON(
 		models.ResponseData{
 			Message:    "Succeed",

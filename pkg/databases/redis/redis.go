@@ -1,6 +1,8 @@
 package databases
 
 import (
+	"fmt"
+
 	"github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
 
@@ -11,6 +13,7 @@ import (
 
 func NewRedisClient(cfg *configs.Config) *redis.Client {
 	url, err := utils.UrlBuilder("redis", cfg)
+	logs.Info(fmt.Sprintf("Connent redis with server %s", url))
 	if err != nil {
 		logs.Error(zap.Error(err))
 	}

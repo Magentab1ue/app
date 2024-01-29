@@ -43,6 +43,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	logs.Info(fmt.Sprintf("Connent kafka with server %v",kafkaServersWithPort))
 	defer producer.Close()
 
 	// Configure Kafka consumer

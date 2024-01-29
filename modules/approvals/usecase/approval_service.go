@@ -54,6 +54,7 @@ func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*mo
 	if checkPermission {
 		return nil, fmt.Errorf("this user id %d dont have permission to update status this approval", int(req.Approver))
 	}
+	logs.Info("Attempting to Update approval")
 	approvalCheck.Approver = req.Approver
 	approvalCheck.IsSignature = req.IsSignature
 	approvalCheck.Status = req.Status
@@ -82,7 +83,7 @@ func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*mo
 
 func (u approvalService) GetReceiveRequest(id uint, optional map[string]interface{}) (approvalRes []models.Approvals, err error) {
 	keyRedis := fmt.Sprintf("GetReceiveRequest:%d,optionnals:%v", id, optional)
-
+	logs.Info("Attempting to Get data from redis")
 	approvalResJson, err := u.Redis.Get(context.Background(), keyRedis).Result()
 	if err == nil {
 		if json.Unmarshal([]byte(approvalResJson), &approvalRes) == nil {
@@ -94,10 +95,12 @@ func (u approvalService) GetReceiveRequest(id uint, optional map[string]interfac
 	if err != nil {
 		logs.Warn("Redis error", zap.Error(err))
 	}
+	logs.Info("Attempting to Get data from database")
 	approvalRes, err = u.approvalRepo.GetReceiveRequest(id, optional)
 	if err != nil {
 		return nil, err
 	}
+	logs.Info(fmt.Sprintf("Attempting to Set data to redis with delay time %d second", (time.Minute*1)/100000000))
 	if data, err := json.Marshal(approvalRes); err == nil {
 		u.Redis.Set(context.Background(), keyRedis, string(data), time.Minute*1)
 	} else {
@@ -108,6 +111,7 @@ func (u approvalService) GetReceiveRequest(id uint, optional map[string]interfac
 
 func (u approvalService) GetSendRequest(id uint, optional map[string]interface{}) (approvalRes []models.Approvals, err error) {
 	keyRedis := fmt.Sprintf("GetSendRequest:%d,optionnals:%v", id, optional)
+	logs.Info("Attempting to Get data from redis")
 	approvalResJson, err := u.Redis.Get(context.Background(), keyRedis).Result()
 	if err == nil {
 		if json.Unmarshal([]byte(approvalResJson), &approvalRes) == nil {
@@ -119,11 +123,12 @@ func (u approvalService) GetSendRequest(id uint, optional map[string]interface{}
 	if err != nil {
 		logs.Warn("Redis error", zap.Error(err))
 	}
+	logs.Info("Attempting to Get data from database")
 	approvalRes, err = u.approvalRepo.GetSendRequest(id, optional)
 	if err != nil {
 		return nil, err
 	}
-
+	logs.Info(fmt.Sprintf("Attempting to Set data to redis with delay time %d", (time.Minute*1)/100000000))
 	if data, err := json.Marshal(approvalRes); err == nil {
 		u.Redis.Set(context.Background(), keyRedis, string(data), time.Minute*1)
 	} else {
@@ -138,10 +143,11 @@ func (u approvalService) DeleteApproval(id uint) error {
 	if err != nil {
 		return err
 	}
-
+	logs.Info("Attempting to Delete data from database")
 	event := events.ApprovalDeletedEvent{
 		Task: approval.Task,
 	}
+	logs.Info("Attempting to produce event to kafka")
 	err = u.produce.Produce(event)
 	if err != nil {
 		return err
@@ -152,6 +158,8 @@ func (u approvalService) DeleteApproval(id uint) error {
 func (u approvalService) GetByID(id uint) (appprove *models.Approvals, err error) {
 	key := fmt.Sprintf("service:GetApprovalByID%v", id)
 	//redis get
+	logs.Info("Attempting to Get data from redis")
+
 	if approvalJson, err := u.Redis.Get(context.Background(), key).Result(); err == nil {
 		if json.Unmarshal([]byte(approvalJson), &appprove) == nil {
 			log.Debug("Read data from: redis")
@@ -160,12 +168,13 @@ func (u approvalService) GetByID(id uint) (appprove *models.Approvals, err error
 	}
 
 	// Data not found in cache, fetch from the database
-	log.Debug("Read data from database")
+	logs.Info("Attempting to Get data from database")
 	approvalDB, err := u.approvalRepo.GetByID(id)
 	if err != nil {
 		logs.Error(err)
 		return nil, errors.New("couldn't get profile data")
 	}
+	logs.Info(fmt.Sprintf("Attempting to Set data to redis with delay time %d", (time.Minute*1)/100000000))
 
 	//redis set
 	if data, err := json.Marshal(approvalDB); err == nil {
@@ -176,6 +185,8 @@ func (u approvalService) GetByID(id uint) (appprove *models.Approvals, err error
 }
 
 func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*models.Approvals, error) {
+	logs.Info("validation request")
+
 	if req.ToRole != "Approver" && req.ToRole != "HR" {
 		return nil, errors.New("to_role field should be Approver or HR")
 	}
@@ -221,6 +232,7 @@ func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*
 			}
 		}
 	}
+	logs.Info(fmt.Sprintf("Attempting to Create request approval requestId %v", request.RequestID))
 	res, err := u.approvalRepo.Create(&models.Approvals{
 		RequestID:       request.RequestID,
 		Status:          "pending",
@@ -252,6 +264,7 @@ func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*
 		NameRequestUser: res.NameRequestUser,
 		ToRole:          res.ToRole,
 	}
+	logs.Info("Attempting to produce event to kafka")
 	err = u.produce.Produce(event)
 	if err != nil {
 		return nil, err
@@ -264,6 +277,7 @@ func (u approvalService) GetAll(optional map[string]interface{}) (appprove []mod
 
 	keyRedis := fmt.Sprintf("GetApprovals:optionnals:%v", optional)
 	//redis get
+
 	if approvalJson, err := u.Redis.Get(context.Background(), keyRedis).Result(); err == nil {
 		if json.Unmarshal([]byte(approvalJson), &appprove) == nil {
 			log.Debug("Read data from: redis")
@@ -356,6 +370,7 @@ func (u approvalService) CreateRequest(req *models.CreateReq) (*models.Approvals
 		logs.Error(err)
 		return nil, errors.New("can't create request")
 	}
+	logs.Info("Attempting to produce event to kafka")
 
 	event := events.RequestCreatedEvent{
 		ID:              newRequest.ID,
@@ -383,6 +398,7 @@ func (u approvalService) CreateRequest(req *models.CreateReq) (*models.Approvals
 func (u approvalService) GetByRequestID(id uuid.UUID) (appprove []models.Approvals, err error) {
 	key := fmt.Sprintf("service:GetApprovalByRequestID%v", id)
 	//redis get
+	logs.Info("Attempting to Get data from redis")
 	if approvalJson, err := u.Redis.Get(context.Background(), key).Result(); err == nil {
 		if json.Unmarshal([]byte(approvalJson), &appprove) == nil {
 			log.Debug("Read data from: redis")
@@ -391,7 +407,7 @@ func (u approvalService) GetByRequestID(id uuid.UUID) (appprove []models.Approva
 	}
 
 	// Data not found in cache, fetch from the database
-	log.Debug("Read data from database")
+	logs.Info("Attempting to Get data from database")
 	approvalDB, err := u.approvalRepo.GetByRequestID(id)
 	if err != nil {
 		logs.Error(err)
@@ -399,6 +415,7 @@ func (u approvalService) GetByRequestID(id uuid.UUID) (appprove []models.Approva
 	}
 
 	//redis set
+	logs.Info("Attempting to set data to redis")
 	if data, err := json.Marshal(approvalDB); err == nil {
 		u.Redis.Set(context.Background(), key, string(data), time.Minute*1)
 	}
