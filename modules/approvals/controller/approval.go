@@ -3,6 +3,7 @@ package controller
 import (
 	"strconv"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -14,6 +15,8 @@ import (
 type approvalHandler struct {
 	approvalSrv models.ApprovalUsecase
 }
+
+var validate = validator.New()
 
 func NewApprovalController(router fiber.Router, approvalSrv models.ApprovalUsecase) {
 	controllers := &approvalHandler{
@@ -36,7 +39,7 @@ func (h *approvalHandler) UpdateStatus(c *fiber.Ctx) error {
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		logs.Error("Error parsing approval ID:", zap.Error(err))
+		logs.Warn("Error parsing approval ID:", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -49,7 +52,17 @@ func (h *approvalHandler) UpdateStatus(c *fiber.Ctx) error {
 	req := new(models.UpdateStatusReq)
 	err = c.BodyParser(req)
 	if err != nil {
-		logs.Error("Error parsing update status approval body:", zap.Error(err))
+		logs.Warn("Error parsing update status approval body:", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrBadRequest.Message,
+				StatusCode: fiber.ErrBadRequest.Code,
+			},
+		)
+	}
+	if err := validate.Struct(req); err != nil {
+		logs.Warn("Invalid request", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -61,7 +74,7 @@ func (h *approvalHandler) UpdateStatus(c *fiber.Ctx) error {
 
 	apprrovalUpdated, err := h.approvalSrv.UpdateStatus(uint(id), req)
 	if err != nil {
-		logs.Error("Error update status approval ", zap.Error(err))
+		logs.Warn(err.Error())
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -86,7 +99,7 @@ func (h *approvalHandler) ReceiveRequest(c *fiber.Ctx) error {
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		logs.Error("Error parsing approval ID:", zap.Error(err))
+		logs.Warn("Error parsing approval ID:", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -111,7 +124,7 @@ func (h *approvalHandler) ReceiveRequest(c *fiber.Ctx) error {
 	if projectId != "" {
 		projectId, err := strconv.Atoi(projectId)
 		if err != nil {
-			logs.Error("Error parsing approval ID:", zap.Error(err))
+			logs.Warn("Error parsing approval ID:", zap.Error(err))
 			return c.Status(fiber.StatusNotFound).JSON(
 				models.ResponseData{
 					Message:    "project option is number",
@@ -125,7 +138,7 @@ func (h *approvalHandler) ReceiveRequest(c *fiber.Ctx) error {
 
 	apprrovalReceive, err := h.approvalSrv.GetReceiveRequest(uint(id), optional)
 	if err != nil {
-		logs.Error("Error can't get Receive approval ", zap.Error(err))
+		logs.Warn("Error can't get Receive approval ", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -151,7 +164,7 @@ func (h *approvalHandler) SendRequest(c *fiber.Ctx) error {
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		logs.Error("Error parsing approval ID:", zap.Error(err))
+		logs.Warn("Error parsing approval ID:", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -167,7 +180,7 @@ func (h *approvalHandler) SendRequest(c *fiber.Ctx) error {
 	if projectId != "" {
 		projectId, err := strconv.Atoi(projectId)
 		if err != nil {
-			logs.Error("Error parsing approval ID:", zap.Error(err))
+			logs.Warn("Error parsing approval ID:", zap.Error(err))
 			return c.Status(fiber.StatusNotFound).JSON(
 				models.ResponseData{
 					Message:    "project option is number",
@@ -191,7 +204,7 @@ func (h *approvalHandler) SendRequest(c *fiber.Ctx) error {
 
 	apprrovalSend, err := h.approvalSrv.GetSendRequest(uint(id), optional)
 	if err != nil {
-		logs.Error("Error get send request approval ", zap.Error(err))
+		logs.Warn("Error get send request approval ", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -217,7 +230,7 @@ func (h *approvalHandler) DeleteApproval(c *fiber.Ctx) error {
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		logs.Error("Error parsing approval ID:", zap.Error(err))
+		logs.Warn("Error parsing approval ID:", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -229,7 +242,7 @@ func (h *approvalHandler) DeleteApproval(c *fiber.Ctx) error {
 
 	err = h.approvalSrv.DeleteApproval(uint(id))
 	if err != nil {
-		logs.Error("Error delete approval ", zap.Error(err))
+		logs.Warn("Error delete approval ", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -281,10 +294,20 @@ func (h *approvalHandler) RequestSent(c *fiber.Ctx) error {
 			"error": "Invalid request",
 		})
 	}
+	if err := validate.Struct(requestBody); err != nil {
+		logs.Warn("Invalid request", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrBadRequest.Message,
+				StatusCode: fiber.ErrBadRequest.Code,
+			},
+		)
+	}
 
 	apprrovalUpdated, err := h.approvalSrv.SentRequest(uint(idApprove), requestBody)
 	if err != nil {
-		logs.Error("Error can't send approval", zap.Error(err))
+		logs.Warn("Error can't send approval", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -358,7 +381,7 @@ func (h *approvalHandler) GetAllApproval(c *fiber.Ctx) error {
 	if projectId != "" {
 		projectId, err := strconv.Atoi(projectId)
 		if err != nil {
-			logs.Error("Error parsing approval ID:", zap.Error(err))
+			logs.Warn("Error parsing approval ID:", zap.Error(err))
 			return c.Status(fiber.StatusNotFound).JSON(
 				models.ResponseData{
 					Message:    "project option is number",
@@ -382,7 +405,7 @@ func (h *approvalHandler) GetAllApproval(c *fiber.Ctx) error {
 
 	apprrovalReceive, err := h.approvalSrv.GetAll(optional)
 	if err != nil {
-		logs.Error("Error can't get all approval ", zap.Error(err))
+		logs.Warn("Error can't get all approval ", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -408,7 +431,7 @@ func (h *approvalHandler) GetByUserID(c *fiber.Ctx) error {
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		logs.Error("Error parsing approval ID:", zap.Error(err))
+		logs.Warn("Error parsing approval ID:", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -424,7 +447,7 @@ func (h *approvalHandler) GetByUserID(c *fiber.Ctx) error {
 	if projectId != "" {
 		projectId, err := strconv.Atoi(projectId)
 		if err != nil {
-			logs.Error("Error parsing approval ID:", zap.Error(err))
+			logs.Warn("Error parsing approval ID:", zap.Error(err))
 			return c.Status(fiber.StatusNotFound).JSON(
 				models.ResponseData{
 					Message:    "project option is number",
@@ -448,7 +471,7 @@ func (h *approvalHandler) GetByUserID(c *fiber.Ctx) error {
 
 	apprrovalReceive, err := h.approvalSrv.GetByUserID(uint(id), optional)
 	if err != nil {
-		logs.Error("Error can't get approval by id", zap.Error(err))
+		logs.Warn("Error can't get approval by id", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -474,15 +497,25 @@ func (h *approvalHandler) CreateRequest(c *fiber.Ctx) error {
 
 	approvalBody := new(models.CreateReq)
 	if err := c.BodyParser(&approvalBody); err != nil {
-		logs.Info("Invalid request", zap.Error(err))
+		logs.Warn("Invalid request", zap.Error(err))
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid request",
 		})
 	}
+	if err := validate.Struct(approvalBody); err != nil {
+		logs.Warn("Invalid request", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrBadRequest.Message,
+				StatusCode: fiber.ErrBadRequest.Code,
+			},
+		)
+	}
 
 	apprrovalCreate, err := h.approvalSrv.CreateRequest(approvalBody)
 	if err != nil {
-		logs.Error("Error can't Create approval ", zap.Error(err))
+		logs.Warn("Error can't Create approval ", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),

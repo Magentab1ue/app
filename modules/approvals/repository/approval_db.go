@@ -17,9 +17,12 @@ type approvalRepositoryDB struct {
 }
 
 func NewapprovalRepositoryDB(db *gorm.DB) approvalRepositoryDB {
-	err := db.AutoMigrate(models.Approvals{})
-	if err != nil {
-		panic(err)
+	// Check if the table exists
+	if !db.Migrator().HasTable(&models.Approvals{}) {
+		err := db.AutoMigrate(models.Approvals{})
+		if err != nil {
+			panic(err)
+		}
 	}
 	return approvalRepositoryDB{db: db}
 }

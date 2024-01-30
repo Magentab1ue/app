@@ -345,8 +345,9 @@ func (u approvalService) CreateRequest(req *models.CreateReq) (*models.Approvals
 	}
 	_, okApprover := projectCheck.FieldByName("Approvers")
 	_, okTeamlead := projectCheck.FieldByName("TeamLeads")
-	if !okTeamlead || !okApprover {
-		return nil, errors.New("project should have a teamleads or approvers")
+	_, okMembers := projectCheck.FieldByName("Members")
+	if !okTeamlead || !okApprover || !okMembers {
+		return nil, errors.New("project should have a teamlaeds and approvers and members")
 	}
 	var to pq.Int64Array
 	for _, teamLead := range project.TeamLeads {
@@ -411,7 +412,7 @@ func (u approvalService) GetByRequestID(id uuid.UUID) (appprove []models.Approva
 	approvalDB, err := u.approvalRepo.GetByRequestID(id)
 	if err != nil {
 		logs.Error(err)
-		return nil, errors.New("couldn't get profile data")
+		return nil, errors.New("couldn't get approval data")
 	}
 
 	//redis set

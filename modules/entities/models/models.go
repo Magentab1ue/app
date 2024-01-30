@@ -11,21 +11,21 @@ import (
 
 // request
 type RequestSentRequest struct {
-	RequestUser     uint   `json:"request_user"`
+	RequestUser     uint   `json:"request_user" validate:"required,numeric,min=1"`
 	IsSignature     bool   `json:"is_signature"`
-	Name            string `json:"name"`
-	Detail          string `json:"detail"`
-	NameRequestUser string `json:"name_request_user"`
-	ToRole          string `json:"to_role"`
+	Name            string `json:"name" validate:"required"`
+	Detail          string `json:"detail" `
+	NameRequestUser string `json:"name_request_user" validate:"required"`
+	ToRole          string `json:"to_role" validate:"required"`
 }
 
 type CreateReq struct {
-	Project         datatypes.JSON `json:"project" gorm:"type:jsonb"`
-	RequestUser     uint           `json:"request_user"`
-	Task            datatypes.JSON `json:"task" gorm:"type:jsonb"`
-	Name            string         `json:"name"`
-	Detail          string         `json:"detail"`
-	NameRequestUser string         `json:"name_request_user"`
+	Project         datatypes.JSON `json:"project" gorm:"type:jsonb" validate:"required"`
+	RequestUser     uint           `json:"request_user" validate:"required"`
+	Task            datatypes.JSON `json:"task" gorm:"type:jsonb" validate:"required"`
+	Name            string         `json:"name" validate:"required"`
+	Detail          string         `json:"detail" `
+	NameRequestUser string         `json:"name_request_user" validate:"required"`
 }
 
 // db
@@ -47,9 +47,9 @@ type Approvals struct {
 }
 
 type UpdateStatusReq struct {
-	IsSignature bool   `json:"is_signature"`
-	Status      string `json:"status"`
-	Approver    uint
+	IsSignature bool   `json:"is_signature" `
+	Status      string `json:"status" validate:"required"`
+	Approver    uint   `json:"approver" validate:"required"`
 }
 
 type ResponseData struct {
@@ -77,7 +77,10 @@ type Project struct {
 		ID int `json:"id"`
 	} `json:"teamleads"`
 	Approvers []struct {
-		ID   int      `json:"id"`
-		Role []string `json:"role"`
+		ID   int `json:"id"`
+		Role []string
 	} `json:"approvers"`
+	Members []struct {
+		ID int `json:"id"`
+	} `json:"members"`
 }

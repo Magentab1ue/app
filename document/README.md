@@ -53,50 +53,129 @@ Authorization: JWT YOUR_TOKEN
 
 ```json
 {
-  "project": { //json type
+  "project": {
     "id": 1,
+    "name": "example1",
+    "create_by": "Pre-sale",
+    "color": "#ff0000",
+    "budget": 100000,
+    "budget_spent": 27000,
+    "remaining_budget": 73000,
+    "total_hours": {
+      "hours": 100,
+      "minutes": 30
+    },
+    "total_points": 300,
+    "start_date": "2023-08-10T07:00:00+07:00",
+    "end_date": "2023-08-10T07:00:00+07:00",
+    "progress": 80,
+    "is_privacy": true,
+    "number_of_members": 1,
+    "status": 0,
     "teamleads": [
       {
         "id": 1,
+        "name": "Name1",
+        "surname": "surname1",
+        "profile": "base64_encoded_image_data",
         "role": [
           "role1"
         ]
-        //...ข้อมูลเพิ่มเติม
       }
     ],
     "approvers": [
       {
         "id": 2,
+        "name": "Name2",
+        "surname": "surname2",
+        "profile": "base64_encoded_image_data",
         "role": [
           "Approver"
         ]
-        //...ข้อมูลเพิ่มเติม
       },
       {
         "id": 3,
+        "name": "Name3",
+        "surname": "surname3",
+        "profile": "base64_encoded_image_data",
         "role": [
           "HR"
         ]
-        //...ข้อมูลเพิ่มเติม
       }
     ],
-      //...ข้อมูลเพิ่มเติม
+    "members": [
+      {
+        "id": 25,
+        "name": "Name25",
+        "surname": "surname25",
+        "profile": "base64_encoded_image_data",
+        "role": [
+          "Frontend"
+        ],
+        "total_hours": {
+          "hours": 100,
+          "minutes": 30
+        },
+        "total_points": 88,
+        "wage_rate": 500,
+        "type": "รายวัน",
+        "net_income": 1000,
+        "tasks_submission_time": "2023-08-20"
+      }
+    ]
   },
-  "task": [ 
+  "task": [
     {
       "id": 1,
-      //...ข้อมูลเพิ่มเติม
+      "project": 123,
+      "worker": 1,
+      "details": "Task details here",
+      "tags": [
+        {
+          "id": 1,
+          "name": "tag1",
+          "color": "#ff0000"
+        }
+      ],
+      "workType": 0,
+      "date": "2024-01-15",
+      "startTime": "09:00 AM",
+      "endTime": "05:00 PM",
+      "hours": 8,
+      "points": 8,
+      "billing": true,
+      "status": 0,
+      "approval": 0,
+      "document": [
+        {
+          "1": "task_document.pdf"
+        }
+      ]
     },
     {
-      "id": 3
-      //...ข้อมูลเพิ่มเติม
-    },
-    {
-      "id": 2
-      //...ข้อมูลเพิ่มเติม
+      "id": 2,
+      "project": 1234,
+      "worker": 2,
+      "details": "Another task details",
+      "tags": [
+        {
+          "name": "tag2",
+          "color": "#00ff00"
+        }
+      ],
+      "workType": 4,
+      "date": "2024-01-16",
+      "startTime": "10:00 AM",
+      "endTime": "04:00 PM",
+      "hours": 6,
+      "points": 6,
+      "billing": false,
+      "status": 1,
+      "approval": 2,
+      "document": "another_task_document.png"
     }
   ],
-  "request_user": 1,
+   "request_user": 1,
   "name": "Timesheet for october 20 day",
   "name_request_user": "Mongkol"
 }
@@ -418,10 +497,10 @@ Authorization: JWT YOUR_TOKEN
 
 **Paremeters**:
 
-- id : (require) type: uint
-- requsetUser type: number
-- project type: number
-- status type: string
+- id : (require) type: uint : id of user
+- requsetUser type: number : to user
+- project type: number : id of project
+- status type: string : "pending" "approved" "reject"
 
 **Response**:
 
@@ -463,10 +542,10 @@ Authorization: JWT YOUR_TOKEN
 
 **Paremeters**:
 
-- id : (require) type: uint
-- to type: number
-- project type: number
-- status type: string
+- id : (require) type: uint : id of user
+- to type: number : to user
+- project type: number : id of project
+- status type: string : "pending" "approved" "reject"
 
 **Response**:
 
