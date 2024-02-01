@@ -53,78 +53,8 @@ Authorization: JWT YOUR_TOKEN
 
 ```json
 {
-  "project": {
-    "id": 1,
-    "name": "example1",
-    "create_by": "Pre-sale",
-    "color": "#ff0000",
-    "budget": 100000,
-    "budget_spent": 27000,
-    "remaining_budget": 73000,
-    "total_hours": {
-      "hours": 100,
-      "minutes": 30
-    },
-    "total_points": 300,
-    "start_date": "2023-08-10T07:00:00+07:00",
-    "end_date": "2023-08-10T07:00:00+07:00",
-    "progress": 80,
-    "is_privacy": true,
-    "number_of_members": 1,
-    "status": 0,
-    "teamleads": [
-      {
-        "id": 1,
-        "name": "Name1",
-        "surname": "surname1",
-        "profile": "base64_encoded_image_data",
-        "role": [
-          "role1"
-        ]
-      }
-    ],
-    "approvers": [
-      {
-        "id": 2,
-        "name": "Name2",
-        "surname": "surname2",
-        "profile": "base64_encoded_image_data",
-        "role": [
-          "Approver"
-        ]
-      },
-      {
-        "id": 3,
-        "name": "Name3",
-        "surname": "surname3",
-        "profile": "base64_encoded_image_data",
-        "role": [
-          "HR"
-        ]
-      }
-    ],
-    "members": [
-      {
-        "id": 25,
-        "name": "Name25",
-        "surname": "surname25",
-        "profile": "base64_encoded_image_data",
-        "role": [
-          "Frontend"
-        ],
-        "total_hours": {
-          "hours": 100,
-          "minutes": 30
-        },
-        "total_points": 88,
-        "wage_rate": 500,
-        "type": "รายวัน",
-        "net_income": 1000,
-        "tasks_submission_time": "2023-08-20"
-      }
-    ]
-  },
-  "task": [
+  "projectId":1,
+  "task": [  //Json data
     {
       "id": 1,
       "project": 123,
@@ -175,9 +105,9 @@ Authorization: JWT YOUR_TOKEN
       "document": "another_task_document.png"
     }
   ],
-   "request_user": 1,
+  "senderId": 15,
   "name": "Timesheet for october 20 day",
-  "name_request_user": "Mongkol"
+  "detail": "Timesheet for october 20 day by tests"
 }
 ```
 
@@ -283,7 +213,7 @@ Authorization: JWT YOUR_TOKEN
     "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
     "IsSignature":false
   },
-    {.....},// ... other profiles
+    {.....},// ... other approvals
   ],
   "status": "OK",
   "status_code": 200
@@ -311,22 +241,76 @@ Authorization: JWT YOUR_TOKEN
 {
 
   "data" : [{
-    "id" : 1,
-    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
-    "name":"Timessheet for October 20 days",
-	  "detail":"test test",
-	  "name_request_user":"แทนไทย ทดสอบ",
-	  "to_role":"teamlead",
-    "to":[1,2,3],
-    "approver" :,
-    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"}, //json
-    "status" :"pending",
-    "creationDate":1-10-5864,
-    "requestUser" :1,
-    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}], //json
-    "IsSignature":false
-  },
-    {.....},// ... other profiles
+      "ID": 8,
+      "CreatedAt": "2024-02-01T04:07:13.926078Z",
+      "UpdatedAt": "2024-02-01T04:32:11.916582Z",
+      "DeletedAt": null,
+      "requestId": "d9cd8566-84bf-4620-8e54-a0868ddbcd11",
+      "to": [
+        6
+      ],
+      "approver": 6,
+      "status": "reject",
+      "creationDate": "2024-02-01T04:07:13.924549Z",
+      "isSignature": false,
+      "task": [
+        {
+          "id": 1,
+          "date": "2024-01-15",
+          "tags": [
+            {
+              "id": 1,
+              "name": "tag1",
+              "color": "#ff0000"
+            }
+          ],
+          "hours": 8,
+          "points": 8,
+          "status": 0,
+          "worker": 1,
+          "billing": true,
+          "details": "Task details here",
+          "endTime": "05:00 PM",
+          "project": 123,
+          "approval": 0,
+          "document": [
+            {
+              "1": "task_document.pdf"
+            }
+          ],
+          "workType": 0,
+          "startTime": "09:00 AM"
+        },
+        {
+          "id": 2,
+          "date": "2024-01-16",
+          "tags": [
+            {
+              "name": "tag2",
+              "color": "#00ff00"
+            }
+          ],
+          "hours": 6,
+          "points": 6,
+          "status": 1,
+          "worker": 2,
+          "billing": false,
+          "details": "Another task details",
+          "endTime": "04:00 PM",
+          "project": 1234,
+          "approval": 2,
+          "document": "another_task_document.png",
+          "workType": 4,
+          "startTime": "10:00 AM"
+        }
+      ],
+      "name": "Timesheet for october 20 day",
+      "detail": "Timesheet for october 20 day",
+      "toRole": "HR",
+      "senderId": 6,
+      "projectId": 5
+    },
+    {.....},// ... other approval
   ],
   "status": "OK",
   "status_code": 200
@@ -419,21 +403,75 @@ id : (require) type: uint
 ```json
 {
   "data" : {
-    "id" : 2,
-    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f55e",
-    "name":"Timessheet for October 20 days",
-	  "detail":"test test",
-	  "name_request_user":"แทนไทย ทดสอบ",
-	  "to_role":"teamlead",
-    "to":[1,2,3],
-    "approver" :,
-    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"}, //json
-    "status" :"pending",
-    "creationDate":1-10-5864,
-    "requestUser" :2,
-    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}], //json
-    "IsSignature":false
-  },
+      "ID": 8,
+      "CreatedAt": "2024-02-01T04:07:13.926078Z",
+      "UpdatedAt": "2024-02-01T04:32:11.916582Z",
+      "DeletedAt": null,
+      "requestId": "d9cd8566-84bf-4620-8e54-a0868ddbcd11",
+      "to": [
+        6
+      ],
+      "approver": 6,
+      "status": "reject",
+      "creationDate": "2024-02-01T04:07:13.924549Z",
+      "isSignature": false,
+      "task": [
+        {
+          "id": 1,
+          "date": "2024-01-15",
+          "tags": [
+            {
+              "id": 1,
+              "name": "tag1",
+              "color": "#ff0000"
+            }
+          ],
+          "hours": 8,
+          "points": 8,
+          "status": 0,
+          "worker": 1,
+          "billing": true,
+          "details": "Task details here",
+          "endTime": "05:00 PM",
+          "project": 123,
+          "approval": 0,
+          "document": [
+            {
+              "1": "task_document.pdf"
+            }
+          ],
+          "workType": 0,
+          "startTime": "09:00 AM"
+        },
+        {
+          "id": 2,
+          "date": "2024-01-16",
+          "tags": [
+            {
+              "name": "tag2",
+              "color": "#00ff00"
+            }
+          ],
+          "hours": 6,
+          "points": 6,
+          "status": 1,
+          "worker": 2,
+          "billing": false,
+          "details": "Another task details",
+          "endTime": "04:00 PM",
+          "project": 1234,
+          "approval": 2,
+          "document": "another_task_document.png",
+          "workType": 4,
+          "startTime": "10:00 AM"
+        }
+      ],
+      "name": "Timesheet for october 20 day",
+      "detail": "Timesheet for october 20 day",
+      "toRole": "HR",
+      "senderId": 6,
+      "projectId": 5
+    },
   "message": "status changed",
   "status": "ok",
   "status_code": 200
@@ -462,22 +500,76 @@ Authorization: JWT YOUR_TOKEN
 ```json
 {
   "data" : [{
-    "id" : 1,
-    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
-    "name":"Timessheet for October 20 days",
-	  "detail":"test test",
-	  "name_request_user":"แทนไทย ทดสอบ",
-	  "to_role":"teamlead",
-    "to":[1,2,3],
-    "approver" :1,
-    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"}, //json
-    "status" :"approved",
-    "creationDate":1-10-5864,
-    "requestUser" :1,
-    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}], //json
-    "IsSignature":true
+    "ID": 11,
+    "CreatedAt": "2024-02-01T11:34:53.0190168+07:00",
+    "UpdatedAt": "2024-02-01T11:34:53.0190168+07:00",
+    "DeletedAt": null,
+    "requestId": "bf5b0d58-a9ff-4c1d-aa51-92db4c50544c",
+    "to": [
+      1
+    ],
+    "approver": 0,
+    "status": "pending",
+    "creationDate": "2024-02-01T11:34:53.018109+07:00",
+    "isSignature": false,
+    "task": [
+      {
+        "id": 1,
+        "project": 123,
+        "worker": 1,
+        "details": "Task details here",
+        "tags": [
+          {
+            "id": 1,
+            "name": "tag1",
+            "color": "#ff0000"
+          }
+        ],
+        "workType": 0,
+        "date": "2024-01-15",
+        "startTime": "09:00 AM",
+        "endTime": "05:00 PM",
+        "hours": 8,
+        "points": 8,
+        "billing": true,
+        "status": 0,
+        "approval": 0,
+        "document": [
+          {
+            "1": "task_document.pdf"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "project": 1234,
+        "worker": 2,
+        "details": "Another task details",
+        "tags": [
+          {
+            "name": "tag2",
+            "color": "#00ff00"
+          }
+        ],
+        "workType": 4,
+        "date": "2024-01-16",
+        "startTime": "10:00 AM",
+        "endTime": "04:00 PM",
+        "hours": 6,
+        "points": 6,
+        "billing": false,
+        "status": 1,
+        "approval": 2,
+        "document": "another_task_document.png"
+      }
+    ],
+    "name": "Timesheet for october 20 day",
+    "detail": "testsdfsa",
+    "toRole": "teamlead",
+    "sender": 15,
+    "projectId": 1
   },
-    {.....},// ... other profiles
+    {.....},// ... other approval
   ],
   "message": "successful",
   "status": "ok",
@@ -507,22 +599,76 @@ Authorization: JWT YOUR_TOKEN
 ```json
 {
   "data" : [{
-   "id" : 1,
-    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
-    "name":"Timessheet for October 20 days",
-	  "detail":"test test",
-	  "name_request_user":"แทนไทย ทดสอบ",
-	  "to_role":"teamlead",
-    "to":[1,2,3],
-    "approver" :1,
-    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"}, //json
-    "status" :"approved",
-    "creationDate":1-10-5864,
-    "requestUser" :1,
-    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}], //json
-    "IsSignature":true
+    "ID": 11,
+    "CreatedAt": "2024-02-01T11:34:53.0190168+07:00",
+    "UpdatedAt": "2024-02-01T11:34:53.0190168+07:00",
+    "DeletedAt": null,
+    "requestId": "bf5b0d58-a9ff-4c1d-aa51-92db4c50544c",
+    "to": [
+      1
+    ],
+    "approver": 0,
+    "status": "pending",
+    "creationDate": "2024-02-01T11:34:53.018109+07:00",
+    "isSignature": false,
+    "task": [
+      {
+        "id": 1,
+        "project": 123,
+        "worker": 1,
+        "details": "Task details here",
+        "tags": [
+          {
+            "id": 1,
+            "name": "tag1",
+            "color": "#ff0000"
+          }
+        ],
+        "workType": 0,
+        "date": "2024-01-15",
+        "startTime": "09:00 AM",
+        "endTime": "05:00 PM",
+        "hours": 8,
+        "points": 8,
+        "billing": true,
+        "status": 0,
+        "approval": 0,
+        "document": [
+          {
+            "1": "task_document.pdf"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "project": 1234,
+        "worker": 2,
+        "details": "Another task details",
+        "tags": [
+          {
+            "name": "tag2",
+            "color": "#00ff00"
+          }
+        ],
+        "workType": 4,
+        "date": "2024-01-16",
+        "startTime": "10:00 AM",
+        "endTime": "04:00 PM",
+        "hours": 6,
+        "points": 6,
+        "billing": false,
+        "status": 1,
+        "approval": 2,
+        "document": "another_task_document.png"
+      }
+    ],
+    "name": "Timesheet for october 20 day",
+    "detail": "testsdfsa",
+    "toRole": "teamlead",
+    "sender": 15,
+    "projectId": 1
   },
-    {.....},// ... other profiles
+    {.....},// ... other approval
   ],
   "message": "successful",
   "status": "ok",
@@ -552,22 +698,76 @@ Authorization: JWT YOUR_TOKEN
 ```json
 {
   "data" : [{
-    "id" : 1,
-    "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
-    "name":"Timessheet for October 20 days",
-	  "detail":"test test",
-	  "name_request_user":"แทนไทย ทดสอบ",
-	  "to_role":"teamlead",
-    "to":[1,2,3],
-    "approver" :1,
-    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
-    "status" :"approved",
-    "creationDate":1-10-5864,
-    "requestUser" :1,
-    "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
-    "IsSignature":true
-  },
-    {.....},// ... other profiles
+      "ID": 8,
+      "CreatedAt": "2024-02-01T04:07:13.926078Z",
+      "UpdatedAt": "2024-02-01T04:32:11.916582Z",
+      "DeletedAt": null,
+      "requestId": "d9cd8566-84bf-4620-8e54-a0868ddbcd11",
+      "to": [
+        6
+      ],
+      "approver": 6,
+      "status": "reject",
+      "creationDate": "2024-02-01T04:07:13.924549Z",
+      "isSignature": false,
+      "task": [
+        {
+          "id": 1,
+          "date": "2024-01-15",
+          "tags": [
+            {
+              "id": 1,
+              "name": "tag1",
+              "color": "#ff0000"
+            }
+          ],
+          "hours": 8,
+          "points": 8,
+          "status": 0,
+          "worker": 1,
+          "billing": true,
+          "details": "Task details here",
+          "endTime": "05:00 PM",
+          "project": 123,
+          "approval": 0,
+          "document": [
+            {
+              "1": "task_document.pdf"
+            }
+          ],
+          "workType": 0,
+          "startTime": "09:00 AM"
+        },
+        {
+          "id": 2,
+          "date": "2024-01-16",
+          "tags": [
+            {
+              "name": "tag2",
+              "color": "#00ff00"
+            }
+          ],
+          "hours": 6,
+          "points": 6,
+          "status": 1,
+          "worker": 2,
+          "billing": false,
+          "details": "Another task details",
+          "endTime": "04:00 PM",
+          "project": 1234,
+          "approval": 2,
+          "document": "another_task_document.png",
+          "workType": 4,
+          "startTime": "10:00 AM"
+        }
+      ],
+      "name": "Timesheet for october 20 day",
+      "detail": "Timesheet for october 20 day",
+      "toRole": "HR",
+      "senderId": 6,
+      "projectId": 5
+    },
+    {.....},// ... other approvals
   ],
   "message": "successful",
   "status": "ok",
@@ -624,14 +824,13 @@ Authorization: JWT YOUR_TOKEN
     "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
     "name":"Timessheet for October 20 days",
 	  "detail":"test test",
-	  "name_request_user":"แทนไทย ทดสอบ",
-	  "to_role":"teamlead",
+	  "toRole":"teamlead",
     "to":[1,2,3],
     "approver" :1,
-    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
-    "status" :"approved",
+    "projectId" :1,
+    "status" :"pending",
     "creationDate":1-10-5864,
-    "requestUser" :1,
+    "senderId" :1,
     "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
     "IsSignature":true
   }
@@ -650,14 +849,13 @@ Authorization: JWT YOUR_TOKEN
     "requsetId":"185f6c4d-0b4e-4c1e-8d68-cbe862c9f38e",
     "name":"Timessheet for October 20 days",
 	  "detail":"test test",
-	  "name_request_user":"แทนไทย ทดสอบ",
-	  "to_role":"teamlead",
+	  "toRole":"teamlead",
     "to":[1,2,3],
     "approver" :1,
-    "project" :{"id": 1,"name":"test","ข้อมูลอื่นๆ เพิ่มเติม"},
-    "status" :"approved",
+    "projectId" :1,
+    "status" :"pending",
     "creationDate":1-10-5864,
-    "requestUser" :1,
+    "senderId" :1,
     "task" : [{"id": "1","ข้อมูลอื่นๆ เพิ่มเติม"},{....}],
     "IsSignature":true
   }
@@ -688,4 +886,4 @@ Authorization: JWT YOUR_TOKEN
 </ul>
 
 
-API Documentation version:1 26/01/2024
+API Documentation version:1 01/02/2024
