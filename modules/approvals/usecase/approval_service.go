@@ -65,12 +65,14 @@ func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*mo
 		ID:           approvalRes.ID,
 		RequestID:    approvalRes.RequestID,
 		To:           approvalRes.To,
-		Approver:     approvalRes.Approver,
 		Status:       approvalRes.Status,
-		ProjectId:    approvalRes.ProjectID,
+		ProjectID:    approvalRes.ProjectID,
 		CreationDate: approvalRes.CreationDate,
-		IsSignature:  approvalRes.IsSignature,
+		SenderID:     approvalRes.SenderID,
 		Task:         approvalRes.Task,
+		Name:         approvalRes.Name,
+		Detail:       approvalRes.Detail,
+		ToRole:       approvalRes.ToRole,
 	}
 	err = u.produce.Produce(event)
 	if err != nil {

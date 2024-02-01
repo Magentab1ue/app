@@ -54,7 +54,7 @@ type RequestCreatedEvent struct {
 	Name         string         `json:"name"`                   // name timesheet
 	Detail       string         `json:"detail"`                 //detail timesheet
 	ToRole       string         `json:"toRole"`
-	SenderID     uint           `json:"sender"`
+	SenderID     uint           `json:"senderId"`
 	ProjectID    uint           `json:"projectId"`
 }
 
@@ -68,11 +68,14 @@ type ApprovalUpdatedEvent struct {
 	To           pq.Int64Array  `json:"to" gorm:"type:integer[]"`
 	Approver     uint           `json:"approver"`
 	Status       string         `json:"status"`
-	ProjectId    uint           `json:"project_id" validate:"required"`
 	CreationDate time.Time      `json:"creationDate"`
-	SenderID     uint           `json:"senderID"`
 	IsSignature  bool           `json:"isSignature"`
-	Task         datatypes.JSON `json:"task" gorm:"type:jsonb"`
+	Task         datatypes.JSON `json:"task" gorm:"type:jsonb"` // Assuming your database supports JSONB
+	Name         string         `json:"name"`                   // name timesheet
+	Detail       string         `json:"detail"`                 //detail timesheet
+	ToRole       string         `json:"toRole"`
+	SenderID     uint           `json:"senderId"`
+	ProjectID    uint           `json:"projectId"`
 }
 
 func (ApprovalUpdatedEvent) String() string {
