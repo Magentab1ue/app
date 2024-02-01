@@ -48,6 +48,7 @@ func main() {
 
 	// Configure Kafka consumer
 	consumerConfig := sarama.NewConfig()
+	consumerConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
 	consumerConfig.ClientID = cfg.Kafkas.ClientID
 
 	consumer, err := sarama.NewConsumerGroup(kafkaServersWithPort, cfg.Kafkas.Group, consumerConfig)

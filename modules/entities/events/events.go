@@ -13,24 +13,49 @@ type Event interface {
 }
 
 var SubscribedTopics = []string{
-	//RequestCreatedEvent{}.String(),
+	UserProfile{}.TopicCreate(),
+	UserProfile{}.TopicUpdate(),
+	UserProfileDeleted{}.TopicDelete(),
+	ProjectEvent{}.TopicCreate(),
+	ProjectEvent{}.TopicUpdate(),
+	ProjectEventDeleted{}.TopicDelete(),
+}
+
+type UserProfile struct {
+	ProfileId uint   `json:"profileId" validate:"required"`
+	Name      string `json:"Name" validate:"required"`
+	UserId    uint   `json:"userId" validate:"required"`
+}
+
+func (UserProfile) TopicCreate() string {
+	return "tcchub-profile-profileCreated"
+}
+func (UserProfile) TopicUpdate() string {
+	return "tcchub-profile-profileUpdated"
+}
+
+type UserProfileDeleted struct {
+	UserId uint `json:"userId" validate:"required"`
+}
+
+func (UserProfileDeleted) TopicDelete() string {
+	return "tcchub-profile-profileDeleted"
 }
 
 type RequestCreatedEvent struct {
-	ID              uint           `json:"id"`
-	RequestID       uuid.UUID      `json:"request_id"`
-	To              pq.Int64Array  `json:"to" gorm:"type:integer[]"`
-	Approver        uint           `json:"approver"`
-	Status          string         `json:"status"`
-	Project         datatypes.JSON `json:"project" gorm:"type:jsonb"` // Assuming your database supports JSONB
-	CreationDate    time.Time      `json:"creation_date"`
-	RequestUser     uint           `json:"request_user"`
-	IsSignature     bool           `json:"is_signature"`
-	Task            datatypes.JSON `json:"task" gorm:"type:jsonb"`
-	Name            string         `json:"name"`
-	Detail          string         `json:"detail"`
-	NameRequestUser string         `json:"name_request_user"`
-	ToRole          string         `json:"to_role"`
+	ID           uint           `json:"id"`
+	RequestID    uuid.UUID      `json:"requestId"`
+	To           pq.Int64Array  `json:"to" gorm:"type:integer[]"`
+	Approver     uint           `json:"approver"`
+	Status       string         `json:"status"`
+	CreationDate time.Time      `json:"creationDate"`
+	IsSignature  bool           `json:"isSignature"`
+	Task         datatypes.JSON `json:"task" gorm:"type:jsonb"` // Assuming your database supports JSONB
+	Name         string         `json:"name"`                   // name timesheet
+	Detail       string         `json:"detail"`                 //detail timesheet
+	ToRole       string         `json:"toRole"`
+	SenderID     uint           `json:"sender"`
+	ProjectID    uint           `json:"projectId"`
 }
 
 func (RequestCreatedEvent) String() string {
@@ -39,14 +64,14 @@ func (RequestCreatedEvent) String() string {
 
 type ApprovalUpdatedEvent struct {
 	ID           uint           `json:"id"`
-	RequestID    uuid.UUID      `json:"request_id"`
+	RequestID    uuid.UUID      `json:"requestId"`
 	To           pq.Int64Array  `json:"to" gorm:"type:integer[]"`
 	Approver     uint           `json:"approver"`
 	Status       string         `json:"status"`
-	Project      datatypes.JSON `json:"project" gorm:"type:jsonb"` // Assuming your database supports JSONB
-	CreationDate time.Time      `json:"creation_date"`
-	RequestUser  uint           `json:"request_user"`
-	IsSignature  bool           `json:"is_signature"`
+	ProjectId    uint           `json:"project_id" validate:"required"`
+	CreationDate time.Time      `json:"creationDate"`
+	SenderID     uint           `json:"senderID"`
+	IsSignature  bool           `json:"isSignature"`
 	Task         datatypes.JSON `json:"task" gorm:"type:jsonb"`
 }
 
@@ -60,4 +85,34 @@ type ApprovalDeletedEvent struct {
 
 func (ApprovalDeletedEvent) String() string {
 	return "tcchub-approval-approvalDeleted"
+}
+
+type ProjectEvent struct {
+	ID        uint   `json:"id"`
+	Name      string `json:"name"`
+	TeamLeads []struct {
+		ID int `json:"id"`
+	} `json:"teamleads"`
+	Approvers []struct {
+		ID   int `json:"id"`
+		Role []string
+	} `json:"approvers"`
+	Members []struct {
+		ID int `json:"id"`
+	} `json:"members"`
+}
+
+func (ProjectEvent) TopicCreate() string {
+	return "tcchub-project-ProjectCreated"
+}
+func (ProjectEvent) TopicUpdate() string {
+	return "tcchub-project-ProjectUpdated"
+}
+
+type ProjectEventDeleted struct {
+	ID uint `json:"id"`
+}
+
+func (ProjectEventDeleted) TopicDelete() string {
+	return "tcchub-project-ProjectDeleted"
 }

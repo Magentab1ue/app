@@ -16,7 +16,7 @@ type approvalRepositoryDB struct {
 	db *gorm.DB
 }
 
-func NewapprovalRepositoryDB(db *gorm.DB) approvalRepositoryDB {
+func NewapprovalRepositoryDB(db *gorm.DB) models.ApprovalRepository {
 	// Check if the table exists
 	if !db.Migrator().HasTable(&models.Approvals{}) {
 		err := db.AutoMigrate(models.Approvals{})
@@ -40,19 +40,10 @@ func (r approvalRepositoryDB) Update(req *models.Approvals) (*models.Approvals, 
 func (r approvalRepositoryDB) GetSendRequest(userId uint, optional map[string]interface{}) ([]models.Approvals, error) {
 
 	approval := []models.Approvals{}
+	optional["sender_id"] = userId
 	optionalStr := fmt.Sprintf("%v", optional)
-	condition := r.db.Where("request_user = ?", userId)
-	if _, ok := optional["to"]; ok {
-		to := optional["to"]
-		delete(optional, "to")
-		condition = condition.Where("? = ANY(\"to\")", to)
-	}
-	if _, ok := optional["project"]; ok {
-		projectId := optional["project"]
-		delete(optional, "project")
-		condition = condition.Where("project ->> 'id' = ? ", projectId)
-	}
-	err := condition.Where(optional).Find(&approval).Error
+
+	err := r.db.Where(optional).Find(&approval).Error
 	if err != nil {
 		logs.Error(fmt.Sprintf("Error finding approval Send request user with ID %d with optional %s : %v", userId, optionalStr, err), zap.Error(err))
 		return nil, fmt.Errorf("error cant't finding approval Send request user with ID %d with optional %s", userId, optionalStr)
@@ -69,11 +60,6 @@ func (r approvalRepositoryDB) GetReceiveRequest(userId uint, optional map[string
 	optionalStr := fmt.Sprintf("%v", optional)
 	condition := r.db.Where("? = ANY(\"to\")", userId)
 
-	if _, ok := optional["project"]; ok {
-		projectId := optional["project"]
-		delete(optional, "project")
-		condition = condition.Where("project ->> 'id' = ? ", projectId)
-	}
 	err := condition.Where(optional).Find(&approval).Error
 	if err != nil {
 		logs.Error(fmt.Sprintf("Error finding approval receive request user with ID %d with optinoal %s %v", userId, optionalStr, err), zap.Error(err))
@@ -135,11 +121,6 @@ func (r approvalRepositoryDB) GetAll(optional map[string]interface{}) ([]models.
 		delete(optional, "to")
 		condition = condition.Where("? = ANY(\"to\")", to)
 	}
-	if _, ok := optional["project"]; ok {
-		projectId := optional["project"]
-		delete(optional, "project")
-		condition = condition.Where("project ->> 'id' = ? ", projectId)
-	}
 
 	err := condition.Where(optional).Find(&approval).Error
 	if err != nil {
@@ -158,20 +139,12 @@ func (r approvalRepositoryDB) GetByUserID(id uint, optional map[string]interface
 	approval := []models.Approvals{}
 	optionalStr := fmt.Sprintf("%v", optional)
 	condition := r.db
-
-	if _, ok := optional["status"]; ok {
-		condition = condition.Where("status = ?", optional["status"])
-
-	}
+	optional["sender_id"] = id
+	optional["to"] = id
 	if _, ok := optional["to"]; ok {
 		to := optional["to"]
 		delete(optional, "to")
 		condition = condition.Where("? = ANY(\"to\")", to)
-	}
-	if _, ok := optional["project"]; ok {
-		projectId := optional["project"]
-		delete(optional, "project")
-		condition = condition.Where("project ->> 'id' = ? ", projectId)
 	}
 
 	err := condition.Where(optional).Find(&approval).Error
@@ -213,4 +186,13 @@ func (r approvalRepositoryDB) GetByRequestIDLast(id uuid.UUID) (*models.Approval
 	return approval, nil
 }
 
-//test
+func (r approvalRepositoryDB) GetProjectById(id uint) (*models.Project, error) {
+	project := new(models.Project)
+
+	err := r.db.Where("id = ?", id).Last(&project).Error
+	if err != nil {
+		logs.Error(fmt.Sprintf("Error finding project by id : %v  : %v to validation", id, err), zap.Error(err))
+		return nil, fmt.Errorf("error finding project by id : %v  : to validation", id)
+	}
+	return project, nil
+}

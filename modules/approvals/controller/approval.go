@@ -112,15 +112,15 @@ func (h *approvalHandler) ReceiveRequest(c *fiber.Ctx) error {
 	optional := map[string]interface{}{}
 
 	//Optional
-	requestUser := c.Query("requestUser")
+	requestUser := c.Query("senderId")
 	if requestUser != "" {
-		optional["request_user"] = requestUser
+		optional["sender_id"] = requestUser
 	}
 	status := c.Query("status")
-	if requestUser != "" {
+	if status != "" {
 		optional["status"] = status
 	}
-	projectId := c.Query("project")
+	projectId := c.Query("projectId")
 	if projectId != "" {
 		projectId, err := strconv.Atoi(projectId)
 		if err != nil {
@@ -133,7 +133,7 @@ func (h *approvalHandler) ReceiveRequest(c *fiber.Ctx) error {
 				},
 			)
 		}
-		optional["project"] = projectId
+		optional["project_id"] = projectId
 	}
 
 	apprrovalReceive, err := h.approvalSrv.GetReceiveRequest(uint(id), optional)
@@ -176,7 +176,7 @@ func (h *approvalHandler) SendRequest(c *fiber.Ctx) error {
 	optional := map[string]interface{}{}
 
 	//Optional
-	projectId := c.Query("project")
+	projectId := c.Query("projectId")
 	if projectId != "" {
 		projectId, err := strconv.Atoi(projectId)
 		if err != nil {
@@ -189,7 +189,7 @@ func (h *approvalHandler) SendRequest(c *fiber.Ctx) error {
 				},
 			)
 		}
-		optional["project"] = projectId
+		optional["project_id"] = projectId
 	}
 
 	to := c.Query("to")
@@ -341,6 +341,29 @@ func (h *approvalHandler) GetApprovalByID(c *fiber.Ctx) error {
 			},
 		)
 	}
+	optional := map[string]interface{}{}
+
+	//Optional
+	projectId := c.Query("projectId")
+	if projectId != "" {
+		projectId, err := strconv.Atoi(projectId)
+		if err != nil {
+			logs.Warn("Error parsing approval ID:", zap.Error(err))
+			return c.Status(fiber.StatusNotFound).JSON(
+				models.ResponseData{
+					Message:    "project option is number",
+					Status:     fiber.ErrBadRequest.Message,
+					StatusCode: fiber.ErrBadRequest.Code,
+				},
+			)
+		}
+		optional["project_id"] = projectId
+	}
+	status := c.Query("status")
+	if status != "" {
+		optional["status"] = status
+	}
+
 	idProfile, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(
@@ -377,7 +400,7 @@ func (h *approvalHandler) GetAllApproval(c *fiber.Ctx) error {
 
 	optional := map[string]interface{}{}
 	//Optional
-	projectId := c.Query("project")
+	projectId := c.Query("projectId")
 	if projectId != "" {
 		projectId, err := strconv.Atoi(projectId)
 		if err != nil {
@@ -390,7 +413,7 @@ func (h *approvalHandler) GetAllApproval(c *fiber.Ctx) error {
 				},
 			)
 		}
-		optional["project"] = projectId
+		optional["project_id"] = projectId
 	}
 
 	to := c.Query("to")
@@ -443,7 +466,7 @@ func (h *approvalHandler) GetByUserID(c *fiber.Ctx) error {
 
 	optional := map[string]interface{}{}
 	//Optional
-	projectId := c.Query("project")
+	projectId := c.Query("projectId")
 	if projectId != "" {
 		projectId, err := strconv.Atoi(projectId)
 		if err != nil {
@@ -456,7 +479,7 @@ func (h *approvalHandler) GetByUserID(c *fiber.Ctx) error {
 				},
 			)
 		}
-		optional["project"] = projectId
+		optional["project_id"] = projectId
 	}
 
 	to := c.Query("to")

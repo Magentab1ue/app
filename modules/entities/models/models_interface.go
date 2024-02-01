@@ -32,6 +32,14 @@ type ApprovalRepository interface {
 	GetByUserID(uint, map[string]interface{}) ([]Approvals, error)
 	GetByRequestID(uuid.UUID) ([]Approvals, error)
 	GetByRequestIDLast(uuid.UUID) (*Approvals, error)
+	GetProjectById(id uint) (*Project, error)
+}
+
+type ProfileRepositoryDB interface {
+	Create(request *UserProfile) error
+	Update(req *UserProfile) error
+	Delete(Id uint) error
+	GetByID(id uint) (*UserProfile, error)
 }
 
 type ProducerApproval interface {
@@ -40,15 +48,32 @@ type ProducerApproval interface {
 	ApprovalDeleted(uint) error
 }
 
+type ConsumerUsecase interface {
+	CreateProfile(e events.UserProfile) error
+	UpdateProfile(e events.UserProfile) error
+	DeleteProfile(e events.UserProfileDeleted) error
+	CreateProject(e events.ProjectEvent) error
+	UpdateProject(e events.ProjectEvent) error
+	DeleteProject(e events.ProjectEventDeleted) error
+	//CheckOffsetMessage(topic string, offset int64, partition int32) error
+}
+
+type ConsumerRepository interface {
+	Get(req *ConsumerOffset) (*ConsumerOffset, error)
+	Create(req *ConsumerOffset) error
+}
+
 // consumer
 type EventHandlerConsume interface {
-	Handle(toppic string, eventByte []byte)
+	// CheckMessage(msg *sarama.ConsumerMessage) error
+	Handle(toppic string, eventByte []byte) error
 }
-
-type ConsumerUsecase interface {
-	//RequestCreated(event events.RequestCreatedEvent) error
-}
-
 type EventProducer interface {
 	Produce(events.Event) error
+}
+
+type ProjectRepositoryDB interface {
+	Create(request *Project) error
+	Update(req *Project) error
+	Delete(Id uint) error
 }

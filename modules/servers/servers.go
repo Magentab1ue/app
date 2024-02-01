@@ -1,11 +1,13 @@
 package servers
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/IBM/sarama"
 	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 
 	"approval-service/configs"
@@ -55,14 +57,14 @@ func (s *server) Start() {
 	// Start consumer
 	logs.Info(fmt.Sprintf("Starting comsuming kafa server: %v Port : %v Group: %v", s.Cfg.Kafkas.Servers, s.Cfg.Kafkas.Port, s.Cfg.Kafkas.Group))
 	logs.Info(fmt.Sprintf("Subscribed topics: %s", events.SubscribedTopics))
-	// go func() {
-	// 	for {
-	// 		err := s.ConsumerGroup.Consume(context.Background(), events.SubscribedTopics, s.consumerGroupHandler)
-	// 		if err != nil {
-	// 			logs.Error(fmt.Sprintf("Can't consuming with : server: %v Port : %v Group: %v", s.Cfg.Kafkas.Servers, s.Cfg.Kafkas.Port, s.Cfg.Kafkas.Group),zap.Error(err))
-	// 		}
-	// 	}
-	// }()
+	go func() {
+		for {
+			err := s.ConsumerGroup.Consume(context.Background(), events.SubscribedTopics, s.consumerGroupHandler)
+			if err != nil {
+				logs.Error(fmt.Sprintf("Can't consuming with : server: %v Port : %v Group: %v", s.Cfg.Kafkas.Servers, s.Cfg.Kafkas.Port, s.Cfg.Kafkas.Group), zap.Error(err))
+			}
+		}
+	}()
 
 	logs.Info(fmt.Sprintf("server started on %s ", fiberConnURL))
 
