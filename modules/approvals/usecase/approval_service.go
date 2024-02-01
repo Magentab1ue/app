@@ -350,6 +350,11 @@ func (u approvalService) CreateRequest(req *models.CreateReq) (*models.Approvals
 	// if !okTeamlead || !okApprover || !okMembers {
 	// 	return nil, errors.New("project should have a teamlaeds and approvers and members")
 	// }
+	// _, err := u.approvalRepo.GetUserById(req.SenderID)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
 	project, err := u.approvalRepo.GetProjectById(req.ProjectId)
 	if err != nil {
 		return nil, err
@@ -363,6 +368,15 @@ func (u approvalService) CreateRequest(req *models.CreateReq) (*models.Approvals
 	}
 	for _, teamLead := range projectJson.TeamLeads {
 		to = append(to, int64(teamLead.ID))
+	}
+	//check senderId have in member
+	var membersId pq.Int64Array
+	for _, teamLead := range projectJson.Members {
+		membersId = append(membersId, int64(teamLead.ID))
+	}
+	hasMembers := intInSlice(int64(req.SenderID), membersId)
+	if !hasMembers {
+		return nil, fmt.Errorf("the user senderId is not a member of this project")
 	}
 	newRequest, err := u.approvalRepo.Create(&models.Approvals{
 		RequestID:    uuid.New(),
