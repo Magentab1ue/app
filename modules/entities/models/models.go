@@ -11,43 +11,23 @@ import (
 
 // request
 type RequestSentRequest struct {
-	RequestUser     uint   `json:"request_user" validate:"required,numeric,min=1"`
-	IsSignature     bool   `json:"is_signature"`
-	Name            string `json:"name" validate:"required"`
-	Detail          string `json:"detail" `
-	NameRequestUser string `json:"name_request_user" validate:"required"`
-	ToRole          string `json:"to_role" validate:"required"`
+	SenderID    uint   `json:"senderId" validate:"required,numeric,min=1"`
+	IsSignature bool   `json:"isSignature"`
+	Name        string `json:"name" validate:"required"`
+	Detail      string `json:"detail" `
+	ToRole      string `json:"toRole" validate:"required"`
 }
 
 type CreateReq struct {
-	Project         datatypes.JSON `json:"project" gorm:"type:jsonb" validate:"required"`
-	RequestUser     uint           `json:"request_user" validate:"required"`
-	Task            datatypes.JSON `json:"task" gorm:"type:jsonb" validate:"required"`
-	Name            string         `json:"name" validate:"required"`
-	Detail          string         `json:"detail" `
-	NameRequestUser string         `json:"name_request_user" validate:"required"`
-}
-
-// db
-type Approvals struct {
-	gorm.Model
-	RequestID       uuid.UUID      `json:"request_id"`
-	To              pq.Int64Array  `json:"to" gorm:"type:integer[]"`
-	Approver        uint           `json:"approver"`
-	Status          string         `json:"status"`
-	Project         datatypes.JSON `json:"project" gorm:"type:jsonb"` // Assuming your database supports JSONB
-	CreationDate    time.Time      `json:"creation_date"`
-	RequestUser     uint           `json:"request_user"`
-	IsSignature     bool           `json:"is_signature"`
-	Task            datatypes.JSON `json:"task" gorm:"type:jsonb"` // Assuming your database supports JSONB
-	Name            string         `json:"name"`                   // name timesheet
-	Detail          string         `json:"detail"`                 //detail timesheet
-	NameRequestUser string         `json:"name_request_user"`
-	ToRole          string         `json:"to_role"`
+	ProjectId uint           `json:"projectId"  validate:"required,numeric,min=1"`
+	SenderID  uint           `json:"senderId" validate:"required,numeric,min=1"`
+	Task      datatypes.JSON `json:"task" gorm:"type:jsonb" validate:"required"`
+	Name      string         `json:"name" validate:"required"`
+	Detail    string         `json:"detail" `
 }
 
 type UpdateStatusReq struct {
-	IsSignature bool   `json:"is_signature" `
+	IsSignature bool   `json:"isSignature" `
 	Status      string `json:"status" validate:"required"`
 	Approver    uint   `json:"approver" validate:"required"`
 }
@@ -70,8 +50,44 @@ const (
 	Reject  string = "reject"
 )
 
+type ConsumerOffset struct {
+	gorm.Model
+	Topic     string
+	Offset    int64
+	Partition int32
+}
+
+// db
+type Approvals struct {
+	gorm.Model
+	RequestID    uuid.UUID      `json:"requestId"`
+	To           pq.Int64Array  `json:"to" gorm:"type:integer[]"`
+	Approver     uint           `json:"approver"`
+	Status       string         `json:"status"`
+	CreationDate time.Time      `json:"creationDate"`
+	IsSignature  bool           `json:"isSignature"`
+	Task         datatypes.JSON `json:"task" gorm:"type:jsonb"` // Assuming your database supports JSONB
+	Name         string         `json:"name"`                   // name timesheet
+	Detail       string         `json:"detail"`                 //detail timesheet
+	ToRole       string         `json:"toRole"`
+	SenderID     uint           `json:"senderId"`
+	ProjectID    uint           `json:"projectId"`
+}
+
+type UserProfile struct {
+	gorm.Model
+	ProfileId uint        `json:"profileId" validate:"required"`
+	Name      string      `json:"name" validate:"required"`
+	Approvals []Approvals `gorm:"foreignKey:SenderID"`
+}
+
 type Project struct {
-	ID        int    `json:"id"`
+	gorm.Model
+	Project   datatypes.JSON `json:"project" gorm:"type:jsonb"`
+	Approvals []Approvals    `gorm:"foreignKey:ProjectID"`
+}
+type ProjectJson struct {
+	ID        uint   `json:"id"`
 	Name      string `json:"name"`
 	TeamLeads []struct {
 		ID int `json:"id"`

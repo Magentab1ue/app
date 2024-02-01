@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"reflect"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -51,7 +50,7 @@ func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*mo
 	}
 	// has approver in send to
 	checkPermission := intInSlice(int64(req.Approver), approvalCheck.To)
-	if checkPermission {
+	if !checkPermission {
 		return nil, fmt.Errorf("this user id %d dont have permission to update status this approval", int(req.Approver))
 	}
 	logs.Info("Attempting to Update approval")
@@ -66,13 +65,14 @@ func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*mo
 		ID:           approvalRes.ID,
 		RequestID:    approvalRes.RequestID,
 		To:           approvalRes.To,
-		Approver:     approvalRes.Approver,
 		Status:       approvalRes.Status,
-		Project:      approvalRes.Project,
+		ProjectID:    approvalRes.ProjectID,
 		CreationDate: approvalRes.CreationDate,
-		RequestUser:  approvalRes.RequestUser,
-		IsSignature:  approvalRes.IsSignature,
+		SenderID:     approvalRes.SenderID,
 		Task:         approvalRes.Task,
+		Name:         approvalRes.Name,
+		Detail:       approvalRes.Detail,
+		ToRole:       approvalRes.ToRole,
 	}
 	err = u.produce.Produce(event)
 	if err != nil {
@@ -190,11 +190,12 @@ func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*
 	if req.ToRole != "Approver" && req.ToRole != "HR" {
 		return nil, errors.New("to_role field should be Approver or HR")
 	}
-	//validation
+	// //validation
 	request, err := u.approvalRepo.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
+
 	if request.Status != models.Approve {
 		return nil, errors.New("this approvals has not yet been approved")
 	}
@@ -208,23 +209,24 @@ func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*
 	if requestLast.Status == models.Pending {
 		return nil, errors.New("the approval has already been sent")
 	}
-	//filter to using to_role in project
-	project := new(models.Project)
-	err = json.Unmarshal(request.Project, project)
+	checkPermission := intInSlice(int64(req.SenderID), request.To)
+	if !checkPermission {
+		return nil, fmt.Errorf("this user id %d dont have permission to send this approval", int(req.SenderID))
+	}
+
+	project, err := u.approvalRepo.GetProjectById(request.ProjectID)
 	if err != nil {
-		return nil, errors.New("this approval have project formatted incorrectly")
+		return nil, err
 	}
-	projectCheck := reflect.TypeOf(project)
-	if projectCheck.Kind() == reflect.Ptr {
-		projectCheck = projectCheck.Elem()
-	}
-	_, ok := projectCheck.FieldByName("Approvers")
-	if !ok {
-		return nil, errors.New("this project dont have a approvers")
+	projectJson := new(models.ProjectJson)
+	err = json.Unmarshal(project.Project, projectJson)
+	if err != nil {
+		logs.Error(err)
+		return nil, errors.New("can't create request")
 	}
 
 	var to pq.Int64Array
-	for _, approver := range project.Approvers {
+	for _, approver := range projectJson.Approvers {
 		for _, role := range approver.Role {
 			if role == req.ToRole {
 				to = append(to, int64(approver.ID))
@@ -232,37 +234,36 @@ func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*
 			}
 		}
 	}
+
 	logs.Info(fmt.Sprintf("Attempting to Create request approval requestId %v", request.RequestID))
 	res, err := u.approvalRepo.Create(&models.Approvals{
-		RequestID:       request.RequestID,
-		Status:          "pending",
-		Project:         request.Project,
-		To:              to,
-		CreationDate:    time.Now(),
-		RequestUser:     req.RequestUser,
-		Task:            request.Task,
-		IsSignature:     req.IsSignature,
-		Name:            req.Name,
-		Detail:          req.Detail,
-		NameRequestUser: req.NameRequestUser,
-		ToRole:          req.ToRole,
+		RequestID:    request.RequestID,
+		Status:       "pending",
+		ProjectID:    request.ProjectID,
+		To:           to,
+		CreationDate: time.Now(),
+		SenderID:     req.SenderID,
+		Task:         request.Task,
+		IsSignature:  req.IsSignature,
+		Name:         req.Name,
+		Detail:       req.Detail,
+		ToRole:       req.ToRole,
 	})
 	if err != nil {
 		return nil, err
 	}
 	event := events.RequestCreatedEvent{
-		ID:              res.ID,
-		RequestID:       res.RequestID,
-		To:              res.To,
-		Status:          res.Status,
-		Project:         res.Project,
-		CreationDate:    res.CreationDate,
-		RequestUser:     res.RequestUser,
-		Task:            res.Task,
-		Name:            res.Name,
-		Detail:          res.Detail,
-		NameRequestUser: res.NameRequestUser,
-		ToRole:          res.ToRole,
+		ID:           res.ID,
+		RequestID:    res.RequestID,
+		To:           res.To,
+		Status:       res.Status,
+		ProjectID:    res.ProjectID,
+		CreationDate: res.CreationDate,
+		SenderID:     res.SenderID,
+		Task:         res.Task,
+		Name:         res.Name,
+		Detail:       res.Detail,
+		ToRole:       res.ToRole,
 	}
 	logs.Info("Attempting to produce event to kafka")
 	err = u.produce.Produce(event)
@@ -334,38 +335,46 @@ func stringInSlice(str string, list []string) bool {
 
 func (u approvalService) CreateRequest(req *models.CreateReq) (*models.Approvals, error) {
 
-	project := new(models.Project)
-	err := json.Unmarshal(req.Project, project)
+	// project := new(models.Project)
+	// err := json.Unmarshal(req.ProjectId, project)
+	// if err != nil {
+	// 	return nil, errors.New("project is formatted incorrectly")
+	// }
+	// projectCheck := reflect.TypeOf(project)
+	// if projectCheck.Kind() == reflect.Ptr {
+	// 	projectCheck = projectCheck.Elem()
+	// }
+	// _, okApprover := projectCheck.FieldByName("Approvers")
+	// _, okTeamlead := projectCheck.FieldByName("TeamLeads")
+	// _, okMembers := projectCheck.FieldByName("Members")
+	// if !okTeamlead || !okApprover || !okMembers {
+	// 	return nil, errors.New("project should have a teamlaeds and approvers and members")
+	// }
+	project, err := u.approvalRepo.GetProjectById(req.ProjectId)
 	if err != nil {
-		return nil, errors.New("project is formatted incorrectly")
-	}
-	projectCheck := reflect.TypeOf(project)
-	if projectCheck.Kind() == reflect.Ptr {
-		projectCheck = projectCheck.Elem()
-	}
-	_, okApprover := projectCheck.FieldByName("Approvers")
-	_, okTeamlead := projectCheck.FieldByName("TeamLeads")
-	_, okMembers := projectCheck.FieldByName("Members")
-	if !okTeamlead || !okApprover || !okMembers {
-		return nil, errors.New("project should have a teamlaeds and approvers and members")
+		return nil, err
 	}
 	var to pq.Int64Array
-	for _, teamLead := range project.TeamLeads {
+	projectJson := new(models.ProjectJson)
+	err = json.Unmarshal(project.Project, projectJson)
+	if err != nil {
+		logs.Error(err)
+		return nil, errors.New("can't create request")
+	}
+	for _, teamLead := range projectJson.TeamLeads {
 		to = append(to, int64(teamLead.ID))
 	}
-
 	newRequest, err := u.approvalRepo.Create(&models.Approvals{
-		RequestID:       uuid.New(),
-		To:              to,
-		Status:          "pending",
-		Project:         req.Project,
-		CreationDate:    time.Now(),
-		RequestUser:     req.RequestUser,
-		Task:            req.Task,
-		Name:            req.Name,
-		Detail:          req.Detail,
-		NameRequestUser: req.NameRequestUser,
-		ToRole:          "teamlead ",
+		RequestID:    uuid.New(),
+		To:           to,
+		Status:       models.Pending,
+		ProjectID:    req.ProjectId,
+		CreationDate: time.Now(),
+		SenderID:     req.SenderID,
+		Task:         req.Task,
+		Name:         req.Name,
+		Detail:       req.Detail,
+		ToRole:       "teamlead",
 	})
 	if err != nil {
 		logs.Error(err)
@@ -374,18 +383,17 @@ func (u approvalService) CreateRequest(req *models.CreateReq) (*models.Approvals
 	logs.Info("Attempting to produce event to kafka")
 
 	event := events.RequestCreatedEvent{
-		ID:              newRequest.ID,
-		RequestID:       newRequest.RequestID,
-		To:              newRequest.To,
-		Status:          newRequest.Status,
-		Project:         newRequest.Project,
-		CreationDate:    newRequest.CreationDate,
-		RequestUser:     newRequest.RequestUser,
-		Task:            newRequest.Task,
-		Name:            newRequest.Name,
-		Detail:          newRequest.Detail,
-		NameRequestUser: newRequest.NameRequestUser,
-		ToRole:          newRequest.ToRole,
+		ID:           newRequest.ID,
+		RequestID:    newRequest.RequestID,
+		To:           newRequest.To,
+		Status:       newRequest.Status,
+		ProjectID:    newRequest.ProjectID,
+		CreationDate: newRequest.CreationDate,
+		SenderID:     newRequest.SenderID,
+		Task:         newRequest.Task,
+		Name:         newRequest.Name,
+		Detail:       newRequest.Detail,
+		ToRole:       newRequest.ToRole,
 	}
 	err = u.produce.Produce(event)
 	if err != nil {

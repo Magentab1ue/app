@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"approval-service/logs"
 	"approval-service/modules/entities/models"
+	"fmt"
 
 	"github.com/IBM/sarama"
 )
@@ -25,11 +27,15 @@ func (consumer *handlerConsumeGroup) Cleanup(sarama.ConsumerGroupSession) error 
 
 func (consumer *handlerConsumeGroup) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
-		go func() {
-			consumer.eventHandler.Handle(msg.Topic, msg.Value)
-		}()
-		session.MarkMessage(msg, "")
+		logs.Info(fmt.Sprintf("Consumed message from topic %s with partition: %d and offset: %d", msg.Topic, msg.Partition, msg.Offset))
+		//err := consumer.eventHandler.CheckMessage(msg)
+		// if err != nil {
+		// 	continue
+		// }
+		err := consumer.eventHandler.Handle(msg.Topic, msg.Value)
+		if err == nil {
+			session.MarkMessage(msg, "")
+		}
 	}
-
 	return nil
 }

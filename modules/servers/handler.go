@@ -5,11 +5,13 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 
 	"approval-service/modules/approvals/controller"
-	"approval-service/modules/approvals/repository"
+	approvalRepository "approval-service/modules/approvals/repository"
 	_appSrv "approval-service/modules/approvals/usecase"
 	consumerHandler "approval-service/modules/consumer/handlers"
 	_consumerUsecase "approval-service/modules/consumer/usecase"
 	_handlerProducer "approval-service/modules/producer/handlers"
+	profileRepository "approval-service/modules/profile/repository"
+	projectRepository "approval-service/modules/project/repository"
 )
 
 func (s *server) Handlers() error {
@@ -23,10 +25,13 @@ func (s *server) Handlers() error {
 	// Group a version
 	v1 := s.App.Group("/v1")
 	//repo
-	approveRepo := repository.NewapprovalRepositoryDB(s.Db)
+	approveRepo := approvalRepository.NewapprovalRepositoryDB(s.Db)
+	profileRepo := profileRepository.NewprofileRepositoryDB(s.Db)
+	projectRepo := projectRepository.NewproProjectRepositoryDB(s.Db)
+	//consumRepo := consumerRepository.NewConsumerRepository(s.Db)
 
 	// consumer
-	consumeUsecase := _consumerUsecase.NewConsumerUsecase(approveRepo)
+	consumeUsecase := _consumerUsecase.NewConsumerUsecase(profileRepo, projectRepo)
 	eventHandlerConsumer := consumerHandler.NewEventHandler(consumeUsecase)
 	s.consumerGroupHandler = consumerHandler.NewHandlerConsumeGroup(eventHandlerConsumer)
 
