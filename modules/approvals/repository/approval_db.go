@@ -196,3 +196,13 @@ func (r approvalRepositoryDB) GetProjectById(id uint) (*models.Project, error) {
 	}
 	return project, nil
 }
+func (r approvalRepositoryDB) GetUserById(id uint) (*models.UserProfile, error) {
+	userProfile := new(models.UserProfile)
+
+	err := r.db.Where("id = ?", id).Last(&userProfile).Error
+	if err != nil {
+		logs.Error(fmt.Sprintf("Error finding userid by id : %v  : %v to validation", id, err), zap.Error(err))
+		return nil, fmt.Errorf("error finding userid by id : %v  : to validation", id)
+	}
+	return userProfile, nil
+}
