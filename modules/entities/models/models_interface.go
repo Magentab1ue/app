@@ -33,6 +33,7 @@ type ApprovalRepository interface {
 	GetByRequestID(uuid.UUID) ([]Approvals, error)
 	GetByRequestIDLast(uuid.UUID) (*Approvals, error)
 	GetProjectById(id uint) (*Project, error)
+	GetUserById(id uint) (*UserProfile, error)
 }
 
 type ProfileRepositoryDB interface {

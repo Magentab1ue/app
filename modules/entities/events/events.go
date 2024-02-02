@@ -28,10 +28,10 @@ type UserProfile struct {
 }
 
 func (UserProfile) TopicCreate() string {
-	return "tcchub-profile-profileCreated"
+	return "tcchub.profile.created"
 }
 func (UserProfile) TopicUpdate() string {
-	return "tcchub-profile-profileUpdated"
+	return "tcchub.profile.updated"
 }
 
 type UserProfileDeleted struct {
@@ -39,7 +39,7 @@ type UserProfileDeleted struct {
 }
 
 func (UserProfileDeleted) TopicDelete() string {
-	return "tcchub-profile-profileDeleted"
+	return "tcchub.profile.deleted"
 }
 
 type RequestCreatedEvent struct {
@@ -59,7 +59,7 @@ type RequestCreatedEvent struct {
 }
 
 func (RequestCreatedEvent) String() string {
-	return "tcchub-approval-approvalCreated"
+	return "tcchub.approval.created"
 }
 
 type ApprovalUpdatedEvent struct {
@@ -79,7 +79,7 @@ type ApprovalUpdatedEvent struct {
 }
 
 func (ApprovalUpdatedEvent) String() string {
-	return "tcchub-approval-approvalUpdated"
+	return "tcchub.approval.updated"
 }
 
 type ApprovalDeletedEvent struct {
@@ -87,7 +87,7 @@ type ApprovalDeletedEvent struct {
 }
 
 func (ApprovalDeletedEvent) String() string {
-	return "tcchub-approval-approvalDeleted"
+	return "tcchub.approval.deleted"
 }
 
 type ProjectEvent struct {
@@ -106,10 +106,10 @@ type ProjectEvent struct {
 }
 
 func (ProjectEvent) TopicCreate() string {
-	return "tcchub-project-ProjectCreated"
+	return "tcchub.project.created"
 }
 func (ProjectEvent) TopicUpdate() string {
-	return "tcchub-project-ProjectUpdated"
+	return "tcchub.project.updated"
 }
 
 type ProjectEventDeleted struct {
@@ -117,5 +117,5 @@ type ProjectEventDeleted struct {
 }
 
 func (ProjectEventDeleted) TopicDelete() string {
-	return "tcchub-project-ProjectDeleted"
+	return "tcchub.project.deleted"
 }
