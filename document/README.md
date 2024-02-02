@@ -814,7 +814,7 @@ Authorization: JWT YOUR_TOKEN
 
 **ApprovalCreated**
 
-**Publish** to the `tcchub-approval-approvalCreated` topic to publish information for create approval
+**Publish** to the `tcchub.approval.created` topic to publish information for create approval
 
 **Message**:
 
@@ -838,7 +838,7 @@ Authorization: JWT YOUR_TOKEN
 
 **ApprovalUpdated**
 
-**Publish** information about approval after update to the `tcchub-approval-approvalUpdated` topic
+**Publish** information about approval after update to the `tcchub.approval.updated` topic
 
 **Message**:
 
@@ -863,7 +863,7 @@ Authorization: JWT YOUR_TOKEN
 
 **ApprovalDeleted**
 
-**Publish** delete event approval after delete to the `tcchub-approval-approvalDeleted` topic
+**Publish** delete event approval after delete to the `tcchub.approval.deleted` topic
 
 **Message**:
 
