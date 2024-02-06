@@ -19,6 +19,9 @@ var SubscribedTopics = []string{
 	ProjectEvent{}.TopicCreate(),
 	ProjectEvent{}.TopicUpdate(),
 	ProjectEventDeleted{}.TopicDelete(),
+	TaskEvent{}.TaskEventCreated(),
+	TaskEvent{}.TaskEventUpdated(),
+	TaskEvent{}.TaskEventDeleted(),
 }
 
 type UserProfile struct {
@@ -118,4 +121,23 @@ type ProjectEventDeleted struct {
 
 func (ProjectEventDeleted) TopicDelete() string {
 	return "tcchub.project.deleted"
+}
+
+type TaskEvent struct {
+	ID             int    `json:"taskId"`
+	UserID         string `json:"userId"`
+	ProjectId      string `json:"projectId"`
+	Status         int    `json:"status"`
+	ApprovalStatus int    `json:"approvalStatus"`
+	Detail         string ` json:"detail"`
+}
+
+func (TaskEvent) TaskEventCreated() string {
+	return "tcchub.task.task.created"
+}
+func (TaskEvent) TaskEventUpdated() string {
+	return "tcchub.task.task.updated"
+}
+func (TaskEvent) TaskEventDeleted() string {
+	return "tcchub.task.task.deleted"
 }

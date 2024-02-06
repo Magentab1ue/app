@@ -206,3 +206,58 @@ func (r approvalRepositoryDB) GetUserById(id uint) (*models.UserProfile, error) 
 	}
 	return userProfile, nil
 }
+
+func (r approvalRepositoryDB) CreateProject(request *models.Project) (*models.Project, error) {
+	err := r.db.FirstOrCreate(request).Error
+	if err != nil {
+		logs.Error(fmt.Sprintf("Error Create Project with ID %d: %v", request.ID, err), zap.Error(err))
+		return nil, fmt.Errorf("failed to create Project: %v", err)
+	}
+
+	return request, nil
+}
+
+func (r approvalRepositoryDB) CreateUser(request *models.UserProfile) (*models.UserProfile, error) {
+	err := r.db.FirstOrCreate(request).Error
+	if err != nil {
+		logs.Error(fmt.Sprintf("Error Create Project with ID %d: %v", request.ID, err), zap.Error(err))
+		return nil, fmt.Errorf("failed to create Project: %v", err)
+	}
+	return request, nil
+}
+
+func (r approvalRepositoryDB) GetListTaskCheck(ids []int64) ([]models.Task, error) {
+	tasks := []models.Task{}
+	err := r.db.Find(&tasks, ids).Where("status = ?", models.TaskAppproveStatusMap[1]).Or("status = ?", models.TaskAppproveStatusMap[3]).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to get task: %v", err)
+	}
+	return tasks, nil
+}
+
+func (r approvalRepositoryDB) GetTask(id int64) (*models.Task, error) {
+	task := new(models.Task)
+	err := r.db.Find(&task, id).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to get tast id %d : %v", id, err)
+	}
+	return task, nil
+}
+func (r approvalRepositoryDB) GetTasks(ids []int64) ([]models.Task, error) {
+	tasks := []models.Task{}
+	err := r.db.Find(&tasks, ids).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to get task: %v", err)
+	}
+	if len(tasks) != len(ids) {
+		return nil, fmt.Errorf("no tasks found with the provided IDs")
+	}
+	return tasks, nil
+}
+func (r approvalRepositoryDB) UpdateTasksStatus(ids []int64, status string) error {
+	err := r.db.Model(&models.Task{}).Where("id IN ?", ids).Updates(map[string]interface{}{"approval_status": status}).Error
+	if err != nil {
+		return fmt.Errorf("failed to update tasks: %v", err)
+	}
+	return nil
+}

@@ -32,6 +32,9 @@ func NewApprovalController(router fiber.Router, approvalSrv models.ApprovalUseca
 	router.Get("/approvals/:requestId", controllers.GetApprovalByRequestID)
 	router.Delete("/approval/:id", controllers.DeleteApproval)
 	router.Post("/approval/create", controllers.CreateRequest)
+	//mockData
+	router.Post("/approval/Add/Project", controllers.CreateProjectMock)
+	router.Post("/approval/Add/User", controllers.CreateUserMock)
 }
 
 func (h *approvalHandler) UpdateStatus(c *fiber.Ctx) error {
@@ -605,4 +608,85 @@ func (h *approvalHandler) GetApprovalByRequestID(c *fiber.Ctx) error {
 	)
 }
 
-//test
+func (h *approvalHandler) CreateProjectMock(c *fiber.Ctx) error {
+	logs.Info("Post : Attempting to by pass create project")
+	ProjectReq := new(models.ProjectJson)
+	if err := c.BodyParser(ProjectReq); err != nil {
+		logs.Warn("Invalid request", zap.Error(err))
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request",
+		})
+	}
+	if err := validate.Struct(ProjectReq); err != nil {
+		logs.Warn("Invalid request", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrBadRequest.Message,
+				StatusCode: fiber.ErrBadRequest.Code,
+			},
+		)
+	}
+	res, err := h.approvalSrv.CreateProject(ProjectReq)
+	if err != nil {
+		logs.Warn("Error can't Create approval ", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrNotFound.Message,
+				StatusCode: fiber.ErrNotFound.Code,
+			},
+		)
+	}
+	logs.Info("GET : Attempting to Approva bu request id successfully")
+	return c.Status(fiber.StatusOK).JSON(
+		models.ResponseData{
+			Message:    "Succeed",
+			Status:     "OK",
+			StatusCode: fiber.StatusOK,
+			Data:       res,
+		},
+	)
+}
+
+func (h *approvalHandler) CreateUserMock(c *fiber.Ctx) error {
+	logs.Info("Post : Attempting to by pass create project")
+	req := new(models.UserProfile)
+	if err := c.BodyParser(req); err != nil {
+		logs.Warn("Invalid request", zap.Error(err))
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request",
+		})
+	}
+	if err := validate.Struct(req); err != nil {
+		logs.Warn("Invalid request", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrBadRequest.Message,
+				StatusCode: fiber.ErrBadRequest.Code,
+			},
+		)
+	}
+	res, err := h.approvalSrv.CreateUser(req)
+	if err != nil {
+		logs.Warn("Error can't Create approval ", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrNotFound.Message,
+				StatusCode: fiber.ErrNotFound.Code,
+			},
+		)
+	}
+
+	logs.Info("GET : Attempting to Approva bu request id successfully")
+	return c.Status(fiber.StatusOK).JSON(
+		models.ResponseData{
+			Message:    "Succeed",
+			Status:     "OK",
+			StatusCode: fiber.StatusOK,
+			Data:       res,
+		},
+	)
+}

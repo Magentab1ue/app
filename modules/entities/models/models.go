@@ -100,3 +100,31 @@ type ProjectJson struct {
 		ID int `json:"id"`
 	} `json:"members"`
 }
+
+type Task struct {
+	gorm.Model
+	Status         string `json:"status"`
+	ApprovalStatus string `json:"approvalStatus"`
+	UserID         uint   `json:"userId"`
+	ProjectId      uint   `json:"projectId"`
+	Detail         string `db:"detail" json:"detail"`
+}
+
+var TaskAppproveStatusMap = map[int]string{
+	0: "waiting",
+	1: "approved",
+	2: "reject",
+	3: "pending",
+}
+
+var TaskStatusMap = map[int]string{
+	0: "OPEN",
+	1: "DONE",
+}
+
+type ReqTask struct {
+	ID             uint   `json:"id"`
+	Status         int    `json:"status"`
+	ApprovalStatus int    `json:"approvalStatus"`
+	Detail         string `db:"detail" json:"detail"`
+}

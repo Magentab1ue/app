@@ -12,6 +12,7 @@ import (
 	_handlerProducer "approval-service/modules/producer/handlers"
 	profileRepository "approval-service/modules/profile/repository"
 	projectRepository "approval-service/modules/project/repository"
+	taskRepository "approval-service/modules/task/repository"
 )
 
 func (s *server) Handlers() error {
@@ -28,10 +29,11 @@ func (s *server) Handlers() error {
 	approveRepo := approvalRepository.NewapprovalRepositoryDB(s.Db)
 	profileRepo := profileRepository.NewprofileRepositoryDB(s.Db)
 	projectRepo := projectRepository.NewproProjectRepositoryDB(s.Db)
+	taskRepo := taskRepository.NewproTaskRepositoryDB(s.Db)
 	//consumRepo := consumerRepository.NewConsumerRepository(s.Db)
 
 	// consumer
-	consumeUsecase := _consumerUsecase.NewConsumerUsecase(profileRepo, projectRepo)
+	consumeUsecase := _consumerUsecase.NewConsumerUsecase(profileRepo, projectRepo, taskRepo)
 	eventHandlerConsumer := consumerHandler.NewEventHandler(consumeUsecase)
 	s.consumerGroupHandler = consumerHandler.NewHandlerConsumeGroup(eventHandlerConsumer)
 
