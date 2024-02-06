@@ -6,6 +6,7 @@ import (
 	"approval-service/modules/entities/models"
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/go-playground/validator"
 	"go.uber.org/zap"
@@ -15,10 +16,11 @@ type consumerUsecase struct {
 	//consumerRepo models.ConsumerRepository
 	profileRepo models.ProfileRepositoryDB
 	projectRepo models.ProjectRepositoryDB
+	taskRepo    models.TaskRepositoryDB
 }
 
-func NewConsumerUsecase(profileRepo models.ProfileRepositoryDB, projectRepo models.ProjectRepositoryDB) models.ConsumerUsecase {
-	return &consumerUsecase{profileRepo, projectRepo}
+func NewConsumerUsecase(profileRepo models.ProfileRepositoryDB, projectRepo models.ProjectRepositoryDB, taskRepo models.TaskRepositoryDB) models.ConsumerUsecase {
+	return &consumerUsecase{profileRepo, projectRepo, taskRepo}
 }
 
 var validate = validator.New()
@@ -124,6 +126,73 @@ func (u consumerUsecase) UpdateProject(e events.ProjectEvent) (err error) {
 
 func (u consumerUsecase) DeleteProject(e events.ProjectEventDeleted) error {
 	err := u.projectRepo.Delete(e.ID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u consumerUsecase) CreateTask(e events.TaskEvent) (err error) {
+	projectIdint, err := strconv.Atoi(e.ProjectId)
+	if err != nil {
+		fmt.Errorf("can't create task")
+	}
+	userIdint, err := strconv.Atoi(e.UserID)
+	if err != nil {
+		fmt.Errorf("can't create task")
+	}
+
+	task := new(models.Task)
+	task.ID = uint(e.ID)
+	task.Detail = e.Detail
+	task.Status = models.TaskStatusMap[e.Status]
+	task.ApprovalStatus = models.TaskAppproveStatusMap[e.ApprovalStatus]
+	task.ProjectId = uint(projectIdint)
+	task.UserID = uint(userIdint)
+
+	if err != nil {
+		logs.Error(fmt.Sprintf("Can't create project with userid %d", e.ID))
+		return err
+	}
+	err = u.taskRepo.Create(task)
+	if err != nil {
+		logs.Error(fmt.Sprintf("Can't create project with userid %d", e.ID))
+		return err
+	}
+	return nil
+}
+
+func (u consumerUsecase) UpdateTask(e events.TaskEvent) (err error) {
+	projectIdint, err := strconv.Atoi(e.ProjectId)
+	if err != nil {
+		fmt.Errorf("can't create task")
+	}
+	userIdint, err := strconv.Atoi(e.UserID)
+	if err != nil {
+		fmt.Errorf("can't create task")
+	}
+
+	task := new(models.Task)
+	task.ID = uint(e.ID)
+	task.Detail = e.Detail
+	task.Status = models.TaskStatusMap[e.Status]
+	task.ApprovalStatus = models.TaskAppproveStatusMap[e.ApprovalStatus]
+	task.ProjectId = uint(projectIdint)
+	task.UserID = uint(userIdint)
+	if err != nil {
+		logs.Error(fmt.Sprintf("Can't create project with userid %d", e.ID))
+		return err
+	}
+	err = u.taskRepo.Update(task)
+	if err != nil {
+		logs.Error(fmt.Sprintf("Can't update project with userid %d", e.ID))
+		return err
+	}
+	return nil
+}
+
+func (u consumerUsecase) DeleteTask(e events.TaskEvent) error {
+	err := u.taskRepo.Delete(uint(e.ID))
 	if err != nil {
 		return err
 	}

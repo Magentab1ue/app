@@ -33,11 +33,11 @@ func NewApprovalService(
 }
 
 func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*models.Approvals, error) {
-	statusList := []string{models.Approve, models.Pending, models.Reject}
+	statusList := []string{models.Approve, models.Reject}
 
 	hasStatus := stringInSlice(req.Status, statusList)
 	if !hasStatus {
-		return nil, errors.New("format status incorrect, status should have approved , pending or reject")
+		return nil, errors.New("format status incorrect, status should have approved or reject")
 	}
 	//validation
 	approvalCheck, err := u.approvalRepo.GetByID(id)
@@ -60,6 +60,20 @@ func (u approvalService) UpdateStatus(id uint, req *models.UpdateStatusReq) (*mo
 	approvalRes, err := u.approvalRepo.Update(approvalCheck)
 	if err != nil {
 		return nil, err
+	}
+	tasks := []models.ReqTask{}
+	err = json.Unmarshal(approvalCheck.Task, &tasks)
+	if err != nil {
+		logs.Error("task is formatted incorrectly", zap.Error(err))
+		return nil, errors.New("task is formatted incorrectly")
+	}
+	taskIds := []int64{}
+	for _, task := range tasks {
+		taskIds = append(taskIds, int64(task.ID))
+	}
+	err = u.approvalRepo.UpdateTasksStatus(taskIds, req.Status)
+	if err != nil {
+		return nil, fmt.Errorf("can't update task id %v status", taskIds)
 	}
 	event := events.ApprovalUpdatedEvent{
 		ID:           approvalRes.ID,
@@ -238,7 +252,7 @@ func (u approvalService) SentRequest(id uint, req *models.RequestSentRequest) (*
 	logs.Info(fmt.Sprintf("Attempting to Create request approval requestId %v", request.RequestID))
 	res, err := u.approvalRepo.Create(&models.Approvals{
 		RequestID:    request.RequestID,
-		Status:       "pending",
+		Status:       models.Pending,
 		ProjectID:    request.ProjectID,
 		To:           to,
 		CreationDate: time.Now(),
@@ -335,25 +349,31 @@ func stringInSlice(str string, list []string) bool {
 
 func (u approvalService) CreateRequest(req *models.CreateReq) (*models.Approvals, error) {
 
-	// project := new(models.Project)
-	// err := json.Unmarshal(req.ProjectId, project)
-	// if err != nil {
-	// 	return nil, errors.New("project is formatted incorrectly")
-	// }
-	// projectCheck := reflect.TypeOf(project)
-	// if projectCheck.Kind() == reflect.Ptr {
-	// 	projectCheck = projectCheck.Elem()
-	// }
-	// _, okApprover := projectCheck.FieldByName("Approvers")
-	// _, okTeamlead := projectCheck.FieldByName("TeamLeads")
-	// _, okMembers := projectCheck.FieldByName("Members")
-	// if !okTeamlead || !okApprover || !okMembers {
-	// 	return nil, errors.New("project should have a teamlaeds and approvers and members")
-	// }
-	// _, err := u.approvalRepo.GetUserById(req.SenderID)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	tasks := []models.ReqTask{}
+	err := json.Unmarshal(req.Task, &tasks)
+	if err != nil {
+		logs.Error("task is formatted incorrectly", zap.Error(err))
+		return nil, errors.New("task is formatted incorrectly")
+	}
+	taskIds := []int64{}
+	for _, task := range tasks {
+		taskIds = append(taskIds, int64(task.ID))
+	}
+
+	tasksCheck, _ := u.approvalRepo.GetTasks(taskIds)
+	if len(tasksCheck) <= 0 {
+		return nil, fmt.Errorf("no task id found in %v from this service", taskIds)
+	}
+	for _, task := range tasksCheck {
+		if task.ApprovalStatus == models.TaskAppproveStatusMap[1] || task.ApprovalStatus == models.TaskAppproveStatusMap[3] {
+			return nil, fmt.Errorf("task ID %v : already sent", taskIds)
+		}
+	}
+	fmt.Printf("%v\n", tasksCheck)
+	err = u.approvalRepo.UpdateTasksStatus(taskIds, models.TaskAppproveStatusMap[3])
+	if err != nil {
+		return nil, fmt.Errorf("can't update task id %v status", taskIds)
+	}
 
 	project, err := u.approvalRepo.GetProjectById(req.ProjectId)
 	if err != nil {
@@ -446,6 +466,31 @@ func (u approvalService) GetByRequestID(id uuid.UUID) (appprove []models.Approva
 	return approvalDB, nil
 }
 
+func (u approvalService) CreateProject(req *models.ProjectJson) (res *models.Project, err error) {
+
+	project := new(models.Project)
+	project.ID = req.ID
+	project.Project, err = json.Marshal(req)
+	if err != nil {
+		logs.Error(fmt.Sprintf("Can't create project with userid %d", req.ID))
+		return nil, err
+	}
+	res, err = u.approvalRepo.CreateProject(project)
+	if err != nil {
+		logs.Error(fmt.Sprintf("Can't create project with userid %d", req.ID))
+		return nil, err
+	}
+	return res, nil
+}
+func (u approvalService) CreateUser(req *models.UserProfile) (res *models.UserProfile, err error) {
+
+	res, err = u.approvalRepo.CreateUser(req)
+	if err != nil {
+		logs.Error(fmt.Sprintf("Can't create project with userid %d", req.ID))
+		return nil, err
+	}
+	return res, nil
+}
 func intInSlice(variable int64, list pq.Int64Array) bool {
 	for _, val := range list {
 		if val == variable {

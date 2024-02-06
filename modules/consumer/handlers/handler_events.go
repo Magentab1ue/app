@@ -140,8 +140,48 @@ func (obj *eventHandler) Handle(topic string, eventBytes []byte) error {
 			return err
 		}
 		logs.Info("Create project successfully")
-	}
-
+	case events.TaskEvent{}.TaskEventCreated():
+		event := events.TaskEvent{}
+		err := json.Unmarshal(eventBytes, &event)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		logs.Info("Attempting to create project")
+		err = obj.consumer.CreateTask(event)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		logs.Info("Create project successfully")
+	case events.TaskEvent{}.TaskEventUpdated():
+		event := events.TaskEvent{}
+		err := json.Unmarshal(eventBytes, &event)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		logs.Info("Attempting to create project")
+		err = obj.consumer.UpdateTask(event)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		logs.Info("Create project successfully")
+	case events.TaskEvent{}.TaskEventDeleted():
+		event := events.TaskEvent{}
+		err := json.Unmarshal(eventBytes, &event)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		logs.Info("Attempting to create project")
+		err = obj.consumer.DeleteTask(event)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		logs.Info("Create project successfully")}
 	return nil
 }
 

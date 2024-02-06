@@ -19,6 +19,8 @@ type ApprovalUsecase interface {
 	GetByUserID(uint, map[string]interface{}) ([]Approvals, error)
 	CreateRequest(*CreateReq) (*Approvals, error)
 	GetByRequestID(uuid.UUID) ([]Approvals, error)
+	CreateProject(req *ProjectJson) (res *Project, err error)
+	CreateUser(req *UserProfile) (res *UserProfile, err error)
 }
 
 type ApprovalRepository interface {
@@ -34,6 +36,12 @@ type ApprovalRepository interface {
 	GetByRequestIDLast(uuid.UUID) (*Approvals, error)
 	GetProjectById(id uint) (*Project, error)
 	GetUserById(id uint) (*UserProfile, error)
+	CreateProject(request *Project) (*Project, error)
+	CreateUser(request *UserProfile) (*UserProfile, error)
+	GetListTaskCheck(ids []int64) ([]Task, error)
+	GetTask(id int64) (*Task, error)
+	GetTasks(ids []int64) ([]Task, error)
+	UpdateTasksStatus(ids []int64, status string) error
 }
 
 type ProfileRepositoryDB interface {
@@ -56,6 +64,9 @@ type ConsumerUsecase interface {
 	CreateProject(e events.ProjectEvent) error
 	UpdateProject(e events.ProjectEvent) error
 	DeleteProject(e events.ProjectEventDeleted) error
+	CreateTask(e events.TaskEvent) error
+	UpdateTask(e events.TaskEvent) error
+	DeleteTask(e events.TaskEvent) error
 	//CheckOffsetMessage(topic string, offset int64, partition int32) error
 }
 
@@ -77,4 +88,10 @@ type ProjectRepositoryDB interface {
 	Create(request *Project) error
 	Update(req *Project) error
 	Delete(Id uint) error
+}
+type TaskRepositoryDB interface {
+	Create(request *Task) error
+	Update(req *Task) error
+	Delete(Id uint) error
+	GetByID(id uint) (*Task, error)
 }
