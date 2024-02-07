@@ -18,7 +18,6 @@ type RequestSentRequest struct {
 	ToRole      string `json:"toRole" validate:"required"`
 }
 
-
 type TaskRequest struct {
 	Status         string `json:"status"`
 	ApprovalStatus string `json:"approvalStatus"`
@@ -120,7 +119,7 @@ type Task struct {
 }
 
 var TaskAppproveStatusMap = map[int]string{
-	0: "g",
+	0: "open",
 	1: "waiting",
 	2: "approved",
 	3: "reject",
