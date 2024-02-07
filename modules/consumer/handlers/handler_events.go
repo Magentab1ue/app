@@ -149,7 +149,11 @@ func (obj *eventHandler) Handle(topic string, eventBytes []byte) error {
 			log.Error(err)
 			return err
 		}
+<<<<<<< modules/consumer/handlers/handler_events.go
 		logs.Info("deleted Task successfully")
+=======
+		logs.Info("Create project successfully")
+>>>>>>> modules/consumer/handlers/handler_events.go
 	}
 	return nil
 }

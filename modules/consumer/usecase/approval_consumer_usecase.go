@@ -1,15 +1,16 @@
 package usecase
 
 import (
-	"approval-service/logs"
-	"approval-service/modules/entities/events"
-	"approval-service/modules/entities/models"
 	"encoding/json"
 	"fmt"
 	"strconv"
 
 	"github.com/go-playground/validator"
 	"go.uber.org/zap"
+
+	"approval-service/logs"
+	"approval-service/modules/entities/events"
+	"approval-service/modules/entities/models"
 )
 
 type consumerUsecase struct {
@@ -132,14 +133,45 @@ func (u consumerUsecase) DeleteProject(e events.ProjectEventDeleted) error {
 	return nil
 }
 
+// func (u consumerUsecase) CreateTask(e events.TaskEvent) (err error) {
+// 	projectIdint, err := strconv.Atoi(e.ProjectId)
+// 	if err != nil {
+// 		fmt.Errorf("can't create task")
+// 	}
+// 	userIdint, err := strconv.Atoi(e.UserID)
+// 	if err != nil {
+// 		fmt.Errorf("can't create task")
+// 		return err
+// 	}
+
+// 	task := new(models.Task)
+// 	task.ID = uint(e.ID)
+// 	task.Detail = e.Detail
+// 	task.Status = models.TaskStatusMap[e.Status]
+// 	task.ApprovalStatus = models.TaskAppproveStatusMap[e.ApprovalStatus]
+// 	task.ProjectId = uint(projectIdint)
+// 	task.UserID = uint(userIdint)
+
+// 	if err != nil {
+// 		logs.Error(fmt.Sprintf("Can't create project with userid %d", e.ID))
+// 		return err
+// 	}
+// 	err = u.taskRepo.Create(task)
+// 	if err != nil {
+// 		logs.Error(fmt.Sprintf("Can't create project with userid %d", e.ID))
+// 		return err
+// 	}
+// 	return nil
+// }
+
 func (u consumerUsecase) CreateTask(e events.TaskEvent) (err error) {
 	projectIdint, err := strconv.Atoi(e.ProjectId)
 	if err != nil {
-		fmt.Errorf("can't create task")
+		return fmt.Errorf("can't convert ProjectId to integer: %v", err)
 	}
 	userIdint, err := strconv.Atoi(e.UserID)
 	if err != nil {
-		fmt.Errorf("can't create task")
+		return fmt.Errorf("can't convert UserID to integer: %v", err)
 	}
 
 	task := new(models.Task)
@@ -150,26 +182,23 @@ func (u consumerUsecase) CreateTask(e events.TaskEvent) (err error) {
 	task.ProjectId = uint(projectIdint)
 	task.UserID = uint(userIdint)
 
-	if err != nil {
-		logs.Error(fmt.Sprintf("Can't create project with userid %d", e.ID))
-		return err
-	}
 	err = u.taskRepo.Create(task)
 	if err != nil {
-		logs.Error(fmt.Sprintf("Can't create project with userid %d", e.ID))
+		logs.Error(fmt.Sprintf("Can't create task with ID %d: %v", e.ID, err))
 		return err
 	}
 	return nil
 }
 
-func (u consumerUsecase) UpdateTask(e events.TaskEvent) (err error) {
+func (u consumerUsecase) UpdateTask(e events.TaskEvent) error {
 	projectIdint, err := strconv.Atoi(e.ProjectId)
 	if err != nil {
-		fmt.Errorf("can't create task")
+		return fmt.Errorf("can't convert ProjectId to integer: %v", err)
 	}
+
 	userIdint, err := strconv.Atoi(e.UserID)
 	if err != nil {
-		fmt.Errorf("can't create task")
+		return fmt.Errorf("can't convert UserID to integer: %v", err)
 	}
 
 	task := new(models.Task)

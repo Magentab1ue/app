@@ -499,3 +499,13 @@ func intInSlice(variable int64, list pq.Int64Array) bool {
 	}
 	return false
 }
+
+func (u approvalService) AddTask(req *models.Task) (res *models.Task, err error) {
+
+	res, err = u.approvalRepo.CreateTask(req)
+	if err != nil {
+		logs.Error(fmt.Sprintf("Can't create project with userid %d", req.ID))
+		return nil, err
+	}
+	return res, nil
+}

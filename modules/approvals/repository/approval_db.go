@@ -261,3 +261,13 @@ func (r approvalRepositoryDB) UpdateTasksStatus(ids []int64, status string) erro
 	}
 	return nil
 }
+
+func (r approvalRepositoryDB) CreateTask(request *models.Task) (*models.Task, error) {
+	err := r.db.FirstOrCreate(request).Error
+	if err != nil {
+		logs.Error(fmt.Sprintf("Error Create Task with ID %d: %v", request.ID, err), zap.Error(err))
+		return nil, fmt.Errorf("failed to create Task: %v", err)
+	}
+
+	return request, nil
+}
