@@ -23,18 +23,7 @@ func (obj *eventHandler) Handle(topic string, eventBytes []byte) error {
 	switch topic {
 	case events.UserProfile{}.TopicCreate():
 		event := events.UserProfile{}
-		message := map[string]interface{}{}
-		err := json.Unmarshal(eventBytes, &message)
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-		jsonData, err := json.Marshal(message["data"])
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-		err = json.Unmarshal(jsonData, &event)
+		err := json.Unmarshal(eventBytes, &event)
 		if err != nil {
 			log.Error(err)
 			return err
@@ -49,18 +38,8 @@ func (obj *eventHandler) Handle(topic string, eventBytes []byte) error {
 
 	case events.UserProfile{}.TopicUpdate():
 		event := events.UserProfile{}
-		message := map[string]interface{}{}
-		err := json.Unmarshal(eventBytes, &message)
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-		jsonData, err := json.Marshal(message["data"])
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-		err = json.Unmarshal(jsonData, &event)
+
+		err := json.Unmarshal(eventBytes, &event)
 		if err != nil {
 			log.Error(err)
 			return err
@@ -74,18 +53,7 @@ func (obj *eventHandler) Handle(topic string, eventBytes []byte) error {
 		logs.Info("update profile successfully")
 	case events.UserProfileDeleted{}.TopicDelete():
 		event := events.UserProfileDeleted{}
-		message := map[string]interface{}{}
-		err := json.Unmarshal(eventBytes, &message)
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-		jsonData, err := json.Marshal(message["data"])
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-		err = json.Unmarshal(jsonData, &event)
+		err := json.Unmarshal(eventBytes, &event)
 		if err != nil {
 			log.Error(err)
 			return err
@@ -119,13 +87,13 @@ func (obj *eventHandler) Handle(topic string, eventBytes []byte) error {
 			log.Error(err)
 			return err
 		}
-		logs.Info("Attempting to create project")
+		logs.Info("Attempting to update project")
 		err = obj.consumer.UpdateProject(event)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
-		logs.Info("Create project successfully")
+		logs.Info("update project successfully")
 	case events.ProjectEventDeleted{}.TopicDelete():
 		event := events.ProjectEventDeleted{}
 		err := json.Unmarshal(eventBytes, &event)
@@ -133,13 +101,13 @@ func (obj *eventHandler) Handle(topic string, eventBytes []byte) error {
 			log.Error(err)
 			return err
 		}
-		logs.Info("Attempting to create project")
+		logs.Info("Attempting to Delete project")
 		err = obj.consumer.DeleteProject(event)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
-		logs.Info("Create project successfully")
+		logs.Info("Delete project successfully")
 	case events.TaskEvent{}.TaskEventCreated():
 		event := events.TaskEvent{}
 		err := json.Unmarshal(eventBytes, &event)
@@ -147,13 +115,13 @@ func (obj *eventHandler) Handle(topic string, eventBytes []byte) error {
 			log.Error(err)
 			return err
 		}
-		logs.Info("Attempting to create project")
+		logs.Info("Attempting to create task")
 		err = obj.consumer.CreateTask(event)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
-		logs.Info("Create project successfully")
+		logs.Info("Create task successfully")
 	case events.TaskEvent{}.TaskEventUpdated():
 		event := events.TaskEvent{}
 		err := json.Unmarshal(eventBytes, &event)
@@ -161,13 +129,13 @@ func (obj *eventHandler) Handle(topic string, eventBytes []byte) error {
 			log.Error(err)
 			return err
 		}
-		logs.Info("Attempting to create project")
+		logs.Info("Attempting to update Task")
 		err = obj.consumer.UpdateTask(event)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
-		logs.Info("Create project successfully")
+		logs.Info("update Task successfully")
 	case events.TaskEvent{}.TaskEventDeleted():
 		event := events.TaskEvent{}
 		err := json.Unmarshal(eventBytes, &event)
@@ -175,13 +143,14 @@ func (obj *eventHandler) Handle(topic string, eventBytes []byte) error {
 			log.Error(err)
 			return err
 		}
-		logs.Info("Attempting to create project")
+		logs.Info("Attempting to delete Task")
 		err = obj.consumer.DeleteTask(event)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
-		logs.Info("Create project successfully")}
+		logs.Info("deleted Task successfully")
+	}
 	return nil
 }
 

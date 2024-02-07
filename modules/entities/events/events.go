@@ -53,9 +53,9 @@ type RequestCreatedEvent struct {
 	Status       string         `json:"status"`
 	CreationDate time.Time      `json:"creationDate"`
 	IsSignature  bool           `json:"isSignature"`
-	Task         datatypes.JSON `json:"task" gorm:"type:jsonb"` // Assuming your database supports JSONB
-	Name         string         `json:"name"`                   // name timesheet
-	Detail       string         `json:"detail"`                 //detail timesheet
+	Task         datatypes.JSON `json:"task" gorm:"type:jsonb"`
+	Name         string         `json:"name"`   // name timesheet
+	Detail       string         `json:"detail"` //detail timesheet
 	ToRole       string         `json:"toRole"`
 	SenderID     uint           `json:"senderId"`
 	ProjectID    uint           `json:"projectId"`
@@ -86,7 +86,19 @@ func (ApprovalUpdatedEvent) String() string {
 }
 
 type ApprovalDeletedEvent struct {
-	Task datatypes.JSON `json:"task"`
+	ID           uint           `json:"id"`
+	RequestID    uuid.UUID      `json:"requestId"`
+	To           pq.Int64Array  `json:"to" gorm:"type:integer[]"`
+	Approver     uint           `json:"approver"`
+	Status       string         `json:"status"`
+	CreationDate time.Time      `json:"creationDate"`
+	IsSignature  bool           `json:"isSignature"`
+	Task         datatypes.JSON `json:"task" gorm:"type:jsonb"` // Assuming your database supports JSONB
+	Name         string         `json:"name"`                   // name timesheet
+	Detail       string         `json:"detail"`                 //detail timesheet
+	ToRole       string         `json:"toRole"`
+	SenderID     uint           `json:"senderId"`
+	ProjectID    uint           `json:"projectId"`
 }
 
 func (ApprovalDeletedEvent) String() string {
