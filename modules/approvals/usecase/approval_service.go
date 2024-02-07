@@ -159,7 +159,17 @@ func (u approvalService) DeleteApproval(id uint) error {
 	}
 	logs.Info("Attempting to Delete data from database")
 	event := events.ApprovalDeletedEvent{
-		Task: approval.Task,
+		ID:           approval.ID,
+		RequestID:    approval.RequestID,
+		To:           approval.To,
+		Status:       approval.Status,
+		ProjectID:    approval.ProjectID,
+		CreationDate: approval.CreationDate,
+		SenderID:     approval.SenderID,
+		Task:         approval.Task,
+		Name:         approval.Name,
+		Detail:       approval.Detail,
+		ToRole:       approval.ToRole,
 	}
 	logs.Info("Attempting to produce event to kafka")
 	err = u.produce.Produce(event)
@@ -365,12 +375,12 @@ func (u approvalService) CreateRequest(req *models.CreateReq) (*models.Approvals
 		return nil, fmt.Errorf("no task id found in %v from this service", taskIds)
 	}
 	for _, task := range tasksCheck {
-		if task.ApprovalStatus == models.TaskAppproveStatusMap[1] || task.ApprovalStatus == models.TaskAppproveStatusMap[3] {
+		if task.ApprovalStatus == models.TaskAppproveStatusMap[0] || task.ApprovalStatus == models.TaskAppproveStatusMap[3] {
 			return nil, fmt.Errorf("task ID %v : already sent", taskIds)
 		}
 	}
 	fmt.Printf("%v\n", tasksCheck)
-	err = u.approvalRepo.UpdateTasksStatus(taskIds, models.TaskAppproveStatusMap[3])
+	err = u.approvalRepo.UpdateTasksStatus(taskIds, models.TaskAppproveStatusMap[1])
 	if err != nil {
 		return nil, fmt.Errorf("can't update task id %v status", taskIds)
 	}

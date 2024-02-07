@@ -111,7 +111,7 @@ type Task struct {
 }
 
 var TaskAppproveStatusMap = map[int]string{
-	0: "open",
+	0: "g",
 	1: "waiting",
 	2: "approved",
 	3: "reject",
