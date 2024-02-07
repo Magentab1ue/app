@@ -18,6 +18,15 @@ type RequestSentRequest struct {
 	ToRole      string `json:"toRole" validate:"required"`
 }
 
+
+type TaskRequest struct {
+	Status         string `json:"status"`
+	ApprovalStatus string `json:"approvalStatus"`
+	UserID         uint   `json:"userId"`
+	ProjectId      uint   `json:"projectId"`
+	Detail         string `db:"detail" json:"detail"`
+}
+
 type CreateReq struct {
 	ProjectId uint           `json:"projectId"  validate:"required,numeric,min=1"`
 	SenderID  uint           `json:"senderId" validate:"required,numeric,min=1"`

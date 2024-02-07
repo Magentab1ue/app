@@ -11,7 +11,13 @@ COPY . .
 RUN go build -o main ./app/main.go
 
 # Final stage
-FROM alpine:latest
+FROM scratch
+
+ARG APP_PORT
+ENV APP_PORT=${APP_PORT}
+
+EXPOSE ${APP_PORT}
+
 
 WORKDIR /app
 

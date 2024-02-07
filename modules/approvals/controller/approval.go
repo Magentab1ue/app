@@ -690,3 +690,45 @@ func (h *approvalHandler) CreateUserMock(c *fiber.Ctx) error {
 		},
 	)
 }
+
+func (h *approvalHandler) CreateTaskMock(c *fiber.Ctx) error {
+	logs.Info("Post : Attempting to by pass create task")
+	req := new(models.Task)
+	if err := c.BodyParser(req); err != nil {
+		logs.Warn("Invalid request", zap.Error(err))
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request",
+		})
+	}
+	if err := validate.Struct(req); err != nil {
+		logs.Warn("Invalid request", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrBadRequest.Message,
+				StatusCode: fiber.ErrBadRequest.Code,
+			},
+		)
+	}
+	res, err := h.approvalSrv.AddTask(req)
+	if err != nil {
+		logs.Warn("Error can't Create task ", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrNotFound.Message,
+				StatusCode: fiber.ErrNotFound.Code,
+			},
+		)
+	}
+
+	logs.Info("GET : Attempting to task bu request id successfully")
+	return c.Status(fiber.StatusOK).JSON(
+		models.ResponseData{
+			Message:    "Succeed",
+			Status:     "OK",
+			StatusCode: fiber.StatusOK,
+			Data:       res,
+		},
+	)
+}
