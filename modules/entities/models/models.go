@@ -101,8 +101,8 @@ type ProjectJson struct {
 		ID int `json:"id"`
 	} `json:"teamleads"`
 	Approvers []struct {
-		ID   int `json:"id"`
-		Role []string
+		ID   int      `json:"id"`
+		Role []string `json:"roles"`
 	} `json:"approvers"`
 	Members []struct {
 		ID int `json:"id"`
