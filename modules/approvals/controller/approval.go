@@ -36,8 +36,8 @@ func NewApprovalController(router fiber.Router, approvalSrv models.ApprovalUseca
 	router.Post("/approval/Add/project", controllers.CreateProjectMock)
 	router.Post("/approval/Add/user", controllers.CreateUserMock)
 	router.Post("/approval/Add/task", controllers.CreateTaskMock)
-	router.Post("/approval/projects", controllers.GetAllProject)
-	router.Post("/approval/tasks", controllers.GetAllTask)
+	router.Get("/approval/project/projects", controllers.GetAllProject)
+	router.Get("/approval/task/tasks", controllers.GetAllTask)
 }
 
 func (h *approvalHandler) UpdateStatus(c *fiber.Ctx) error {
