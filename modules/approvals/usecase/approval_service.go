@@ -358,9 +358,13 @@ func stringInSlice(str string, list []string) bool {
 }
 
 func (u approvalService) CreateRequest(req *models.CreateReq) (*models.Approvals, error) {
+	project, err := u.approvalRepo.GetProjectById(req.ProjectId)
+	if err != nil {
+		return nil, err
+	}
 
 	tasks := []models.ReqTask{}
-	err := json.Unmarshal(req.Task, &tasks)
+	err = json.Unmarshal(req.Task, &tasks)
 	if err != nil {
 		logs.Error("task is formatted incorrectly", zap.Error(err))
 		return nil, errors.New("task is formatted incorrectly")
@@ -385,10 +389,6 @@ func (u approvalService) CreateRequest(req *models.CreateReq) (*models.Approvals
 		return nil, fmt.Errorf("can't update task id %v status", taskIds)
 	}
 
-	project, err := u.approvalRepo.GetProjectById(req.ProjectId)
-	if err != nil {
-		return nil, err
-	}
 	var to pq.Int64Array
 	projectJson := new(models.ProjectJson)
 	err = json.Unmarshal(project.Project, projectJson)
@@ -515,6 +515,24 @@ func (u approvalService) AddTask(req *models.Task) (res *models.Task, err error)
 	res, err = u.approvalRepo.CreateTask(req)
 	if err != nil {
 		logs.Error(fmt.Sprintf("Can't create project with userid %d", req.ID))
+		return nil, err
+	}
+	return res, nil
+}
+func (u approvalService) GetAllProject() (res []models.Project, err error) {
+
+	res, err = u.approvalRepo.GetAllProject()
+	if err != nil {
+		logs.Error(fmt.Sprintf("Can't create project with userid error : %v", err))
+		return nil, err
+	}
+	return res, nil
+}
+func (u approvalService) GetAllTask() (res []models.Task, err error) {
+
+	res, err = u.approvalRepo.GetAllTask()
+	if err != nil {
+		logs.Error(fmt.Sprintf("Can't create project with userid error : %v", err))
 		return nil, err
 	}
 	return res, nil

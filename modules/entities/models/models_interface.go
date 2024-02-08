@@ -22,6 +22,8 @@ type ApprovalUsecase interface {
 	CreateProject(req *ProjectJson) (res *Project, err error)
 	CreateUser(req *UserProfile) (res *UserProfile, err error)
 	AddTask(*Task) (*Task, error)
+	GetAllTask() (res []Task, err error)
+	GetAllProject() (res []Project, err error)
 }
 
 type ApprovalRepository interface {
@@ -44,6 +46,8 @@ type ApprovalRepository interface {
 	GetTasks(ids []int64) ([]Task, error)
 	UpdateTasksStatus(ids []int64, status string) error
 	CreateTask(*Task) (*Task, error)
+	GetAllProject() ([]Project, error)
+	GetAllTask() ([]Task, error)
 }
 
 type ProfileRepositoryDB interface {

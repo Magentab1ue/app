@@ -33,8 +33,11 @@ func NewApprovalController(router fiber.Router, approvalSrv models.ApprovalUseca
 	router.Delete("/approval/:id", controllers.DeleteApproval)
 	router.Post("/approval/create", controllers.CreateRequest)
 	//mockData
-	router.Post("/approval/Add/Project", controllers.CreateProjectMock)
-	router.Post("/approval/Add/User", controllers.CreateUserMock)
+	router.Post("/approval/Add/project", controllers.CreateProjectMock)
+	router.Post("/approval/Add/user", controllers.CreateUserMock)
+	router.Post("/approval/Add/task", controllers.CreateTaskMock)
+	router.Post("/approval/projects", controllers.GetAllProject)
+	router.Post("/approval/tasks", controllers.GetAllTask)
 }
 
 func (h *approvalHandler) UpdateStatus(c *fiber.Ctx) error {
@@ -729,6 +732,58 @@ func (h *approvalHandler) CreateTaskMock(c *fiber.Ctx) error {
 			Status:     "OK",
 			StatusCode: fiber.StatusOK,
 			Data:       res,
+		},
+	)
+}
+
+func (h *approvalHandler) GetAllProject(c *fiber.Ctx) error {
+	logs.Info("GET : Attempting to get all approval")
+
+	apprrovalReceive, err := h.approvalSrv.GetAllProject()
+	if err != nil {
+		logs.Warn("Error can't get all approval ", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrNotFound.Message,
+				StatusCode: fiber.ErrNotFound.Code,
+			},
+		)
+	}
+
+	logs.Info("get all approval successfully")
+	return c.Status(fiber.StatusOK).JSON(
+		models.ResponseData{
+			Message:    "Succeed",
+			Status:     "OK",
+			StatusCode: fiber.StatusOK,
+			Data:       apprrovalReceive,
+		},
+	)
+}
+
+func (h *approvalHandler) GetAllTask(c *fiber.Ctx) error {
+	logs.Info("GET : Attempting to get all approval")
+
+	apprrovalReceive, err := h.approvalSrv.GetAllTask()
+	if err != nil {
+		logs.Warn("Error can't get all approval ", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(
+			models.ResponseData{
+				Message:    err.Error(),
+				Status:     fiber.ErrNotFound.Message,
+				StatusCode: fiber.ErrNotFound.Code,
+			},
+		)
+	}
+
+	logs.Info("get all approval successfully")
+	return c.Status(fiber.StatusOK).JSON(
+		models.ResponseData{
+			Message:    "Succeed",
+			Status:     "OK",
+			StatusCode: fiber.StatusOK,
+			Data:       apprrovalReceive,
 		},
 	)
 }

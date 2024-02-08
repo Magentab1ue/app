@@ -271,3 +271,20 @@ func (r approvalRepositoryDB) CreateTask(request *models.Task) (*models.Task, er
 
 	return request, nil
 }
+func (r approvalRepositoryDB) GetAllProject() ([]models.Project, error) {
+	project := []models.Project{}
+	err := r.db.Find(&project).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to get task: %v", err)
+	}
+	return project, nil
+}
+
+func (r approvalRepositoryDB) GetAllTask() ([]models.Task, error) {
+	tasks := []models.Task{}
+	err := r.db.Find(&tasks).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to get task: %v", err)
+	}
+	return tasks, nil
+}
