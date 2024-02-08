@@ -737,11 +737,11 @@ func (h *approvalHandler) CreateTaskMock(c *fiber.Ctx) error {
 }
 
 func (h *approvalHandler) GetAllProject(c *fiber.Ctx) error {
-	logs.Info("GET : Attempting to get all approval")
+	logs.Info("GET : Attempting to get all project")
 
 	apprrovalReceive, err := h.approvalSrv.GetAllProject()
 	if err != nil {
-		logs.Warn("Error can't get all approval ", zap.Error(err))
+		logs.Warn("Error can't get all project ", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -751,7 +751,7 @@ func (h *approvalHandler) GetAllProject(c *fiber.Ctx) error {
 		)
 	}
 
-	logs.Info("get all approval successfully")
+	logs.Info("get all project successfully")
 	return c.Status(fiber.StatusOK).JSON(
 		models.ResponseData{
 			Message:    "Succeed",
@@ -763,11 +763,11 @@ func (h *approvalHandler) GetAllProject(c *fiber.Ctx) error {
 }
 
 func (h *approvalHandler) GetAllTask(c *fiber.Ctx) error {
-	logs.Info("GET : Attempting to get all approval")
+	logs.Info("GET : Attempting to get all task")
 
 	apprrovalReceive, err := h.approvalSrv.GetAllTask()
 	if err != nil {
-		logs.Warn("Error can't get all approval ", zap.Error(err))
+		logs.Warn("Error can't get all task ", zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(
 			models.ResponseData{
 				Message:    err.Error(),
@@ -777,7 +777,7 @@ func (h *approvalHandler) GetAllTask(c *fiber.Ctx) error {
 		)
 	}
 
-	logs.Info("get all approval successfully")
+	logs.Info("get all task successfully")
 	return c.Status(fiber.StatusOK).JSON(
 		models.ResponseData{
 			Message:    "Succeed",

@@ -379,11 +379,10 @@ func (u approvalService) CreateRequest(req *models.CreateReq) (*models.Approvals
 		return nil, fmt.Errorf("no task id found in %v from this service", taskIds)
 	}
 	for _, task := range tasksCheck {
-		if task.ApprovalStatus == models.TaskAppproveStatusMap[0] || task.ApprovalStatus == models.TaskAppproveStatusMap[3] {
+		if task.ApprovalStatus == models.TaskAppproveStatusMap[1] || task.ApprovalStatus == models.TaskAppproveStatusMap[2] {
 			return nil, fmt.Errorf("task ID %v : already sent", taskIds)
 		}
 	}
-	fmt.Printf("%v\n", tasksCheck)
 	err = u.approvalRepo.UpdateTasksStatus(taskIds, models.TaskAppproveStatusMap[1])
 	if err != nil {
 		return nil, fmt.Errorf("can't update task id %v status", taskIds)
