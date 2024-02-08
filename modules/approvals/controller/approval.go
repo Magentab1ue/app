@@ -750,6 +750,9 @@ func (h *approvalHandler) GetAllProject(c *fiber.Ctx) error {
 			},
 		)
 	}
+	responseData := new(models.ResGetApprovals)
+	responseData.Approvals = apprrovalReceive
+	responseData.Count = len(apprrovalReceive)
 
 	logs.Info("get all project successfully")
 	return c.Status(fiber.StatusOK).JSON(
@@ -757,7 +760,7 @@ func (h *approvalHandler) GetAllProject(c *fiber.Ctx) error {
 			Message:    "Succeed",
 			Status:     "OK",
 			StatusCode: fiber.StatusOK,
-			Data:       apprrovalReceive,
+			Data:       responseData,
 		},
 	)
 }

@@ -47,6 +47,11 @@ type ResponseData struct {
 	Data       interface{} `json:"data"`
 }
 
+type ResGetApprovals struct {
+	Approvals interface{} `json:"approvals"`
+	Count     int         `json:"count"`
+}
+
 type ProduceReq struct {
 	ID   uint
 	Data interface{}
