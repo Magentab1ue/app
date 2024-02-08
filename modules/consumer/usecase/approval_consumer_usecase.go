@@ -74,24 +74,6 @@ func (u consumerUsecase) DeleteProfile(e events.UserProfileDeleted) error {
 	return nil
 }
 
-// func (u consumerUsecase) CheckOffsetMessage(topic string, offset int64, partition int32) error {
-// 	ConsumeOffset := new(models.ConsumerOffset)
-// 	ConsumeOffset.Topic = topic
-// 	ConsumeOffset.Offset = offset
-// 	ConsumeOffset.Partition = partition
-
-// 	check, err := u.consumerRepo.Get(ConsumeOffset)
-// 	if err != nil {
-// 		logs.Info(fmt.Sprintf("Save offset for topric %s partition %d offset %d", topic, offset, partition))
-// 		u.consumerRepo.Create(ConsumeOffset)
-// 		return nil
-// 	}
-// 	if check != nil || err == nil {
-// 		return fmt.Errorf("have offset")
-// 	}
-// 	return fmt.Errorf("have offset")
-// }
-
 func (u consumerUsecase) CreateProject(e events.ProjectEvent) (err error) {
 
 	project := new(models.Project)
@@ -132,38 +114,6 @@ func (u consumerUsecase) DeleteProject(e events.ProjectEventDeleted) error {
 	}
 	return nil
 }
-
-// func (u consumerUsecase) CreateTask(e events.TaskEvent) (err error) {
-// 	projectIdint, err := strconv.Atoi(e.ProjectId)
-// 	if err != nil {
-// 		fmt.Errorf("can't create task")
-// 	}
-// 	userIdint, err := strconv.Atoi(e.UserID)
-// 	if err != nil {
-// 		fmt.Errorf("can't create task")
-// 		return err
-// 	}
-
-// 	task := new(models.Task)
-// 	task.ID = uint(e.ID)
-// 	task.Detail = e.Detail
-// 	task.Status = models.TaskStatusMap[e.Status]
-// 	task.ApprovalStatus = models.TaskAppproveStatusMap[e.ApprovalStatus]
-// 	task.ProjectId = uint(projectIdint)
-// 	task.UserID = uint(userIdint)
-
-// 	if err != nil {
-// 		logs.Error(fmt.Sprintf("Can't create project with userid %d", e.ID))
-// 		return err
-// 	}
-// 	err = u.taskRepo.Create(task)
-// 	if err != nil {
-// 		logs.Error(fmt.Sprintf("Can't create project with userid %d", e.ID))
-// 		return err
-// 	}
-// 	return nil
-// }
-
 func (u consumerUsecase) CreateTask(e events.TaskEvent) (err error) {
 	projectIdint, err := strconv.Atoi(e.ProjectId)
 	if err != nil {
@@ -227,3 +177,50 @@ func (u consumerUsecase) DeleteTask(e events.TaskEvent) error {
 	}
 	return nil
 }
+// func (u consumerUsecase) CreateTask(e events.TaskEvent) (err error) {
+// 	projectIdint, err := strconv.Atoi(e.ProjectId)
+// 	if err != nil {
+// 		fmt.Errorf("can't create task")
+// 	}
+// 	userIdint, err := strconv.Atoi(e.UserID)
+// 	if err != nil {
+// 		fmt.Errorf("can't create task")
+// 		return err
+// 	}
+
+// 	task := new(models.Task)
+// 	task.ID = uint(e.ID)
+// 	task.Detail = e.Detail
+// 	task.Status = models.TaskStatusMap[e.Status]
+// 	task.ApprovalStatus = models.TaskAppproveStatusMap[e.ApprovalStatus]
+// 	task.ProjectId = uint(projectIdint)
+// 	task.UserID = uint(userIdint)
+
+// 	if err != nil {
+// 		logs.Error(fmt.Sprintf("Can't create project with userid %d", e.ID))
+// 		return err
+// 	}
+// 	err = u.taskRepo.Create(task)
+// 	if err != nil {
+// 		logs.Error(fmt.Sprintf("Can't create project with userid %d", e.ID))
+// 		return err
+// 	}
+// 	return nil
+// }
+// func (u consumerUsecase) CheckOffsetMessage(topic string, offset int64, partition int32) error {
+// 	ConsumeOffset := new(models.ConsumerOffset)
+// 	ConsumeOffset.Topic = topic
+// 	ConsumeOffset.Offset = offset
+// 	ConsumeOffset.Partition = partition
+
+// 	check, err := u.consumerRepo.Get(ConsumeOffset)
+// 	if err != nil {
+// 		logs.Info(fmt.Sprintf("Save offset for topric %s partition %d offset %d", topic, offset, partition))
+// 		u.consumerRepo.Create(ConsumeOffset)
+// 		return nil
+// 	}
+// 	if check != nil || err == nil {
+// 		return fmt.Errorf("have offset")
+// 	}
+// 	return fmt.Errorf("have offset")
+// }
