@@ -145,7 +145,7 @@ type TaskEvent struct {
 }
 
 func (TaskEvent) TaskEventCreated() string {
-	return "tcchub.task.task.created"
+	return "tcchub.task.task.create"
 }
 func (TaskEvent) TaskEventUpdated() string {
 	return "tcchub.task.task.updated"
