@@ -13,9 +13,9 @@ type Event interface {
 }
 
 var SubscribedTopics = []string{
-	UserProfile{}.TopicCreate(),
-	UserProfile{}.TopicUpdate(),
-	UserProfileDeleted{}.TopicDelete(),
+	//UserProfile{}.TopicCreate(),
+	//UserProfile{}.TopicUpdate(),
+	//UserProfileDeleted{}.TopicDelete(),
 	ProjectEvent{}.TopicCreate(),
 	ProjectEvent{}.TopicUpdate(),
 	ProjectEventDeleted{}.TopicDelete(),
