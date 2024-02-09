@@ -113,7 +113,7 @@ type ProjectEvent struct {
 	} `json:"teamleads"`
 	Approvers []struct {
 		ID   int      `json:"id"`
-		Role []string `json:"roles"`
+		Role []string `json:"role"`
 	} `json:"approvers"`
 	Members []struct {
 		ID int `json:"id"`
