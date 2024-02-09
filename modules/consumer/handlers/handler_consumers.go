@@ -17,11 +17,13 @@ func NewHandlerConsumeGroup(eventHandler models.EventHandlerConsume) sarama.Cons
 	return &handlerConsumeGroup{eventHandler}
 }
 
-func (consumer *handlerConsumeGroup) Setup(sarama.ConsumerGroupSession) error {
+func (consumer *handlerConsumeGroup) Setup(session sarama.ConsumerGroupSession) error {
+	logs.Info("kafka Setup")
 	return nil
 }
 
-func (consumer *handlerConsumeGroup) Cleanup(sarama.ConsumerGroupSession) error {
+func (consumer *handlerConsumeGroup) Cleanup(session sarama.ConsumerGroupSession) error {
+	logs.Info("kafka Cleanup")
 	return nil
 }
 
