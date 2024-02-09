@@ -55,9 +55,9 @@ func (s *server) Start() {
 	}
 
 	// Start consumer
-	logs.Info(fmt.Sprintf("Starting comsuming kafa server: %v Port : %v Group: %v", s.Cfg.Kafkas.Servers, s.Cfg.Kafkas.Port, s.Cfg.Kafkas.Group))
-	logs.Info(fmt.Sprintf("Subscribed topics: %s", events.SubscribedTopics))
+	
 	go func() {
+		logs.Info(fmt.Sprintf("Starting comsuming kafa server: %v Port : %v Group: %v", s.Cfg.Kafkas.Servers, s.Cfg.Kafkas.Port, s.Cfg.Kafkas.Group))
 		for {
 			err := s.ConsumerGroup.Consume(context.Background(), events.SubscribedTopics, s.consumerGroupHandler)
 			if err != nil {
