@@ -29,11 +29,12 @@ func (consumer *handlerConsumeGroup) ConsumeClaim(session sarama.ConsumerGroupSe
 	for msg := range claim.Messages() {
 		logs.Info(fmt.Sprintf("Consumed message from topic %s with partition: %d and offset: %d", msg.Topic, msg.Partition, msg.Offset))
 		err := consumer.eventHandler.Handle(msg.Topic, msg.Value)
-		if err != nil {
-			logs.Error(fmt.Sprintf("Error handling message from topic %s with partition: %d and offset: %d Error : %s", msg.Topic, msg.Partition, msg.Offset, err.Error()))
+		if err == nil {
+			session.MarkMessage(msg, "")
 			continue
 		}
-		session.MarkMessage(msg, "")
+		logs.Error(fmt.Sprintf("Error handling message from topic %s with partition: %d and offset: %d Error : %s", msg.Topic, msg.Partition, msg.Offset, err.Error()))
+
 	}
 	return nil
 }
