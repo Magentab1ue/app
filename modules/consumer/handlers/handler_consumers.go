@@ -29,15 +29,22 @@ func (consumer *handlerConsumeGroup) Cleanup(session sarama.ConsumerGroupSession
 
 func (consumer *handlerConsumeGroup) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	logs.Info(fmt.Sprintf("Subscribed topics: %s", claim.Topic()))
-	for msg := range claim.Messages() {
-		logs.Info(fmt.Sprintf("Consumed message from topic %s with partition: %d and offset: %d", msg.Topic, msg.Partition, msg.Offset))
-		err := consumer.eventHandler.Handle(msg.Topic, msg.Value)
-		session.MarkMessage(msg, "")
-		if err != nil {
-			logs.Error(fmt.Sprintf("Error handling message from topic %s with partition: %d and offset: %d Error : %s", msg.Topic, msg.Partition, msg.Offset, err.Error()))
-			return err
+	for {
+		select {
+		case message, ok := <-claim.Messages():
+			if !ok {
+				logs.Info("Kafka message channel was closed")
+				return nil
+			}
+			logs.Info(fmt.Sprintf("Consumed message  claimed from value = %s, timestamp = %v, topic = %s, offset = %d", string(message.Value), message.Timestamp, message.Topic, message.Offset))
+			err := consumer.eventHandler.Handle(message.Topic, message.Value)
+			if err != nil {
+				logs.Error(fmt.Sprintf("Error handling message from topic %s with partition: %d and offset: %d Error : %s", message.Topic, message.Partition, message.Offset, err.Error()))
+				return nil
+			}
+			session.MarkMessage(message, "")
+		case <-session.Context().Done():
+			return nil
 		}
-
 	}
-	return nil
 }
