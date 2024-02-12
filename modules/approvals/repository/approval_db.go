@@ -28,7 +28,7 @@ func NewapprovalRepositoryDB(db *gorm.DB) models.ApprovalRepository {
 }
 
 func (r approvalRepositoryDB) Update(req *models.Approvals) (*models.Approvals, error) {
-
+	logs.Info("Attempting to update approval in postgres")
 	//update to database
 	if err := r.db.Save(&req).Error; err != nil {
 		logs.Error(fmt.Sprintf("Error updating approval with request ID %d: %v", req.ID, err), zap.Error(err))
@@ -38,7 +38,7 @@ func (r approvalRepositoryDB) Update(req *models.Approvals) (*models.Approvals, 
 }
 
 func (r approvalRepositoryDB) GetSendRequest(userId uint, optional map[string]interface{}) ([]models.Approvals, error) {
-
+	logs.Info("Attempting to GET approval in postgres")
 	approval := []models.Approvals{}
 	optional["sender_id"] = userId
 	optionalStr := fmt.Sprintf("%v", optional)
@@ -55,7 +55,7 @@ func (r approvalRepositoryDB) GetSendRequest(userId uint, optional map[string]in
 }
 
 func (r approvalRepositoryDB) GetReceiveRequest(userId uint, optional map[string]interface{}) ([]models.Approvals, error) {
-
+	logs.Info("Attempting to GET Receive approval  in postgres")
 	approval := []models.Approvals{}
 	optionalStr := fmt.Sprintf("%v", optional)
 	condition := r.db.Where("? = ANY(\"to\")", userId)
@@ -72,7 +72,7 @@ func (r approvalRepositoryDB) GetReceiveRequest(userId uint, optional map[string
 }
 
 func (r approvalRepositoryDB) DeleteApproval(requestId uint) (*models.Approvals, error) {
-
+	logs.Info("Attempting to Delete approval  in postgres")
 	approval := new(models.Approvals)
 	if err := r.db.First(&approval, requestId).Error; err != nil {
 		logs.Error(fmt.Sprintf("Error cant't finding approval with request ID %d: %v", requestId, err), zap.Error(err))
@@ -88,6 +88,7 @@ func (r approvalRepositoryDB) DeleteApproval(requestId uint) (*models.Approvals,
 }
 
 func (r approvalRepositoryDB) Create(request *models.Approvals) (*models.Approvals, error) {
+	logs.Info("Attempting to Create approval  in postgres")
 	if err := r.db.Create(request).Error; err != nil {
 		return nil, fmt.Errorf("failed to create request: %v", err)
 	}
@@ -96,6 +97,7 @@ func (r approvalRepositoryDB) Create(request *models.Approvals) (*models.Approva
 }
 
 func (r approvalRepositoryDB) GetByID(id uint) (*models.Approvals, error) {
+	logs.Info("Attempting to GET by Id approval  in postgres")
 	var approval models.Approvals
 	result := r.db.First(&approval, id)
 
@@ -107,6 +109,7 @@ func (r approvalRepositoryDB) GetByID(id uint) (*models.Approvals, error) {
 }
 
 func (r approvalRepositoryDB) GetAll(optional map[string]interface{}) ([]models.Approvals, error) {
+	logs.Info("Attempting to GET All approval  in postgres")
 
 	approval := []models.Approvals{}
 	optionalStr := fmt.Sprintf("%v", optional)
@@ -135,7 +138,7 @@ func (r approvalRepositoryDB) GetAll(optional map[string]interface{}) ([]models.
 }
 
 func (r approvalRepositoryDB) GetByUserID(id uint, optional map[string]interface{}) ([]models.Approvals, error) {
-
+	logs.Info("Attempting to GET by user approval  in postgres")
 	approval := []models.Approvals{}
 	optionalStr := fmt.Sprintf("%v", optional)
 	condition := r.db

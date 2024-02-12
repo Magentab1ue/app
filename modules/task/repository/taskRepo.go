@@ -25,10 +25,16 @@ func NewproTaskRepositoryDB(db *gorm.DB) models.TaskRepositoryDB {
 	return taskRepositoryDB{db: db}
 }
 
-func (r taskRepositoryDB) Create(request *models.Task) error {
-	if err := r.db.Create(request).Error; err != nil {
-		logs.Error(fmt.Sprintf("Error updating Project with ID %d: %v", request.ID, err), zap.Error(err))
-		return fmt.Errorf("failed to create Project: %v", err)
+func (r taskRepositoryDB) Create(req *models.Task) error {
+
+	if err := r.db.Create(req).Error; err != nil {
+		logs.Error(fmt.Sprintf("Fail create Project with ID %d: %v", req.ID, err), zap.Error(err))
+	}
+	logs.Error(fmt.Sprintf("Attempting update Project with ID %d", req.ID))
+
+	if err := r.db.Updates(req).Error; err != nil {
+		logs.Error(fmt.Sprintf("Fail create Project with ID %d: %v", req.ID, err), zap.Error(err))
+		return fmt.Errorf("fail to create Project with ID %d: %v", req.ID, err)
 	}
 
 	return nil
@@ -45,7 +51,7 @@ func (r taskRepositoryDB) GetByID(id uint) (*models.Task, error) {
 
 func (r taskRepositoryDB) Update(req *models.Task) error {
 
-	if err := r.db.Save(&req).Error; err != nil {
+	if err := r.db.Updates(&req).Error; err != nil {
 		logs.Error(fmt.Sprintf("Error updating project with ID %d: %v", req.ID, err), zap.Error(err))
 		return fmt.Errorf("error cant't updating project with ID %d", req.ID)
 	}
